@@ -1,0 +1,15 @@
+# Project exclude paths
+/.gradle/
+/browser/build/
+/build/
+/build/js/packages/section-browser/kotlin/
+/common/build/
+/desktop/build/
+.gradle
+.idea
+gradle/wrapper/gradle-wrapper.jar
+data
+section.code-workspace
+simple-server/bin
+kotlin-js-store/yarn.lock
+/monolith-webflux.zip

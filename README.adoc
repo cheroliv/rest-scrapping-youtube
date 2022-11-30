@@ -1,0 +1,26 @@
+= kotlin-springboot-monolith
+
+== *springboot monolith codebase*
+
+* springboot
+* webflux
+* spring data r2dbc
+* rest api
+* spring security
+* kotlin
+* kotlin coroutines
+
+== class diagram
+
+image::images/monolith_domain_class.png[Classes]
+
+
+==== **to test the app**
+Open terminal and run : ```./gradlew :monolith:check```
+
+==== **to BDD test the app**
+Open terminal and run : ```./gradlew :monolith:cucumber```
+
+==== **to run the app**
+Open terminal and run : ```./gradlew :monolith:bootRun``` +
+and launch http://localhost:8080/
