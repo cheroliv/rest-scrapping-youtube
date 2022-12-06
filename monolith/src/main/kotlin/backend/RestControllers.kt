@@ -2,20 +2,21 @@
 
 package backend
 
-import backend.Constants.ACCOUNT_API
-import backend.Constants.ACTIVATE_API
-import backend.Constants.ACTIVATE_API_KEY
 import backend.Constants.AUTHORITY_API
-import backend.Constants.CHANGE_PASSWORD_API
-import backend.Constants.RESET_PASSWORD_API_FINISH
-import backend.Constants.RESET_PASSWORD_API_INIT
-import backend.Constants.SIGNUP_API
 import backend.Log.log
-import org.springframework.http.HttpStatus.CREATED
+import org.springframework.data.domain.Page
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus.OK
+import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.*
-import javax.validation.Valid
-import javax.validation.constraints.Email
+import org.springframework.web.server.ServerWebExchange
+import org.springframework.web.server.WebFilter
+import org.springframework.web.server.WebFilterChain
+import org.springframework.web.util.UriComponentsBuilder
+import reactor.core.publisher.Mono
+import java.io.UnsupportedEncodingException
+import java.net.URLEncoder
+import java.text.MessageFormat
 
 /*=================================================================================*/
 @RestController
@@ -33,121 +34,6 @@ class AuthorityController(
     suspend fun count() = authorityRepository
         .count()
 }
-/*=================================================================================*/
-@RestController
-@RequestMapping(ACCOUNT_API)
-class SignupController(
-    private val signupService: SignupService
-) {
-    internal class SignupException(message: String) : RuntimeException(message)
-
-    /**
-     * {@code POST  /signup} : register the user.
-     *
-     * @param accountCredentials the managed user View Model.
-     * @throws backend.InvalidPasswordException {@code 400 (Bad Request)} if the password is incorrect.
-     * @throws backend.EmailAlreadyUsedProblem {@code 400 (Bad Request)} if the email is already used.
-     * @throws backend.LoginAlreadyUsedProblem {@code 400 (Bad Request)} if the login is already used.
-     */
-    @PostMapping(SIGNUP_API)
-    @ResponseStatus(CREATED)
-    suspend fun signup(
-        @RequestBody @Valid accountCredentials: AccountCredentials
-    ) = signupService.signup(accountCredentials)
-
-    /**
-     * `GET  /activate` : activate the signed-up user.
-     *
-     * @param key the activation key.
-     * @throws RuntimeException `500 (Internal BackendApplication Error)` if the user couldn't be activated.
-     */
-    @GetMapping(ACTIVATE_API)
-    suspend fun activateAccount(@RequestParam(value = ACTIVATE_API_KEY) key: String) {
-        when {
-            !signupService.activate(key) -> throw SignupException("No user was found for this activation key")
-        }
-    }
-}
-
-/*=================================================================================*/
-@RestController
-@RequestMapping(ACCOUNT_API)
-class ResetPasswordController(
-    private val resetPasswordService: ResetPasswordService,
-    private val mailService: MailService
-) {
-    internal class ResetPasswordException(message: String) : RuntimeException(message)
-
-    /**
-     * {@code POST   /account/reset-password/init} : Send an email to reset the password of the user.
-     *
-     * @param mail the mail of the user.
-     */
-    @PostMapping(RESET_PASSWORD_API_INIT)
-    suspend fun requestPasswordReset(@RequestBody @Email mail: String): Unit =
-        with(resetPasswordService.requestPasswordReset(mail)) {
-            when {
-                this == null -> log.warn("Password reset requested for non existing mail")
-                else -> mailService.sendPasswordResetMail(this)
-            }
-        }
-
-    /**
-     * {@code POST   /account/reset-password/finish} : Finish to reset the password of the user.
-     *
-     * @param keyAndPassword the generated key and the new password.
-     * @throws InvalidPasswordProblem {@code 400 (Bad Request)} if the password is incorrect.
-     * @throws RuntimeException         {@code 500 (Internal BackendApplication Error)} if the password could not be reset.
-     */
-    @PostMapping(RESET_PASSWORD_API_FINISH)
-    suspend fun finishPasswordReset(@RequestBody keyAndPassword: KeyAndPassword): Unit =
-        with(InvalidPasswordException()) {
-            when {
-                isPasswordLengthInvalid(keyAndPassword.newPassword) -> throw this
-                keyAndPassword.newPassword != null
-                        && keyAndPassword.key != null
-                        && resetPasswordService.completePasswordReset(
-                    keyAndPassword.newPassword,
-                    keyAndPassword.key
-                ) == null -> throw ResetPasswordException("No user was found for this reset key")
-            }
-        }
-
-}
-
-/*=================================================================================*/
-@RestController
-@RequestMapping(ACCOUNT_API)
-class ChangePasswordController(
-    private val changePasswordService: ChangePasswordService
-) {
-    internal class ChangePasswordException(message: String) : RuntimeException(message)
-
-    /**
-     * {@code POST  /account/change-password} : changes the current user's password.
-     *
-     * @param passwordChange current and new password.
-     * @throws InvalidPasswordProblem {@code 400 (Bad Request)} if the new password is incorrect.
-     */
-    @PostMapping(CHANGE_PASSWORD_API)
-    suspend fun changePassword(@RequestBody passwordChange: PasswordChange): Unit =
-        InvalidPasswordException().run {
-            when {
-                isPasswordLengthInvalid(passwordChange.newPassword) -> throw this
-
-                passwordChange.currentPassword != null
-                        && passwordChange.newPassword != null -> changePasswordService.changePassword(
-                    passwordChange.currentPassword,
-                    passwordChange.newPassword
-                )
-            }
-
-        }
-
-
-}
-
-/*=================================================================================*/
 
 
 //@RestController
@@ -596,4 +482,237 @@ class ChangePasswordController(
 //        .getAuthorities()
 //        .toCollection(mutableListOf())
 //}
+/*=================================================================================*/
+
+@Component
+class SpaWebFilter : WebFilter {
+    override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
+        exchange.request.uri.path.apply {
+            return if (
+                !this.startsWith("/api") &&
+                !this.startsWith("/management") &&
+                !this.startsWith("/services") &&
+                !this.startsWith("/swagger") &&
+                !this.startsWith("/v2/api-docs") &&
+                this.matches(Regex("[^\\\\.]*"))
+            ) chain.filter(
+                exchange.mutate().request(
+                    exchange.request
+                        .mutate()
+                        .path("/index.html")
+                        .build()
+                ).build()
+            ) else chain.filter(exchange)
+        }
+    }
+}
+/*=================================================================================*/
+
+/**
+ * Utility class for HTTP headers creation.
+ */
+object HttpHeaderUtil {
+
+    /**
+     *
+     * createAlert.
+     *
+     * @param applicationName a [java.lang.String] object.
+     * @param message a [java.lang.String] object.
+     * @param param a [java.lang.String] object.
+     * @return a [org.springframework.http.HttpHeaders] object.
+     */
+    private fun createAlert(
+        applicationName: String,
+        message: String?,
+        param: String?
+    ): HttpHeaders = HttpHeaders().apply {
+        add("X-$applicationName-alert", message)
+        try {
+            add("X-$applicationName-params", URLEncoder.encode(param, Charsets.UTF_8))
+        } catch (_: UnsupportedEncodingException) {
+            // StandardCharsets are supported by every Java implementation so this exceptions will never happen
+        }
+    }
+
+    /**
+     *
+     * createEntityCreationAlert.
+     *
+     * @param applicationName a [java.lang.String] object.
+     * @param enableTranslation a boolean.
+     * @param entityName a [java.lang.String] object.
+     * @param param a [java.lang.String] object.
+     * @return a [org.springframework.http.HttpHeaders] object.
+     */
+    fun createEntityCreationAlert(
+        applicationName: String,
+        enableTranslation: Boolean,
+        entityName: String,
+        param: String
+    ): HttpHeaders = createAlert(
+        applicationName,
+        when {
+            enableTranslation -> "$applicationName.$entityName.created"
+            else -> "A new $entityName is created with identifier $param"
+        },
+        param
+    )
+
+    /**
+     *
+     * createEntityUpdateAlert.
+     *
+     * @param applicationName a [java.lang.String] object.
+     * @param enableTranslation a boolean.
+     * @param entityName a [java.lang.String] object.
+     * @param param a [java.lang.String] object.
+     * @return a [org.springframework.http.HttpHeaders] object.
+     */
+    fun createEntityUpdateAlert(
+        applicationName: String,
+        enableTranslation: Boolean,
+        entityName: String,
+        param: String
+    ): HttpHeaders = createAlert(
+        applicationName,
+        when {
+            enableTranslation -> "$applicationName.$entityName.updated"
+            else -> "A $entityName is updated with identifier $param"
+        },
+        param
+    )
+
+    /**
+     *
+     * createEntityDeletionAlert.
+     *
+     * @param applicationName a [java.lang.String] object.
+     * @param enableTranslation a boolean.
+     * @param entityName a [java.lang.String] object.
+     * @param param a [java.lang.String] object.
+     * @return a [org.springframework.http.HttpHeaders] object.
+     */
+    fun createEntityDeletionAlert(
+        applicationName: String,
+        enableTranslation: Boolean,
+        entityName: String,
+        param: String
+    ): HttpHeaders = createAlert(
+        applicationName,
+        when {
+            enableTranslation -> "$applicationName.$entityName.deleted"
+            else -> "A $entityName is deleted with identifier $param"
+        },
+        param
+    )
+
+    /**
+     *
+     * createFailureAlert.
+     *
+     * @param applicationName a [java.lang.String] object.
+     * @param enableTranslation a boolean.
+     * @param entityName a [java.lang.String] object.
+     * @param errorKey a [java.lang.String] object.
+     * @param defaultMessage a [java.lang.String] object.
+     * @return a [org.springframework.http.HttpHeaders] object.
+     */
+    fun createFailureAlert(
+        applicationName: String,
+        enableTranslation: Boolean,
+        entityName: String?,
+        errorKey: String,
+        defaultMessage: String?
+    ): HttpHeaders = log.error(
+        "Entity processing failed, {}",
+        defaultMessage
+    ).run {
+        return@run HttpHeaders().apply {
+            add(
+                "X-$applicationName-error",
+                if (enableTranslation) "error.$errorKey"
+                else defaultMessage!!
+            )
+            add("X-$applicationName-params", entityName)
+        }
+    }
+}
+/*=================================================================================*/
+/**
+ * Utility class for handling pagination.
+ *
+ *
+ *
+ * Pagination uses the same principles as the [GitHub API](https://developer.github.com/v3/#pagination),
+ * and follow [RFC 5988 (Link header)](http://tools.ietf.org/html/rfc5988).
+ */
+object PaginationUtil {
+    private const val HEADER_X_TOTAL_COUNT = "X-Total-Count"
+    private const val HEADER_LINK_FORMAT = "<{0}>; rel=\"{1}\""
+
+    /**
+     * Generate pagination headers for a Spring Data [org.springframework.data.domain.Page] object.
+     *
+     * @param uriBuilder The URI builder.
+     * @param page The page.
+     * @param <T> The type of object.
+     * @return http header.
+    </T> */
+    fun <T> generatePaginationHttpHeaders(uriBuilder: UriComponentsBuilder, page: Page<T>): HttpHeaders {
+        val headers = HttpHeaders()
+        headers.add(HEADER_X_TOTAL_COUNT, page.totalElements.toString())
+        val pageNumber = page.number
+        val pageSize = page.size
+        val link = StringBuilder()
+        if (pageNumber < page.totalPages - 1) {
+            link.append(
+                prepareLink(
+                    uriBuilder = uriBuilder,
+                    pageNumber = pageNumber + 1,
+                    pageSize = pageSize,
+                    relType = "next"
+                )
+            ).append(",")
+        }
+        if (pageNumber > 0) {
+            link.append(prepareLink(uriBuilder, pageNumber - 1, pageSize, "prev"))
+                .append(",")
+        }
+        link.append(prepareLink(uriBuilder, page.totalPages - 1, pageSize, "last"))
+            .append(",")
+            .append(prepareLink(uriBuilder, 0, pageSize, "first"))
+        headers.add(HttpHeaders.LINK, link.toString())
+        return headers
+    }
+
+    private fun prepareLink(
+        uriBuilder: UriComponentsBuilder,
+        pageNumber: Int,
+        pageSize: Int,
+        relType: String
+    ): String = MessageFormat.format(
+        HEADER_LINK_FORMAT,
+        preparePageUri(
+            uriBuilder = uriBuilder,
+            pageNumber = pageNumber,
+            pageSize = pageSize
+        ),
+        relType
+    )
+
+    private fun preparePageUri(
+        uriBuilder: UriComponentsBuilder,
+        pageNumber: Int,
+        pageSize: Int
+    ): String = uriBuilder.replaceQueryParam(
+        "page",
+        pageNumber.toString()
+    ).replaceQueryParam(
+        "size",
+        pageSize.toString()
+    ).toUriString()
+        .replace(oldValue = ",", newValue = "%2C")
+        .replace(oldValue = ";", newValue = "%3B")
+}
 /*=================================================================================*/

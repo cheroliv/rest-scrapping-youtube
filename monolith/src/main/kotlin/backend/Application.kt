@@ -30,3 +30,12 @@ object BackendBootstrap {
 //        kotlin.system.exitProcess(Constants.NORMAL_TERMINATION)
 //    }
 //}
+
+/*=================================================================================*/
+//@org.springframework.stereotype.Component
+//@org.springframework.context.annotation.Profile(Constants.PROFILE_CLI)
+//class CliRunner : CommandLineRunner {
+//    override fun run(vararg args: String?) = runBlocking {
+//        log.info("command line interface: $args")
+//    }
+//}

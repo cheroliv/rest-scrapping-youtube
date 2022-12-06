@@ -21,14 +21,23 @@ import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.getBean
 import org.springframework.context.ApplicationContext
 import org.springframework.context.MessageSource
+import org.springframework.stereotype.Component
 import java.net.InetAddress.getLocalHost
 import java.net.UnknownHostException
 import java.util.*
+import javax.annotation.PostConstruct
 
 /*=================================================================================*/
 object Log {
     @JvmStatic
     val log: Logger by lazy { getLogger(Log.javaClass) }
+}
+/*=================================================================================*/
+@Suppress("unused")
+@Component
+class BackendComponent(private val context: ApplicationContext) {
+    @PostConstruct
+    private fun init() = checkProfileLog(context)
 }
 /*=================================================================================*/
 

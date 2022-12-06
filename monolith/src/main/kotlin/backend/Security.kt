@@ -15,17 +15,25 @@ import io.jsonwebtoken.io.Decoders.BASE64
 import io.jsonwebtoken.jackson.io.JacksonSerializer
 import io.jsonwebtoken.lang.Strings.hasLength
 import io.jsonwebtoken.security.Keys.hmacShaKeyFor
+import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.mono
 import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator
 import org.springframework.beans.factory.InitializingBean
+import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
+import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.context.ReactiveSecurityContextHolder
+import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.server.ServerWebExchange
+import org.springframework.web.server.WebFilter
+import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
 import java.security.Key
 import java.util.*
@@ -184,5 +192,86 @@ class TokenProvider(
         return INVALID_TOKEN
     }
 }
+/*=================================================================================*/
 
+@Component("jwtFilter")
+class JwtFilter(private val tokenProvider: TokenProvider) : WebFilter {
+
+    override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
+        resolveToken(exchange.request).apply token@{
+            chain.apply {
+                return if (!isNullOrBlank() &&
+                    tokenProvider.validateToken(token = this@token)
+                ) filter(exchange)
+                    .contextWrite(
+                        ReactiveSecurityContextHolder.withAuthentication(
+                            tokenProvider.getAuthentication(token = this@token)
+                        )
+                    )
+                else filter(exchange)
+            }
+        }
+    }
+
+    private fun resolveToken(request: ServerHttpRequest): String? = request
+        .headers
+        .getFirst(Constants.AUTHORIZATION_HEADER)
+        .apply {
+            return if (
+                !isNullOrBlank() &&
+                startsWith(Constants.BEARER_START_WITH)
+            ) substring(startIndex = 7)
+            else null
+        }
+
+}
+
+
+/*=================================================================================*/
+
+object SecurityUtils {
+
+    suspend fun getCurrentUserLogin(): String =
+        extractPrincipal(
+            ReactiveSecurityContextHolder.getContext()
+                .awaitSingle()
+                .authentication
+        )
+
+    private fun extractPrincipal(authentication: Authentication?): String =
+        if (authentication == null) ""
+        else when (val principal = authentication.principal) {
+            is UserDetails -> principal.username
+            is String -> principal
+            else -> ""
+        }
+
+    suspend fun getCurrentUserJwt(): String =
+        ReactiveSecurityContextHolder.getContext()
+            .map(SecurityContext::getAuthentication)
+            .filter { it.credentials is String }
+            .map { it.credentials as String }
+            .awaitSingle()
+
+    suspend fun isAuthenticated(): Boolean =
+        ReactiveSecurityContextHolder.getContext()
+            .map(SecurityContext::getAuthentication)
+            .map(Authentication::getAuthorities)
+            .map { roles: Collection<GrantedAuthority> ->
+                roles.map(transform = GrantedAuthority::getAuthority)
+                    .none { it == Constants.ROLE_ANONYMOUS }
+            }.awaitSingle()
+
+
+    suspend fun isCurrentUserInRole(authority: String): Boolean =
+        ReactiveSecurityContextHolder.getContext()
+            .map(SecurityContext::getAuthentication)
+            .map(Authentication::getAuthorities)
+            .map { roles: Collection<GrantedAuthority> ->
+                roles.map(transform = GrantedAuthority::getAuthority)
+                    .any { it == authority }
+            }.awaitSingle()
+}
+
+/*=================================================================================*/
 
