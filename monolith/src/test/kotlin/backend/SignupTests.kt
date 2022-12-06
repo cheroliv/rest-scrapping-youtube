@@ -18,10 +18,11 @@ import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.returnResult
+import java.net.URI
 import kotlin.test.*
 
 
-internal class SignUpAccountControllerTest {
+internal class SignupTests {
 
     private lateinit var context: ConfigurableApplicationContext
 
@@ -45,6 +46,8 @@ internal class SignUpAccountControllerTest {
 
     @AfterEach
     fun tearDown() = deleteAllAccounts(dao)
+
+
 
 
     @Test
@@ -371,5 +374,57 @@ internal class SignUpAccountControllerTest {
         assertTrue(findAllAccountAuthority(dao).none {
             it.role.equals(ROLE_ADMIN, ignoreCase = true)
         })
+    }
+
+
+    @Test
+    fun `vérifie que la requête activate contient bien des données cohérentes`() {
+        RandomUtils.generateActivationKey.run {
+            client
+                .get()
+                .uri("${Constants.ACTIVATE_API_PATH}${Constants.ACTIVATE_API_PARAM}", this)
+                .exchange()
+                .returnResult<Unit>().url.let {
+                    assertEquals(URI("$BASE_URL_DEV${Constants.ACTIVATE_API_PATH}$this"), it)
+                }
+        }
+    }
+
+    @Test
+    fun `test activate avec une mauvaise clé`() {
+        client
+            .get()
+            .uri("${Constants.ACTIVATE_API_PATH}${Constants.ACTIVATE_API_PARAM}", "wrongActivationKey")
+            .exchange()
+            .expectStatus()
+            .is5xxServerError
+            .returnResult<Unit>()
+    }
+
+    @Test
+    fun `test activate avec une clé valide`() {
+        assertEquals(0, countAccount(dao))
+        assertEquals(0, countAccountAuthority(dao))
+        createDataAccounts(setOf(defaultAccount), dao)
+        assertEquals(1, countAccount(dao))
+        assertEquals(1, countAccountAuthority(dao))
+
+        client
+            .get()
+            .uri(
+                "${Constants.ACTIVATE_API_PATH}${Constants.ACTIVATE_API_PARAM}",
+                findOneByLogin(defaultAccount.login!!, dao)!!.apply {
+                    assertTrue(activationKey!!.isNotBlank())
+                    assertFalse(activated)
+                }.activationKey
+            )
+            .exchange()
+            .expectStatus().isOk
+            .returnResult<Unit>()
+
+        findOneByLogin(defaultAccount.login!!, dao)!!.run {
+            assertNull(activationKey)
+            assertTrue(activated)
+        }
     }
 }
