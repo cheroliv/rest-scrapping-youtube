@@ -2,6 +2,7 @@
 
 == *springboot monolith codebase*
 
+.stack:
 * springboot
 * webflux
 * spring data r2dbc
@@ -10,10 +11,9 @@
 * kotlin
 * kotlin coroutines
 
-== class diagram
-
-image::images/monolith_domain_class.png[Classes]
-
+.features:
+* Signup account
+* Password reset and update
 
 ==== **to test the app**
 Open terminal and run : ```./gradlew :monolith:check```
@@ -24,3 +24,6 @@ Open terminal and run : ```./gradlew :monolith:cucumber```
 ==== **to run the app**
 Open terminal and run : ```./gradlew :monolith:bootRun``` +
 and launch http://localhost:8080/
+
+==== **to run desktop app**
+Open terminal and run : ```./gradlew :desktop:run``` +
