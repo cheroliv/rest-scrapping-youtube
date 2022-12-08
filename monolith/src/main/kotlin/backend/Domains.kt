@@ -55,6 +55,7 @@ data class AccountCredentials(
     )
     val password: String? = null,
     val activationKey: String? = null,
+    val resetKey: String? = null,
     val id: UUID? = null,
     @field:NotBlank
     @field:Pattern(regexp = Constants.LOGIN_REGEX)

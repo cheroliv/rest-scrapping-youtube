@@ -1,9 +1,13 @@
 package backend
 
+import backend.RandomUtils.generateResetKey
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.mockito.*
 import org.springframework.beans.factory.getBean
+import org.springframework.boot.runApplication
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.MessageSource
 import org.springframework.mail.MailSendException
@@ -25,6 +29,7 @@ import javax.mail.internet.MimeMultipart
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 
+//TODO: server connection avec profiles
 class MailsTests {
 
     private lateinit var context: ConfigurableApplicationContext
@@ -41,6 +46,16 @@ class MailsTests {
 
     @Captor
     lateinit var messageCaptor: ArgumentCaptor<MimeMessage>
+
+
+    @BeforeAll
+    fun `lance le server en profile test`() =
+        runApplication<BackendApplication> { testLoader(this) }
+            .run { context = this }
+
+    @Suppress("NonAsciiCharacters")
+    @AfterAll
+    fun `arrête le serveur`() = context.close()
 
     @BeforeEach
     fun setup() {
@@ -218,7 +233,8 @@ class MailsTests {
         val user = AccountCredentials(
             langKey = Constants.DEFAULT_LANGUAGE,
             login = "john",
-            email = "john.doe@acme.com"
+            email = "john.doe@acme.com",
+            resetKey = generateResetKey
         )
         mailService.sendCreationEmail(user)
         Mockito.verify(javaMailSender).send(messageCaptor.capture())
