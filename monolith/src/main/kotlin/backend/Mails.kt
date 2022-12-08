@@ -14,6 +14,10 @@ import javax.mail.MessagingException
 
 /*=================================================================================*/
 
+class JavaMailSenderSlurp
+class JavaMailSenderGmail
+
+
 @Service("mailService")
 class MailService(
     private val properties: ApplicationProperties,
