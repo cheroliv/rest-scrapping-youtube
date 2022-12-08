@@ -32,6 +32,8 @@ import kotlin.test.assertNotNull
 //TODO: server connection avec profiles
 class MailsTests {
 
+    class MailGAEProfileTests
+
     private lateinit var context: ConfigurableApplicationContext
     private lateinit var mailService: MailService
 

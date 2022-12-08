@@ -21,6 +21,7 @@ plugins {
     id("io.spring.dependency-management")
     id("com.google.cloud.tools.jib")
     id("com.github.andygoossens.gradle-modernizer-plugin")
+    id("com.google.cloud.tools.appengine")
     jacoco
 }
 
@@ -117,6 +118,9 @@ dependencies {
 
 
 //    testImplementation( "org.springframework.cloud:spring-cloud-starter-contract-verifier")
+//    implementation("org.springframework.cloud:spring-cloud-gcp-starter-storage")
+//    providedCompile ("com.google.appengine:appengine:+")
+
 }
 
 configurations {
