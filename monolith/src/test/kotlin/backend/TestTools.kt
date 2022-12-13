@@ -7,6 +7,7 @@ import backend.Constants.DEFAULT_LANGUAGE
 import backend.Constants.ROLE_ADMIN
 import backend.Constants.ROLE_USER
 import backend.Constants.SPRING_PROFILE_DEVELOPMENT
+import backend.Constants.SPRING_PROFILE_MAILSLURP
 import backend.Constants.SPRING_PROFILE_TEST
 import backend.Constants.SYSTEM_USER
 import com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY

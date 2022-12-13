@@ -2,16 +2,22 @@
 
 package backend
 
+import backend.Constants.DEFAULT_LANGUAGE
 import backend.Constants.SPRING_PROFILE_GMAIL
 import backend.Constants.SPRING_PROFILE_MAILSLURP
 import backend.RandomUtils.generateResetKey
+import com.mailslurp.apis.InboxControllerApi
+import com.mailslurp.apis.WaitForControllerApi
+import com.mailslurp.models.SendEmailOptions
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.mockito.*
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.doNothing
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations.openMocks
 import org.springframework.beans.factory.getBean
 import org.springframework.context.ConfigurableApplicationContext
@@ -25,6 +31,7 @@ import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.net.URI
 import java.nio.charset.Charset
+import java.time.OffsetDateTime
 import java.util.*
 import java.util.regex.Pattern
 import java.util.regex.Pattern.compile
@@ -32,11 +39,10 @@ import javax.mail.Multipart
 import javax.mail.internet.MimeBodyPart
 import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeMultipart
-import kotlin.test.Test
-import kotlin.test.assertNotNull
+import kotlin.test.*
 
 /*=================================================================================*/
-
+@Ignore
 class GmailServiceTests {
 
     private lateinit var context: ConfigurableApplicationContext
@@ -51,13 +57,14 @@ class GmailServiceTests {
     @AfterAll
     fun `arrête le serveur`() = context.close()
 }
-/*=================================================================================*/
 
+/*=================================================================================*/
 class MailSlurpServiceTests {
 
     private lateinit var context: ConfigurableApplicationContext
     private lateinit var mailService: MailService
     lateinit var javaMailSender: JavaMailSenderImpl
+    private val properties:ApplicationProperties by lazy { context.getBean() }
 
     @BeforeAll
     fun `lance le server en profile test`() {
@@ -66,6 +73,76 @@ class MailSlurpServiceTests {
 
     @AfterAll
     fun `arrête le serveur`() = context.close()
+
+
+    @Test
+    fun `check mailslurp token property`() {
+        Log.log.info(properties.message)
+        Log.log.info(properties.mail.mailslurpToken)
+    }
+
+    @Ignore
+    @Test
+    fun `can create inboxes`() {
+        val inboxController = InboxControllerApi(properties.mail.mailslurpToken)
+        val inbox = inboxController.createInbox(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            inboxType = "",
+            virtualInbox = true
+        )
+        assertTrue(inbox.emailAddress.contains("@mailslurp"))
+    }
+
+    @Ignore
+    @Test
+    fun `can send and receive email`() {
+        with(properties.mail.mailslurpToken){
+        // create inbox
+        val inboxController = InboxControllerApi(this)
+        val waitForController = WaitForControllerApi(this)
+        val inbox = inboxController.createInbox(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            inboxType = "",
+            virtualInbox = true
+        )
+
+        val testSubject = "test-subject"
+        val confirmation = inboxController.sendEmailAndConfirm(
+            inboxId = inbox.id,
+            sendEmailOptions = SendEmailOptions(
+                to = listOf(inbox.emailAddress),
+                subject = testSubject
+            )
+        )
+        assertEquals(confirmation.inboxId, inbox.id)
+
+        val email = waitForController.waitForLatestEmail(
+            inboxId = inbox.id,
+            timeout = 60_000,
+            unreadOnly = true,
+            before = OffsetDateTime.now(),
+            delay = 3000,
+            since = OffsetDateTime.now().minusDays(1),
+            sort = "asc"
+        )
+        assertTrue(email.subject == "test-subject")
+    }}
 }
 /*=================================================================================*/
 
@@ -115,133 +192,157 @@ class DefaultMailServiceTests {
     @Test
     fun `test sendEmail`() {
         mailService.sendEmail(
-            "john.doe@acme.com", "testSubject", "testContent", false, false
+            "john.doe@acme.com",
+            "testSubject",
+            "testContent",
+            false,
+            false
         )
-        Mockito.verify(javaMailSender).send(messageCaptor.capture())
+        verify(javaMailSender).send(messageCaptor.capture())
         val message = messageCaptor.value
-        Assertions.assertThat(message.subject).isEqualTo("testSubject")
-        Assertions.assertThat(message.allRecipients[0]).hasToString("john.doe@acme.com")
-        Assertions.assertThat(message.from[0]).hasToString(properties.mail.from)
-        Assertions.assertThat(message.content).isInstanceOf(String::class.java)
-        Assertions.assertThat(message.content).hasToString("testContent")
-        Assertions.assertThat(message.dataHandler.contentType).isEqualTo("text/plain; charset=UTF-8")
+        assertThat(message.subject).isEqualTo("testSubject")
+        assertThat(message.allRecipients[0]).hasToString("john.doe@acme.com")
+        assertThat(message.from[0]).hasToString(properties.mail.from)
+        assertThat(message.content).isInstanceOf(String::class.java)
+        assertThat(message.content).hasToString("testContent")
+        assertThat(message.dataHandler.contentType).isEqualTo("text/plain; charset=UTF-8")
     }
 
     @Test
     fun `test sendMail SendHtmlEmail`() {
         mailService.sendEmail(
-            "john.doe@acme.com", "testSubject", "testContent", isMultipart = false, isHtml = true
+            "john.doe@acme.com",
+            "testSubject",
+            "testContent",
+            isMultipart = false,
+            isHtml = true
         )
-        Mockito.verify(javaMailSender).send(messageCaptor.capture())
+        verify(javaMailSender).send(messageCaptor.capture())
         val message = messageCaptor.value
-        Assertions.assertThat(message.subject).isEqualTo("testSubject")
-        Assertions.assertThat("${message.allRecipients[0]}").isEqualTo("john.doe@acme.com")
-        Assertions.assertThat("${message.from[0]}").isEqualTo(properties.mail.from)
-        Assertions.assertThat(message.content).isInstanceOf(String::class.java)
-        Assertions.assertThat(message.content.toString()).isEqualTo("testContent")
-        Assertions.assertThat(message.dataHandler.contentType).isEqualTo("text/html;charset=UTF-8")
+        assertThat(message.subject).isEqualTo("testSubject")
+        assertThat("${message.allRecipients[0]}").isEqualTo("john.doe@acme.com")
+        assertThat("${message.from[0]}").isEqualTo(properties.mail.from)
+        assertThat(message.content).isInstanceOf(String::class.java)
+        assertThat(message.content.toString()).isEqualTo("testContent")
+        assertThat(message.dataHandler.contentType).isEqualTo("text/html;charset=UTF-8")
     }
 
     @Test
     fun `test sendMail SendMultipartEmail`() {
         mailService.sendEmail(
-            "john.doe@acme.com", "testSubject", "testContent", isMultipart = true, isHtml = false
+            "john.doe@acme.com",
+            "testSubject",
+            "testContent",
+            isMultipart = true,
+            isHtml = false
         )
-        Mockito.verify(javaMailSender).send(messageCaptor.capture())
+        verify(javaMailSender).send(messageCaptor.capture())
         val message = messageCaptor.value
-        val part =
-            ((message.content as MimeMultipart).getBodyPart(0).content as MimeMultipart).getBodyPart(0) as MimeBodyPart
+        val part = ((message.content as MimeMultipart)
+            .getBodyPart(0).content as MimeMultipart)
+            .getBodyPart(0) as MimeBodyPart
         val aos = ByteArrayOutputStream()
         part.writeTo(aos)
-        Assertions.assertThat(message.subject).isEqualTo("testSubject")
-        Assertions.assertThat("${message.allRecipients[0]}").isEqualTo("john.doe@acme.com")
-        Assertions.assertThat("${message.from[0]}").isEqualTo(properties.mail.from)
-        Assertions.assertThat(message.content).isInstanceOf(Multipart::class.java)
-        Assertions.assertThat("$aos").isEqualTo("\r\ntestContent")
-        Assertions.assertThat(part.dataHandler.contentType).isEqualTo("text/plain; charset=UTF-8")
+        assertThat(message.subject).isEqualTo("testSubject")
+        assertThat("${message.allRecipients[0]}").isEqualTo("john.doe@acme.com")
+        assertThat("${message.from[0]}").isEqualTo(properties.mail.from)
+        assertThat(message.content).isInstanceOf(Multipart::class.java)
+        assertThat("$aos").isEqualTo("\r\ntestContent")
+        assertThat(part.dataHandler.contentType).isEqualTo("text/plain; charset=UTF-8")
     }
 
     @Test
     fun `test sendMail SendMultipartHtmlEmail`() {
         mailService.sendEmail(
-            "john.doe@acme.com", "testSubject", "testContent", isMultipart = true, isHtml = true
+            "john.doe@acme.com",
+            "testSubject",
+            "testContent",
+            isMultipart = true,
+            isHtml = true
         )
-        Mockito.verify(javaMailSender).send(messageCaptor.capture())
+        verify(javaMailSender).send(messageCaptor.capture())
         val message = messageCaptor.value
-        val part =
-            ((message.content as MimeMultipart).getBodyPart(0).content as MimeMultipart).getBodyPart(0) as MimeBodyPart
+        val part = ((message.content as MimeMultipart)
+            .getBodyPart(0).content as MimeMultipart)
+            .getBodyPart(0) as MimeBodyPart
         val aos = ByteArrayOutputStream()
         part.writeTo(aos)
-        Assertions.assertThat(message.subject).isEqualTo("testSubject")
-        Assertions.assertThat("${message.allRecipients[0]}").isEqualTo("john.doe@acme.com")
-        Assertions.assertThat("${message.from[0]}").isEqualTo(properties.mail.from)
-        Assertions.assertThat(message.content).isInstanceOf(Multipart::class.java)
-        Assertions.assertThat("$aos").isEqualTo("\r\ntestContent")
-        Assertions.assertThat(part.dataHandler.contentType).isEqualTo("text/html;charset=UTF-8")
+        assertThat(message.subject).isEqualTo("testSubject")
+        assertThat("${message.allRecipients[0]}").isEqualTo("john.doe@acme.com")
+        assertThat("${message.from[0]}").isEqualTo(properties.mail.from)
+        assertThat(message.content).isInstanceOf(Multipart::class.java)
+        assertThat("$aos").isEqualTo("\r\ntestContent")
+        assertThat(part.dataHandler.contentType).isEqualTo("text/html;charset=UTF-8")
     }
 
     @Test
     fun `test SendEmailFromTemplate`() {
         val user = AccountCredentials(
-            login = "john", email = "john.doe@acme.com", langKey = "en"
+            login = "john",
+            email = "john.doe@acme.com",
+            langKey = "en"
         )
         mailService.sendEmailFromTemplate(
-            user, "mail/testEmail", "email.test.title"
+            user,
+            "mail/testEmail",
+            "email.test.title"
         )
-        Mockito.verify(javaMailSender).send(messageCaptor.capture())
+        verify(javaMailSender).send(messageCaptor.capture())
         val message = messageCaptor.value
-        Assertions.assertThat(message.subject).isEqualTo("test title")
-        Assertions.assertThat("${message.allRecipients[0]}").isEqualTo(user.email)
-        Assertions.assertThat("${message.from[0]}").isEqualTo(properties.mail.from)
-        Assertions.assertThat(message.content.toString()).isEqualToNormalizingNewlines(
+        assertThat(message.subject).isEqualTo("test title")
+        assertThat("${message.allRecipients[0]}").isEqualTo(user.email)
+        assertThat("${message.from[0]}").isEqualTo(properties.mail.from)
+        assertThat(message.content.toString()).isEqualToNormalizingNewlines(
             "<html>test title, http://127.0.0.1:8080, john</html>"
         )
-        Assertions.assertThat(message.dataHandler.contentType).isEqualTo("text/html;charset=UTF-8")
+        assertThat(message.dataHandler.contentType).isEqualTo("text/html;charset=UTF-8")
     }
 
     @Test
     fun testSendActivationEmail() {
         val user = AccountCredentials(
-            langKey = Constants.DEFAULT_LANGUAGE, login = "john", email = "john.doe@acme.com"
+            langKey = DEFAULT_LANGUAGE,
+            login = "john",
+            email = "john.doe@acme.com"
         )
         mailService.sendActivationEmail(user)
-        Mockito.verify(javaMailSender).send(messageCaptor.capture())
+        verify(javaMailSender).send(messageCaptor.capture())
         val message = messageCaptor.value
-        Assertions.assertThat("${message.allRecipients[0]}").isEqualTo(user.email)
-        Assertions.assertThat("${message.from[0]}").isEqualTo(properties.mail.from)
-        Assertions.assertThat(message.content.toString()).isNotEmpty
-        Assertions.assertThat(message.dataHandler.contentType).isEqualTo("text/html;charset=UTF-8")
+        assertThat("${message.allRecipients[0]}").isEqualTo(user.email)
+        assertThat("${message.from[0]}").isEqualTo(properties.mail.from)
+        assertThat(message.content.toString()).isNotEmpty
+        assertThat(message.dataHandler.contentType).isEqualTo("text/html;charset=UTF-8")
     }
 
     @Test
     fun testCreationEmail() {
         val user = AccountCredentials(
-            langKey = Constants.DEFAULT_LANGUAGE,
+            langKey = DEFAULT_LANGUAGE,
             login = "john",
             email = "john.doe@acme.com",
             resetKey = generateResetKey
         )
         mailService.sendCreationEmail(user)
-        Mockito.verify(javaMailSender).send(messageCaptor.capture())
+        verify(javaMailSender).send(messageCaptor.capture())
         val message = messageCaptor.value
-        Assertions.assertThat("${message.allRecipients[0]}").isEqualTo(user.email)
-        Assertions.assertThat("${message.from[0]}").isEqualTo(properties.mail.from)
-        Assertions.assertThat(message.content.toString()).isNotEmpty
-        Assertions.assertThat(message.dataHandler.contentType).isEqualTo("text/html;charset=UTF-8")
+        assertThat("${message.allRecipients[0]}").isEqualTo(user.email)
+        assertThat("${message.from[0]}").isEqualTo(properties.mail.from)
+        assertThat(message.content.toString()).isNotEmpty
+        assertThat(message.dataHandler.contentType).isEqualTo("text/html;charset=UTF-8")
     }
 
     @Test
     fun testSendPasswordResetMail() {
         val user = AccountCredentials(
-            langKey = Constants.DEFAULT_LANGUAGE, login = "john", email = "john.doe@acme.com"
+            langKey = DEFAULT_LANGUAGE, login = "john", email = "john.doe@acme.com"
         )
         mailService.sendPasswordResetMail(user)
-        Mockito.verify(javaMailSender).send(messageCaptor.capture())
+        verify(javaMailSender).send(messageCaptor.capture())
         val message = messageCaptor.value
-        Assertions.assertThat("${message.allRecipients[0]}").isEqualTo(user.email)
-        Assertions.assertThat("${message.from[0]}").isEqualTo(properties.mail.from)
-        Assertions.assertThat(message.content.toString()).isNotEmpty
-        Assertions.assertThat(message.dataHandler.contentType).isEqualTo("text/html;charset=UTF-8")
+        assertThat("${message.allRecipients[0]}").isEqualTo(user.email)
+        assertThat("${message.from[0]}").isEqualTo(properties.mail.from)
+        assertThat(message.content.toString()).isNotEmpty
+        assertThat(message.dataHandler.contentType).isEqualTo("text/html;charset=UTF-8")
     }
 
     @Test
@@ -272,7 +373,7 @@ class DefaultMailServiceTests {
             mailService.sendEmailFromTemplate(
                 user.copy(langKey = langKey), "mail/testEmail", "email.test.title"
             )
-            Mockito.verify(javaMailSender, Mockito.atLeastOnce()).send(messageCaptor.capture())
+            verify(javaMailSender, Mockito.atLeastOnce()).send(messageCaptor.capture())
             val message = messageCaptor.value
 
             val resource = this::class.java.classLoader.getResource(
@@ -289,8 +390,8 @@ class DefaultMailServiceTests {
             )
 
             val emailTitle = prop["email.test.title"] as String
-            Assertions.assertThat(message.subject).isEqualTo(emailTitle)
-            Assertions.assertThat(message.content.toString())
+            assertThat(message.subject).isEqualTo(emailTitle)
+            assertThat(message.content.toString())
                 .isEqualToNormalizingNewlines("<html>$emailTitle, http://127.0.0.1:8080, john</html>")
         }
     }
