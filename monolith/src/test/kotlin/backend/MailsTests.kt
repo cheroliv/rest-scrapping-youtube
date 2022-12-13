@@ -2,6 +2,8 @@
 
 package backend
 
+import backend.Constants.SPRING_PROFILE_GMAIL
+import backend.Constants.SPRING_PROFILE_MAILSLURP
 import backend.RandomUtils.generateResetKey
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterAll
@@ -36,12 +38,14 @@ import kotlin.test.assertNotNull
 /*=================================================================================*/
 
 class GmailServiceTests {
+
     private lateinit var context: ConfigurableApplicationContext
     private lateinit var mailService: MailService
     lateinit var javaMailSender: JavaMailSenderImpl
+
     @BeforeAll
     fun `lance le server en profile test`() {
-        context = launcher()
+        context = launcher(SPRING_PROFILE_GMAIL)
     }
 
     @AfterAll
@@ -50,14 +54,15 @@ class GmailServiceTests {
 /*=================================================================================*/
 
 class MailSlurpServiceTests {
+
     private lateinit var context: ConfigurableApplicationContext
     private lateinit var mailService: MailService
     lateinit var javaMailSender: JavaMailSenderImpl
+
     @BeforeAll
     fun `lance le server en profile test`() {
-        context = launcher()
+        context = launcher(SPRING_PROFILE_MAILSLURP)
     }
-
 
     @AfterAll
     fun `arrête le serveur`() = context.close()
