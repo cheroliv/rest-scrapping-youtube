@@ -1,17 +1,19 @@
+@file:Suppress("NonAsciiCharacters")
+
 package backend
 
 //import org.assertj.core.api.Assertions.assertThat
+//import org.springframework.test.web.reactive.server.returnResult
+//import java.net.URI
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.springframework.beans.factory.getBean
-import org.springframework.boot.runApplication
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.test.web.reactive.server.WebTestClient
-//import org.springframework.test.web.reactive.server.returnResult
-//import java.net.URI
 import kotlin.test.*
+
 @Suppress("unused")
 internal class ChangePasswordControllerTests {
 
@@ -138,8 +140,8 @@ internal class ChangePasswordControllerTests {
      */
 
 }
-internal class ResetPasswordControllerTest {
 
+internal class ResetPasswordControllerTest {
 
 
     private val client: WebTestClient by lazy {
@@ -152,17 +154,19 @@ internal class ResetPasswordControllerTest {
     private val dao: R2dbcEntityTemplate by lazy { context.getBean() }
 
     @BeforeAll
-    fun `lance le server en profile test`() =
-        runApplication<BackendApplication> { testLoader(app = this) }
-            .run { context = this }
+    fun `lance le server en profile test`() {
+        context = launcher()
+    }
 
     @AfterAll
     fun `arrête le serveur`() = context.close()
 
     @AfterEach
     fun tearDown() = deleteAllAccounts(dao)
+
     @Test
-    fun `test Request Password Reset`(){}
+    fun `test Request Password Reset`() {
+    }
 //    val user = User(
 //        password = RandomStringUtils.random(60),
 //        activated = true,
@@ -180,7 +184,8 @@ internal class ResetPasswordControllerTest {
 
 
     @Test
-    fun `test Request Password Reset UpperCaseEmail`(){}
+    fun `test Request Password Reset UpperCaseEmail`() {
+    }
 //    val user = User(
 //        password = RandomStringUtils.random(60),
 //        activated = true,

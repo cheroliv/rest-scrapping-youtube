@@ -12,7 +12,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.springframework.beans.factory.getBean
-import org.springframework.boot.runApplication
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.http.MediaType.APPLICATION_JSON
@@ -35,19 +34,16 @@ internal class SignupTests {
 
     private val dao: R2dbcEntityTemplate by lazy { context.getBean() }
 
-
     @BeforeAll
-    fun `lance le server en profile test`() =
-        runApplication<BackendApplication> { testLoader(this) }
-            .run { context = this }
+    fun `lance le server en profile test`() {
+        context = launcher()
+    }
 
     @AfterAll
     fun `arrête le serveur`() = context.close()
 
     @AfterEach
     fun tearDown() = deleteAllAccounts(dao)
-
-
 
 
     @Test
@@ -78,7 +74,7 @@ internal class SignupTests {
             }
     }
 
-    @Test
+    @Test//TODO: mock sendmail
     fun `test signup avec un account valide`() {
         val countUserBefore = countAccount(dao)
         val countUserAuthBefore = countAccountAuthority(dao)
@@ -223,7 +219,7 @@ internal class SignupTests {
             .responseBodyContent!!.isNotEmpty().run { assertTrue(this) }
     }
 
-    @Test
+    @Test//TODO: mock sendmail
     fun `test signup account avec un email dupliqué`() {
 
         assertEquals(0, countAccount(dao))
@@ -332,7 +328,7 @@ internal class SignupTests {
         )
     }
 
-    @Test
+    @Test//TODO: mock sendmail
     fun `test signup account en renseignant l'autorité admin qui sera ignoré et le champ activé qui sera mis à false`() {
         val countUserBefore = countAccount(dao)
         val countUserAuthBefore = countAccountAuthority(dao)

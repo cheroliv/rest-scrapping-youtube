@@ -15,7 +15,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.springframework.beans.factory.getBean
-import org.springframework.boot.runApplication
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import java.time.Instant
@@ -28,10 +27,11 @@ internal class AuthorityRepositoryR2dbcTest {
 
     private val authorityRepository: AuthorityRepository by lazy { context.getBean<AuthorityRepositoryR2dbc>() }
 
+
     @BeforeAll
-    fun `lance le server en profile test`() = runApplication<BackendApplication> {
-        testLoader(app = this)
-    }.run { context = this }
+    fun `lance le server en profile test`() {
+        context = launcher()
+    }
 
     @AfterAll
     fun `arrête le serveur`() = context.close()
@@ -54,10 +54,14 @@ internal class AccountRepositoryR2dbcTest {
     private val dao: R2dbcEntityTemplate by lazy { context.getBean() }
     private val accountRepository: AccountRepository by lazy { context.getBean<AccountRepositoryR2dbc>() }
 
+    //    @BeforeAll
+//    fun `lance le server en profile test`() = runApplication<BackendApplication> {
+//        testLoader(this)
+//    }.run { context = this }
     @BeforeAll
-    fun `lance le server en profile test`() = runApplication<BackendApplication> {
-        testLoader(this)
-    }.run { context = this }
+    fun `lance le server en profile test`() {
+        context = launcher()
+    }
 
     @AfterAll
     fun `arrête le serveur`() = context.close()
@@ -196,10 +200,14 @@ internal class AccountAuthorityRepositoryR2dbcTest {
     private val dao: R2dbcEntityTemplate by lazy { context.getBean() }
     private val accountAuthorityRepository: AccountAuthorityRepository by lazy { context.getBean<AccountAuthorityRepositoryR2dbc>() }
 
+    //    @BeforeAll
+//    fun `lance le server en profile test`() = runApplication<BackendApplication> {
+//        testLoader(this)
+//    }.run { context = this }
     @BeforeAll
-    fun `lance le server en profile test`() = runApplication<BackendApplication> {
-        testLoader(this)
-    }.run { context = this }
+    fun `lance le server en profile test`() {
+        context = launcher()
+    }
 
     @AfterAll
     fun `arrête le serveur`() = context.close()

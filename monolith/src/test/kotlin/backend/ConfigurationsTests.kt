@@ -3,7 +3,6 @@ package backend
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.springframework.beans.factory.getBean
-import org.springframework.boot.runApplication
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.MessageSource
 import java.util.*
@@ -15,9 +14,9 @@ class ConfigurationsTests {
     private val messageSource: MessageSource by lazy { context.getBean() }
 
     @BeforeAll
-    fun `lance le server en profile test`() =
-        runApplication<BackendApplication> { testLoader(this) }
-            .run { context = this }
+    fun `lance le server en profile test`() {
+        context = launcher()
+    }
 
     @Suppress("NonAsciiCharacters")
     @AfterAll

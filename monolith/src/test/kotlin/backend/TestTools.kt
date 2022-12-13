@@ -6,7 +6,7 @@ import backend.Constants.ADMIN
 import backend.Constants.DEFAULT_LANGUAGE
 import backend.Constants.ROLE_ADMIN
 import backend.Constants.ROLE_USER
-import backend.Constants.SPRING_PROFILE_CONF_DEFAULT_KEY
+import backend.Constants.SPRING_PROFILE_DEVELOPMENT
 import backend.Constants.SPRING_PROFILE_TEST
 import backend.Constants.SYSTEM_USER
 import com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY
@@ -16,7 +16,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeDiagnosingMatcher
-import org.springframework.boot.SpringApplication
+import org.springframework.boot.runApplication
+import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.data.r2dbc.core.select
 import org.springframework.data.relational.core.query.Criteria.where
@@ -35,16 +36,16 @@ import kotlin.test.assertTrue
 
 const val BASE_URL_DEV = "http://localhost:8080"
 
-fun testLoader(app: SpringApplication) = with(app) {
-    setDefaultProperties(
-        hashMapOf<String, Any>().apply {
-            set(
-                SPRING_PROFILE_CONF_DEFAULT_KEY,
-                SPRING_PROFILE_TEST
-            )
-        })
-    setAdditionalProfiles(SPRING_PROFILE_TEST)
-}
+fun launcher(vararg profiles: String): ConfigurableApplicationContext =
+    runApplication<BackendApplication>().apply {
+        environment.run {
+            setDefaultProfiles(SPRING_PROFILE_DEVELOPMENT)
+            setActiveProfiles(SPRING_PROFILE_TEST)
+            setActiveProfiles(*profiles.toMutableList().apply {
+                activeProfiles.map { add(it) }
+            }.toSet().toTypedArray())
+        }
+    }
 
 fun createDataAccounts(accounts: Set<AccountCredentials>, dao: R2dbcEntityTemplate) {
     assertEquals(0, countAccount(dao))
@@ -77,17 +78,19 @@ fun createActivatedDataAccounts(accounts: Set<AccountCredentials>, dao: R2dbcEnt
     assertEquals(0, countAccount(dao))
     assertEquals(0, countAccountAuthority(dao))
     accounts.map { acc ->
-        AccountEntity(acc.copy(
-            activated = true,
-            langKey = DEFAULT_LANGUAGE,
-            createdBy = SYSTEM_USER,
-            createdDate = Instant.now(),
-            lastModifiedBy = SYSTEM_USER,
-            lastModifiedDate = Instant.now(),
-            authorities = mutableSetOf(ROLE_USER).apply {
-                if (acc.login == ADMIN) add(ROLE_ADMIN)
-            }.toSet()
-        )).run {
+        AccountEntity(
+            acc.copy(
+                activated = true,
+                langKey = DEFAULT_LANGUAGE,
+                createdBy = SYSTEM_USER,
+                createdDate = Instant.now(),
+                lastModifiedBy = SYSTEM_USER,
+                lastModifiedDate = Instant.now(),
+                authorities = mutableSetOf(ROLE_USER).apply {
+                    if (acc.login == ADMIN) add(ROLE_ADMIN)
+                }.toSet()
+            )
+        ).run {
             dao.insert(this).block()!!.id!!.let { uuid ->
                 authorities!!.map { authority ->
                     dao.insert(AccountAuthorityEntity(userId = uuid, role = authority.role)).block()

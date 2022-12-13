@@ -47,6 +47,8 @@ object Constants {
     const val SPRING_PROFILE_K8S = "k8s"
     const val PROFILE_CLI = "cli"
     val PROFILE_CLI_PROPS = mapOf("spring.main.web-application-type" to "none")
+    const val SPRING_PROFILE_GMAIL = "gmail"
+    const val SPRING_PROFILE_MAILSLURP = "mailslurp"
 
     //Config
     const val DEV_HOST = "localhost"

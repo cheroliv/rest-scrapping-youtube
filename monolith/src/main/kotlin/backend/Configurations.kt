@@ -4,8 +4,16 @@ package backend
 
 //import reactor.core.publisher.Hooks.onOperatorDebug
 
+//import org.springframework.boot.autoconfigure.web.reactive.ResourceHandlerRegistrationCustomizer
+//import org.springframework.context.annotation.Import
+//import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
+//import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
+//import org.springframework.security.core.userdetails.ReactiveUserDetailsService
+//import org.zalando.problem.spring.webflux.advice.security.SecurityProblemSupport
 import backend.Constants.FEATURE_POLICY
 import backend.Constants.REQUEST_PARAM_LANG
+import backend.Constants.SPRING_PROFILE_CONF_DEFAULT_KEY
+import backend.Constants.SPRING_PROFILE_DEVELOPMENT
 import backend.Log.log
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
@@ -15,11 +23,11 @@ import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.InitializingBean
+import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.task.TaskExecutionProperties
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Import
-import org.springframework.context.annotation.Profile
+import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.boot.runApplication
+import org.springframework.context.annotation.*
 import org.springframework.context.i18n.LocaleContext
 import org.springframework.context.i18n.SimpleLocaleContext
 import org.springframework.core.annotation.Order
@@ -72,23 +80,11 @@ import java.util.concurrent.Callable
 import java.util.concurrent.Executor
 import java.util.concurrent.Future
 
-//import org.springframework.boot.autoconfigure.web.reactive.ResourceHandlerRegistrationCustomizer
-//import org.springframework.context.annotation.Import
-//import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
-//import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
-//import org.springframework.security.core.userdetails.ReactiveUserDetailsService
-//import org.zalando.problem.spring.webflux.advice.security.SecurityProblemSupport
-import backend.Constants.SPRING_PROFILE_CONF_DEFAULT_KEY
-import backend.Constants.SPRING_PROFILE_DEVELOPMENT
-import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.context.properties.EnableConfigurationProperties
-import org.springframework.boot.runApplication
 /*=================================================================================*/
 
 @SpringBootApplication
 @EnableConfigurationProperties(ApplicationProperties::class)
-class BackendApplication
-/*=================================================================================*/
+class BackendApplication/*=================================================================================*/
 
 object BackendBootstrap {
     @JvmStatic
@@ -96,8 +92,7 @@ object BackendBootstrap {
         setDefaultProperties(hashMapOf<String, Any>(SPRING_PROFILE_CONF_DEFAULT_KEY to SPRING_PROFILE_DEVELOPMENT))
         setAdditionalProfiles(SPRING_PROFILE_DEVELOPMENT)
     }.run { bootstrapLog(this) }
-}
-/*=================================================================================*/
+}/*=================================================================================*/
 
 //object CliBootstrap {
 //    @JvmStatic
@@ -122,22 +117,19 @@ object BackendBootstrap {
 @Configuration
 class LocaleSupportConfiguration : DelegatingWebFluxConfiguration() {
 
-    override fun createLocaleContextResolver(): LocaleContextResolver =
-        RequestParamLocaleContextResolver()
+    override fun createLocaleContextResolver(): LocaleContextResolver = RequestParamLocaleContextResolver()
 
     class RequestParamLocaleContextResolver : LocaleContextResolver {
         override fun resolveLocaleContext(exchange: ServerWebExchange): LocaleContext {
             var targetLocale = getDefault()
             val referLang = exchange.request.queryParams[REQUEST_PARAM_LANG]
-            if (referLang != null && referLang.isNotEmpty())
-                targetLocale = forLanguageTag(referLang[0])
+            if (referLang != null && referLang.isNotEmpty()) targetLocale = forLanguageTag(referLang[0])
             return SimpleLocaleContext(targetLocale)
         }
 
         @Throws(UnsupportedOperationException::class)
         override fun setLocaleContext(
-            exchange: ServerWebExchange,
-            localeContext: LocaleContext?
+            exchange: ServerWebExchange, localeContext: LocaleContext?
         ): Unit = throw UnsupportedOperationException("Not Supported")
     }
 }
@@ -172,22 +164,31 @@ class MonolithConfiguration(
     @Bean
     fun jdk8TimeModule(): Jdk8Module = Jdk8Module()
 
+
     @Bean
-    fun javaMailSender(): JavaMailSender = JavaMailSenderImpl()
-        .apply {
-            host = properties.mail.host
-            port = properties.mail.port
-            username = properties.mail.from
-            password = properties.mail.password
-            javaMailProperties.apply {
-                this[MAIL_TRANSPORT_PROTOCOL] = properties.mail.property.transport.protocol
-                this[MAIL_SMTP_AUTH] = properties.mail.property.smtp.auth
-                this[MAIL_TRANSPORT_STARTTLS_ENABLE] = properties.mail.property.smtp.starttls.enable
-                this[MAIL_DEBUG] = properties.mail.property.debug
-                this["spring.mail.test-connection"] = true
-                this["mail.smtp.ssl.trust"] = true
-            }
+    fun gmailSender(): JavaMailSender = JavaMailSenderGmail()
+
+    @Bean
+    fun mailSlurpSender(): JavaMailSender = JavaMailSenderSlurp()
+
+    @Bean
+    @Primary
+    fun javaMailSender(): JavaMailSender = JavaMailSenderImpl().apply {
+        host = properties.mail.host
+        port = properties.mail.port
+        username = properties.mail.from
+        password = properties.mail.password
+        javaMailProperties.apply {
+            this[MAIL_TRANSPORT_PROTOCOL] = properties.mail.property.transport.protocol
+            this[MAIL_SMTP_AUTH] = properties.mail.property.smtp.auth
+            this[MAIL_TRANSPORT_STARTTLS_ENABLE] = properties.mail.property.smtp.starttls.enable
+            this[MAIL_DEBUG] = properties.mail.property.debug
+            this["spring.mail.test-connection"] = true
+            this["mail.smtp.ssl.trust"] = true
+            this["mail.connect_timeout"] = 60000
+            this["mail.auth_api_key"] = ""
         }
+    }
 
 
     /**
@@ -198,8 +199,7 @@ class MonolithConfiguration(
     @Bean
     @Order(-2)
     fun problemHandler(
-        mapper: ObjectMapper,
-        problemHandling: ProblemHandling
+        mapper: ObjectMapper, problemHandling: ProblemHandling
     ): WebExceptionHandler = ProblemExceptionHandler(mapper, problemHandling)
 
     @Bean
@@ -214,10 +214,7 @@ class MonolithConfiguration(
     @Bean
     fun corsFilter(): CorsWebFilter = CorsWebFilter(UrlBasedCorsConfigurationSource().apply source@{
         properties.cors.apply config@{
-            if (
-                allowedOrigins != null &&
-                allowedOrigins!!.isNotEmpty()
-            ) {
+            if (allowedOrigins != null && allowedOrigins!!.isNotEmpty()) {
                 log.debug("Registering CORS filter").run {
                     this@source.apply {
                         registerCorsConfiguration("/api/**", this@config)
@@ -237,91 +234,59 @@ class MonolithConfiguration(
     @Bean
     fun reactiveSortHandlerMethodArgumentResolver() = ReactiveSortHandlerMethodArgumentResolver()
 
-/*
-    @Bean
-    fun registrationCustomizer(): ResourceHandlerRegistrationCustomizer {
-        // Disable built-in cache control to use our custom filter instead
-        return registration -> registration.setCacheControl(null);
-    }
+    /*
+        @Bean
+        fun registrationCustomizer(): ResourceHandlerRegistrationCustomizer {
+            // Disable built-in cache control to use our custom filter instead
+            return registration -> registration.setCacheControl(null);
+        }
 
-    @Bean
-    @Profile(Constants.SPRING_PROFILE_PRODUCTION)
-    fun cachingHttpHeadersFilter(): CachingHttpHeadersFilter {
-        // Use a cache filter that only match selected paths
-        return CachingHttpHeadersFilter(
-            TimeUnit.DAYS.toMillis(
-                ApplicationProperties.getHttp().getCache().getTimeToLiveInDays()
+        @Bean
+        @Profile(Constants.SPRING_PROFILE_PRODUCTION)
+        fun cachingHttpHeadersFilter(): CachingHttpHeadersFilter {
+            // Use a cache filter that only match selected paths
+            return CachingHttpHeadersFilter(
+                TimeUnit.DAYS.toMillis(
+                    ApplicationProperties.getHttp().getCache().getTimeToLiveInDays()
+                )
             )
-        )
-    }
-*/
+        }
+    */
     @Bean("passwordEncoder")
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
     @Bean
     fun reactiveAuthenticationManager(): ReactiveAuthenticationManager =
-        UserDetailsRepositoryReactiveAuthenticationManager(userDetailsService)
-            .apply { setPasswordEncoder(passwordEncoder()) }
+        UserDetailsRepositoryReactiveAuthenticationManager(userDetailsService).apply {
+            setPasswordEncoder(passwordEncoder())
+        }
 
     @Bean
     fun springSecurityFilterChain(
         http: ServerHttpSecurity
-    ): SecurityWebFilterChain =
-        @Suppress("DEPRECATION")
-        http.securityMatcher(
-            NegatedServerWebExchangeMatcher(
-                OrServerWebExchangeMatcher(
-                    pathMatchers(
-                        "/app/**",
-                        "/i18n/**",
-                        "/content/**",
-                        "/swagger-ui/**",
-                        "/test/**",
-                        "/webjars/**"
-                    ),
-                    pathMatchers(OPTIONS, "/**")
-                )
+    ): SecurityWebFilterChain = @Suppress("DEPRECATION") http.securityMatcher(
+        NegatedServerWebExchangeMatcher(
+            OrServerWebExchangeMatcher(
+                pathMatchers(
+                    "/app/**", "/i18n/**", "/content/**", "/swagger-ui/**", "/test/**", "/webjars/**"
+                ), pathMatchers(OPTIONS, "/**")
             )
-        ).csrf()
-            .disable()
-            .addFilterAt(SpaWebFilter(), AUTHENTICATION)
-            .addFilterAt(JwtFilter(tokenProvider), HTTP_BASIC)
-            .authenticationManager(reactiveAuthenticationManager())
-            .exceptionHandling()
-            .accessDeniedHandler(problemSupport)
-            .authenticationEntryPoint(problemSupport)
-            .and()
-            .headers().contentSecurityPolicy(Constants.CONTENT_SECURITY_POLICY)
-            .and()
-            .referrerPolicy(STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
-            .and()
-            .featurePolicy(FEATURE_POLICY)
-            .and()
-            .frameOptions().disable()
-            .and()
-            .authorizeExchange()
-            .pathMatchers("/").permitAll()
-            .pathMatchers("/**").permitAll()
-            .pathMatchers("/*.*").permitAll()
-            .pathMatchers("/api/account/signup").permitAll()
-            .pathMatchers("/api/activate").permitAll()
-            .pathMatchers("/api/authenticate").permitAll()
-            .pathMatchers("/api/account/reset-password/init").permitAll()
-            .pathMatchers("/api/account/reset-password/finish").permitAll()
-            .pathMatchers("/api/auth-info").permitAll()
-            .pathMatchers("/api/user/**").permitAll()
-            .pathMatchers("/management/health").permitAll()
-            .pathMatchers("/management/health/**").permitAll()
-            .pathMatchers("/management/info").permitAll()
-            .pathMatchers("/management/prometheus").permitAll()
-            .pathMatchers("/api/**").permitAll()
-            .pathMatchers("/services/**").authenticated()
-            .pathMatchers("/swagger-resources/**").authenticated()
-            .pathMatchers("/v2/api-docs").authenticated()
-            .pathMatchers("/management/**").hasAuthority(Constants.ROLE_ADMIN)
-            .pathMatchers("/api/admin/**").hasAuthority(Constants.ROLE_ADMIN)
-            .and()
-            .build()
+        )
+    ).csrf().disable().addFilterAt(SpaWebFilter(), AUTHENTICATION).addFilterAt(JwtFilter(tokenProvider), HTTP_BASIC)
+        .authenticationManager(reactiveAuthenticationManager()).exceptionHandling().accessDeniedHandler(problemSupport)
+        .authenticationEntryPoint(problemSupport).and().headers()
+        .contentSecurityPolicy(Constants.CONTENT_SECURITY_POLICY).and().referrerPolicy(STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
+        .and().featurePolicy(FEATURE_POLICY).and().frameOptions().disable().and().authorizeExchange().pathMatchers("/")
+        .permitAll().pathMatchers("/**").permitAll().pathMatchers("/*.*").permitAll()
+        .pathMatchers("/api/account/signup").permitAll().pathMatchers("/api/activate").permitAll()
+        .pathMatchers("/api/authenticate").permitAll().pathMatchers("/api/account/reset-password/init").permitAll()
+        .pathMatchers("/api/account/reset-password/finish").permitAll().pathMatchers("/api/auth-info").permitAll()
+        .pathMatchers("/api/user/**").permitAll().pathMatchers("/management/health").permitAll()
+        .pathMatchers("/management/health/**").permitAll().pathMatchers("/management/info").permitAll()
+        .pathMatchers("/management/prometheus").permitAll().pathMatchers("/api/**").permitAll()
+        .pathMatchers("/services/**").authenticated().pathMatchers("/swagger-resources/**").authenticated()
+        .pathMatchers("/v2/api-docs").authenticated().pathMatchers("/management/**").hasAuthority(Constants.ROLE_ADMIN)
+        .pathMatchers("/api/admin/**").hasAuthority(Constants.ROLE_ADMIN).and().build()
 }
 
 /*=================================================================================*/
@@ -337,25 +302,20 @@ class AsyncTasksConfiguration(
 
 
     @Bean(name = ["taskExecutor"])
-    override fun getAsyncExecutor()
-            : Executor = ExceptionHandlingAsyncTaskExecutor(
-        ThreadPoolTaskExecutor().apply {
-            queueCapacity = taskExecutionProperties.pool.queueCapacity
-            @Suppress("UsePropertyAccessSyntax")
-            setThreadNamePrefix(taskExecutionProperties.threadNamePrefix)
-            corePoolSize = taskExecutionProperties.pool.coreSize
-            maxPoolSize = taskExecutionProperties.pool.maxSize
-        }).also { log.debug("Creating Async Task Executor") }
+    override fun getAsyncExecutor(): Executor = ExceptionHandlingAsyncTaskExecutor(ThreadPoolTaskExecutor().apply {
+        queueCapacity = taskExecutionProperties.pool.queueCapacity
+        @Suppress("UsePropertyAccessSyntax") setThreadNamePrefix(taskExecutionProperties.threadNamePrefix)
+        corePoolSize = taskExecutionProperties.pool.coreSize
+        maxPoolSize = taskExecutionProperties.pool.maxSize
+    }).also { log.debug("Creating Async Task Executor") }
 
-    override fun getAsyncUncaughtExceptionHandler()
-            : AsyncUncaughtExceptionHandler = SimpleAsyncUncaughtExceptionHandler()
+    override fun getAsyncUncaughtExceptionHandler(): AsyncUncaughtExceptionHandler =
+        SimpleAsyncUncaughtExceptionHandler()
 
 
     class ExceptionHandlingAsyncTaskExecutor(
         private val executor: AsyncTaskExecutor
-    ) : AsyncTaskExecutor,
-        InitializingBean,
-        DisposableBean {
+    ) : AsyncTaskExecutor, InitializingBean, DisposableBean {
         companion object {
             const val EXCEPTION_MESSAGE = "Caught async exceptions"
         }
@@ -375,14 +335,13 @@ class AsyncTasksConfiguration(
             }
         }
 
-        private fun createWrappedRunnable(task: Runnable): Runnable =
-            Runnable {
-                try {
-                    task.run()
-                } catch (e: Exception) {
-                    handle(e)
-                }
+        private fun createWrappedRunnable(task: Runnable): Runnable = Runnable {
+            try {
+                task.run()
+            } catch (e: Exception) {
+                handle(e)
             }
+        }
 
         private fun handle(e: Exception?): Unit = log.error(EXCEPTION_MESSAGE, e)
 
@@ -392,16 +351,12 @@ class AsyncTasksConfiguration(
 
         @Throws(Exception::class)
         override fun destroy() {
-            if (executor is DisposableBean)
-                (executor as DisposableBean)
-                    .apply(DisposableBean::destroy)
+            if (executor is DisposableBean) (executor as DisposableBean).apply(DisposableBean::destroy)
         }
 
         @Throws(Exception::class)
         override fun afterPropertiesSet() {
-            if (executor is InitializingBean)
-                (executor as InitializingBean)
-                    .apply { afterPropertiesSet() }
+            if (executor is InitializingBean) (executor as InitializingBean).apply { afterPropertiesSet() }
         }
     }
 }

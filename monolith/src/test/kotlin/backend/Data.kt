@@ -18,7 +18,6 @@ import org.apache.commons.lang3.StringUtils.stripAccents
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.springframework.beans.factory.getBean
-import org.springframework.boot.runApplication
 import org.springframework.context.ConfigurableApplicationContext
 import kotlin.test.Test
 
@@ -93,11 +92,9 @@ internal class DataTests {
     private lateinit var context: ConfigurableApplicationContext
 
     @BeforeAll
-    fun `lance le server en profile test`() =
-        runApplication<BackendApplication> {
-            testLoader(app = this)
-        }.run { context = this }
-
+    fun `lance le server en profile test`() {
+        context = launcher()
+    }
     @AfterAll
     fun `arrête le serveur`() = context.close()
 
