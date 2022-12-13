@@ -1,3 +1,5 @@
+@file:Suppress("NonAsciiCharacters")
+
 package backend
 
 import backend.RandomUtils.generateResetKey
@@ -34,12 +36,31 @@ import kotlin.test.assertNotNull
 /*=================================================================================*/
 
 class GmailServiceTests {
+    private lateinit var context: ConfigurableApplicationContext
+    private lateinit var mailService: MailService
     lateinit var javaMailSender: JavaMailSenderImpl
+    @BeforeAll
+    fun `lance le server en profile test`() {
+        context = launcher()
+    }
+
+    @AfterAll
+    fun `arrête le serveur`() = context.close()
 }
 /*=================================================================================*/
 
 class MailSlurpServiceTests {
+    private lateinit var context: ConfigurableApplicationContext
+    private lateinit var mailService: MailService
     lateinit var javaMailSender: JavaMailSenderImpl
+    @BeforeAll
+    fun `lance le server en profile test`() {
+        context = launcher()
+    }
+
+
+    @AfterAll
+    fun `arrête le serveur`() = context.close()
 }
 /*=================================================================================*/
 

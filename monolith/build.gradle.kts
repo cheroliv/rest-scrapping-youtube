@@ -3,7 +3,6 @@
     "DEPRECATION",
 )
 
-//import org.gradle.api.JavaVersion.VERSION_19
 import org.gradle.api.JavaVersion.VERSION_18
 import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
@@ -23,13 +22,6 @@ plugins {
     id("com.github.andygoossens.gradle-modernizer-plugin")
     id("com.google.cloud.tools.appengine")
     jacoco
-}
-
-repositories {
-    mavenCentral()
-    maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap/")
-    maven("https://repo.spring.io/milestone")
-    maven("https://repo.spring.io/snapshot")
 }
 
 dependencies {
@@ -120,6 +112,9 @@ dependencies {
 //    testImplementation( "org.springframework.cloud:spring-cloud-starter-contract-verifier")
 //    implementation("org.springframework.cloud:spring-cloud-gcp-starter-storage")
 //    providedCompile ("com.google.appengine:appengine:+")
+
+    implementation ("com.mailslurp:mailslurp-client-kotlin:15.14.0")
+
 
 }
 
