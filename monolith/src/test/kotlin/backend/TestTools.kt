@@ -4,6 +4,7 @@ package backend
 
 import backend.Constants.ADMIN
 import backend.Constants.DEFAULT_LANGUAGE
+import backend.Constants.DEVELOPMENT
 import backend.Constants.ROLE_ADMIN
 import backend.Constants.ROLE_USER
 import backend.Constants.TEST
@@ -41,7 +42,6 @@ fun launcher(vararg profiles: String): ConfigurableApplicationContext =
         environment.run {
             setActiveProfiles(
                 TEST,
-//                SPRING_PROFILE_DEVELOPMENT,
                 *profiles.toMutableList().apply {
                     activeProfiles.map { add(it) }
                 }.toSet().toTypedArray()
