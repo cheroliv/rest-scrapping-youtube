@@ -3,6 +3,7 @@
 package backend
 
 import backend.Constants.DEFAULT_LANGUAGE
+import backend.Constants.DEVELOPMENT
 import backend.Constants.GMAIL
 import backend.Constants.MAILSLURP
 import backend.Log.log
@@ -77,31 +78,39 @@ class MailSlurpServiceTests {
 
     @Test
     fun `verification des profiles`() {
-        log.info("context.environment.defaultProfiles: ${
-            context
-                .environment
-                .defaultProfiles
-                .reduce { acc, s -> "$acc,$s" }
+        log.info("defaultProfiles: ${
+            when {
+                !context.environment.defaultProfiles.isNullOrEmpty() ->
+                    context.environment
+                        .defaultProfiles
+                        .reduce { acc, s -> "$acc, $s" }
+
+                else -> ""
+            }
         }")
-        log.info("context.environment.activeProfiles: ${
-            context
-                .environment
-                .activeProfiles
-                .reduce { acc, s -> "$acc,$s" }
+        log.info("activeProfiles: ${
+            when {
+                !context.environment.activeProfiles.isNullOrEmpty() ->
+                    context.environment
+                        .activeProfiles
+                        .reduce { acc, s -> "$acc, $s" }
+
+                else -> ""
+            }
         }")
     }
 
     @Test
     fun `check mailslurp token property`() {
-        assertEquals("hello", properties.message)
-        log.info("properties.mail.token: ${properties.mail.token}")
-
+        assertEquals(64,properties.mailslurp.token.length)
+        log.info("properties.mailslurp.token: ${properties.mailslurp.token}")
+        log.info("properties.message: ${properties.message}")
     }
 
     @Ignore
     @Test
     fun `can create inboxes`() {
-        val inboxController = InboxControllerApi(properties.mail.token)
+        val inboxController = InboxControllerApi(properties.mailslurp.token)
         val inbox = inboxController.createInbox(
             null,
             null,
@@ -121,7 +130,7 @@ class MailSlurpServiceTests {
     @Ignore
     @Test
     fun `can send and receive email`() {
-        with(properties.mail.token) {
+        with(properties.mailslurp.token) {
             // create inbox
             val inboxController = InboxControllerApi(this)
             val waitForController = WaitForControllerApi(this)
@@ -184,7 +193,7 @@ class DefaultMailServiceTests {
 
     @BeforeAll
     fun `lance le server en profile test`() {
-        context = launcher()
+        context = launcher(DEVELOPMENT)
     }
 
 

@@ -116,12 +116,6 @@ dependencies {
     implementation("com.mailslurp:mailslurp-client-kotlin:15.14.0")
 }
 
-sourceSets {
-    getByName("main") {
-        kotlin.srcDir("private/resources")
-    }
-}
-
 configurations {
     compileOnly { extendsFrom(configurations.annotationProcessor.get()) }
     implementation.configure {
@@ -160,14 +154,13 @@ tasks.register<Delete>("cleanResources") {
     delete("build/resources")
 }
 
-
-
 tasks.register<TestReport>("testReport") {
     description = "Generates an HTML test report from the results of testReport task."
     group = "report"
     destinationDir = file("$buildDir/reports/tests")
     reportOn("test")
 }
+
 val cucumberRuntime: Configuration by configurations.creating {
     extendsFrom(configurations["testImplementation"])
 }
@@ -247,5 +240,3 @@ tasks.register<DeployGAE>("deployGAE") {
 //    doFirst { springBoot.mainClass.set("backend.CliBootstrap") }
 //    finalizedBy("bootRun")
 //}
-
-

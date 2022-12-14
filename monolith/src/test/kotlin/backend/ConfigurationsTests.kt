@@ -1,18 +1,23 @@
 package backend
 
+import backend.Constants.DEVELOPMENT
+import backend.Constants.PRODUCTION
+import backend.Constants.STARTUP_LOG_MSG_KEY
+import backend.Log.log
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.springframework.beans.factory.getBean
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.MessageSource
 import java.util.*
+import java.util.Locale.FRENCH
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ConfigurationsTests {
     private lateinit var context: ConfigurableApplicationContext
     private val messageSource: MessageSource by lazy { context.getBean() }
-
+private val properties:ApplicationProperties by lazy { context.getBean() }
     @BeforeAll
     fun `lance le server en profile test`() {
         context = launcher()
@@ -30,7 +35,7 @@ class ConfigurationsTests {
                 actual = messageSource.getMessage(
                     "email.activation.greeting",
                     arrayOf(this),
-                    Locale.FRENCH
+                    FRENCH
                 )
             )
         }
@@ -39,17 +44,26 @@ class ConfigurationsTests {
     @Test
     fun `MessageSource test message startupLog`() {
         val msg = "You have misconfigured your application!\n" +
-                "It should not run with both the ${Constants.DEVELOPMENT}\n" +
-                "and ${Constants.PRODUCTION} profiles at the same time."
+                "It should not run with both the $DEVELOPMENT\n" +
+                "and $PRODUCTION profiles at the same time."
         val i18nMsg = messageSource.getMessage(
-            Constants.STARTUP_LOG_MSG_KEY,
+            STARTUP_LOG_MSG_KEY,
             arrayOf(
-                Constants.DEVELOPMENT,
-                Constants.PRODUCTION
+                DEVELOPMENT,
+                PRODUCTION
             ),
             Locale.getDefault()
         )
         assertEquals(msg, i18nMsg)
-        Log.log.info(i18nMsg)
+        log.info(i18nMsg)
+    }
+
+    @Test
+    fun `test go visit message`(){
+        assertEquals(
+            "https://github.com/cheroliv/kotlin-springboot-monolith",
+            properties.goVisitMessage
+        )
+
     }
 }

@@ -4,11 +4,10 @@ package backend
 
 import backend.Constants.ADMIN
 import backend.Constants.DEFAULT_LANGUAGE
-import backend.Constants.DEVELOPMENT
 import backend.Constants.ROLE_ADMIN
 import backend.Constants.ROLE_USER
-import backend.Constants.TEST
 import backend.Constants.SYSTEM_USER
+import backend.Constants.TEST
 import backend.RandomUtils.generateActivationKey
 import com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -18,6 +17,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeDiagnosingMatcher
 import org.springframework.boot.runApplication
+import org.springframework.boot.web.reactive.context.StandardReactiveWebEnvironment
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.data.r2dbc.core.select
@@ -37,17 +37,18 @@ import kotlin.test.assertTrue
 
 const val BASE_URL_DEV = "http://localhost:8080"
 
+
 fun launcher(vararg profiles: String): ConfigurableApplicationContext =
-    runApplication<BackendApplication>().apply {
-        environment.run {
-            setActiveProfiles(
-                TEST,
-                *profiles.toMutableList().apply {
-                    activeProfiles.map { add(it) }
-                }.toSet().toTypedArray()
-            )
-        }
-    }
+    runApplication<BackendApplication>(init = {
+        setEnvironment(StandardReactiveWebEnvironment().apply {
+            setDefaultProfiles(TEST)
+            addActiveProfile(TEST)
+            profiles.toSet().map {
+                addActiveProfile(it)
+            }
+        })
+    })
+
 
 fun createDataAccounts(accounts: Set<AccountCredentials>, dao: R2dbcEntityTemplate) {
     assertEquals(0, countAccount(dao))

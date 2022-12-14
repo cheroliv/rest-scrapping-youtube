@@ -1,10 +1,13 @@
 backend:
   message: hello
   item: item
+  go-visit-message: https://github.com/cheroliv/kotlin-springboot-monolith
   clientApp:
     name: 'server'
   database:
     populator-path: db/tables.sql
+  mailslurp:
+    token: mailslurp-token-default
   mail:
     base-url: http://127.0.0.1:8080
     from: backend-r2dbc-jwt@localhost

@@ -8,11 +8,8 @@ import org.springframework.web.cors.CorsConfiguration
 
 
 /*=================================================================================*/
-@ConstructorBinding
-@ConfigurationProperties(
-    prefix = "backend",
-    ignoreUnknownFields = false
-)
+
+@ConfigurationProperties(prefix = "backend", ignoreUnknownFields = false)
 @PropertySources(
     PropertySource(
         value = ["classpath:git.properties"],
@@ -23,20 +20,26 @@ import org.springframework.web.cors.CorsConfiguration
         ignoreResourceNotFound = true
     )
 )
+@ConstructorBinding
 class ApplicationProperties(
-    val message: String,
+    val message: String="",
     val item: String,
+    val goVisitMessage:String,
     val clientApp: ClientApp = ClientApp(),
     val database: Database = Database(),
-    val mail: Mail = Mail(),
+    val mailslurp:MailSlurp= MailSlurp(),
+    val mail: MailSmtp = MailSmtp(),
+    val gmail:GoogleMail=GoogleMail(),
     val http: Http = Http(),
     val cache: Cache = Cache(),
     val security: Security = Security(),
     val cors: CorsConfiguration = CorsConfiguration(),
 ) {
+    class MailSlurp(val token:String="")
+    class GoogleMail(val token:String="")
     class ClientApp(val name: String = "")
     class Database(val populatorPath: String = "")
-    class Mail(
+    class MailSmtp(
         val enabled: Boolean = false,
         val from: String = "",
         val baseUrl: String = "",
@@ -44,7 +47,6 @@ class ApplicationProperties(
         val port: Int = 0,
         val password: String = "",
         val property: Property = Property(),
-        val token:String = "",
     ) {
         class Property(
             val debug: Boolean = false,
@@ -77,22 +79,22 @@ class ApplicationProperties(
         val authentication: Authentication = Authentication(),
         val clientAuthorization: ClientAuthorization = ClientAuthorization()
     ) {
-        class RememberMe(var key: String? = null)
+        class RememberMe(var key: String = "")
 
         class Authentication(val jwt: Jwt = Jwt()) {
             class Jwt(
                 val tokenValidityInSecondsForRememberMe: Long = 2592000,
                 val tokenValidityInSeconds: Long = 1800,
-                var base64Secret: String? = null,
-                var secret: String? = null
+                var base64Secret: String = "",
+                var secret: String = ""
             )
         }
 
         class ClientAuthorization(
-            var accessTokenUri: String? = null,
-            var tokenServiceId: String? = null,
-            var clientId: String? = null,
-            var clientSecret: String? = null
+            var accessTokenUri: String = "",
+            var tokenServiceId: String = "",
+            var clientId: String = "",
+            var clientSecret: String = ""
         )
     }
 }
