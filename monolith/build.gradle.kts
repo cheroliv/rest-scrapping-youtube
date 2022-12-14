@@ -114,14 +114,11 @@ dependencies {
 //    providedCompile ("com.google.appengine:appengine:+")
 
     implementation("com.mailslurp:mailslurp-client-kotlin:15.14.0")
-//    implementation("com.mailslurp:mailslurp-client-kotlin:11.7.0")
-
-
 }
 
 sourceSets {
     getByName("main") {
-        java.srcDir("private/resources")
+        kotlin.srcDir("private/resources")
     }
 }
 

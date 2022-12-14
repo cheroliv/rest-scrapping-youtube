@@ -291,7 +291,7 @@ class ProblemTranslator(
         type: URI
     ): ProblemBuilder {
         var detail = throwable.message
-        if (env.activeProfiles.contains(Constants.SPRING_PROFILE_PRODUCTION)) {
+        if (env.activeProfiles.contains(Constants.PRODUCTION)) {
             detail = when (throwable) {
                 is HttpMessageConversionException -> "Unable to convert http message"
                 is DataAccessException -> "Failure during data access"

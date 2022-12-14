@@ -1,6 +1,6 @@
 ##############################################################################
 backend:
-  message: go visit https://www.cheroliv.com
+  message: go visit https://github.com/cheroliv/kotlin-springboot-monolith
   item: monolith
   clientApp:
     name: 'server'

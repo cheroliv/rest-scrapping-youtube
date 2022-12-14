@@ -1,12 +1,11 @@
 package backend
 
 import backend.Constants.BASE_URL
-import backend.Constants.SPRING_PROFILE_GMAIL
-import backend.Constants.SPRING_PROFILE_MAILSLURP
+import backend.Constants.GMAIL
+import backend.Constants.MAILSLURP
 import backend.Constants.USER
 import backend.Log.log
 import org.springframework.context.MessageSource
-import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import org.springframework.mail.MailException
 import org.springframework.mail.SimpleMailMessage
@@ -25,8 +24,8 @@ import kotlin.text.Charsets.UTF_8
 
 /*=================================================================================*/
 @Service
-@Profile(SPRING_PROFILE_MAILSLURP)
-class JavaMailSenderSlurp : JavaMailSender {
+@Profile(MAILSLURP)
+class SenderMailSlurp : JavaMailSender {
     override fun send(mimeMessage: MimeMessage) {
         TODO("Not yet implemented")
     }
@@ -63,8 +62,8 @@ class JavaMailSenderSlurp : JavaMailSender {
 
 /*=================================================================================*/
 @Service
-@Profile(SPRING_PROFILE_GMAIL)
-class JavaMailSenderGmail : JavaMailSender {
+@Profile(GMAIL)
+class SenderGmail : JavaMailSender {
     override fun send(mimeMessage: MimeMessage) {
         TODO("Not yet implemented")
     }
@@ -100,8 +99,8 @@ class JavaMailSenderGmail : JavaMailSender {
 }
 
 /*=================================================================================*/
-@Primary
 @Service
+@Profile("!$GMAIL or !$MAILSLURP")
 class MailService(
     private val properties: ApplicationProperties,
     private val mailSender: JavaMailSender,

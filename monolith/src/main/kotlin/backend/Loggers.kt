@@ -10,9 +10,9 @@ import backend.Constants.SERVER_PORT
 import backend.Constants.SERVER_SERVLET_CONTEXT_PATH
 import backend.Constants.SERVER_SSL_KEY_STORE
 import backend.Constants.SPRING_APPLICATION_NAME
-import backend.Constants.SPRING_PROFILE_CLOUD
-import backend.Constants.SPRING_PROFILE_DEVELOPMENT
-import backend.Constants.SPRING_PROFILE_PRODUCTION
+import backend.Constants.CLOUD
+import backend.Constants.DEVELOPMENT
+import backend.Constants.PRODUCTION
 import backend.Constants.STARTUP_HOST_WARN_LOG_MSG
 import backend.Constants.STARTUP_LOG_MSG_KEY
 import backend.Log.log
@@ -44,28 +44,28 @@ class BackendComponent(private val context: ApplicationContext) {
 internal fun checkProfileLog(context: ApplicationContext) =
     context.environment.activeProfiles.run {
         when {
-            contains(element = SPRING_PROFILE_DEVELOPMENT) &&
-                    contains(element = SPRING_PROFILE_PRODUCTION)
+            contains(element = DEVELOPMENT) &&
+                    contains(element = PRODUCTION)
             -> log.error(
                 context.getBean<MessageSource>().getMessage(
                     STARTUP_LOG_MSG_KEY,
                     arrayOf(
-                        SPRING_PROFILE_DEVELOPMENT,
-                        SPRING_PROFILE_PRODUCTION
+                        DEVELOPMENT,
+                        PRODUCTION
                     ),
                     Locale.getDefault()
                 )
             )
         }
         when {
-            contains(SPRING_PROFILE_DEVELOPMENT) &&
-                    contains(SPRING_PROFILE_CLOUD)
+            contains(DEVELOPMENT) &&
+                    contains(CLOUD)
             -> log.error(
                 context.getBean<MessageSource>().getMessage(
                     STARTUP_LOG_MSG_KEY,
                     arrayOf(
-                        SPRING_PROFILE_DEVELOPMENT,
-                        SPRING_PROFILE_CLOUD
+                        DEVELOPMENT,
+                        CLOUD
                     ),
                     Locale.getDefault()
                 )

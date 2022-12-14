@@ -3,8 +3,9 @@
 package backend
 
 import backend.Constants.DEFAULT_LANGUAGE
-import backend.Constants.SPRING_PROFILE_GMAIL
-import backend.Constants.SPRING_PROFILE_MAILSLURP
+import backend.Constants.GMAIL
+import backend.Constants.MAILSLURP
+import backend.Log.log
 import backend.RandomUtils.generateResetKey
 import com.mailslurp.apis.InboxControllerApi
 import com.mailslurp.apis.WaitForControllerApi
@@ -51,7 +52,7 @@ class GmailServiceTests {
 
     @BeforeAll
     fun `lance le server en profile test`() {
-        context = launcher(SPRING_PROFILE_GMAIL)
+        context = launcher(GMAIL)
     }
 
     @AfterAll
@@ -63,28 +64,44 @@ class MailSlurpServiceTests {
 
     private lateinit var context: ConfigurableApplicationContext
     private lateinit var mailService: MailService
-    lateinit var javaMailSender: JavaMailSenderImpl
-    private val properties:ApplicationProperties by lazy { context.getBean() }
+    private lateinit var javaMailSender: JavaMailSenderImpl
+    private val properties: ApplicationProperties by lazy { context.getBean() }
 
     @BeforeAll
     fun `lance le server en profile test`() {
-        context = launcher(SPRING_PROFILE_MAILSLURP)
+        context = launcher(MAILSLURP)
     }
 
     @AfterAll
     fun `arrête le serveur`() = context.close()
 
+    @Test
+    fun `verification des profiles`() {
+        log.info("context.environment.defaultProfiles: ${
+            context
+                .environment
+                .defaultProfiles
+                .reduce { acc, s -> "$acc,$s" }
+        }")
+        log.info("context.environment.activeProfiles: ${
+            context
+                .environment
+                .activeProfiles
+                .reduce { acc, s -> "$acc,$s" }
+        }")
+    }
 
     @Test
     fun `check mailslurp token property`() {
-        Log.log.info(properties.message)
-        Log.log.info(properties.mail.mailslurpToken)
+        assertEquals("hello", properties.message)
+        log.info("properties.mail.token: ${properties.mail.token}")
+
     }
 
     @Ignore
     @Test
     fun `can create inboxes`() {
-        val inboxController = InboxControllerApi(properties.mail.mailslurpToken)
+        val inboxController = InboxControllerApi(properties.mail.token)
         val inbox = inboxController.createInbox(
             null,
             null,
@@ -104,45 +121,46 @@ class MailSlurpServiceTests {
     @Ignore
     @Test
     fun `can send and receive email`() {
-        with(properties.mail.mailslurpToken){
-        // create inbox
-        val inboxController = InboxControllerApi(this)
-        val waitForController = WaitForControllerApi(this)
-        val inbox = inboxController.createInbox(
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            inboxType = "",
-            virtualInbox = true
-        )
-
-        val testSubject = "test-subject"
-        val confirmation = inboxController.sendEmailAndConfirm(
-            inboxId = inbox.id,
-            sendEmailOptions = SendEmailOptions(
-                to = listOf(inbox.emailAddress),
-                subject = testSubject
+        with(properties.mail.token) {
+            // create inbox
+            val inboxController = InboxControllerApi(this)
+            val waitForController = WaitForControllerApi(this)
+            val inbox = inboxController.createInbox(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                inboxType = "",
+                virtualInbox = true
             )
-        )
-        assertEquals(confirmation.inboxId, inbox.id)
 
-        val email = waitForController.waitForLatestEmail(
-            inboxId = inbox.id,
-            timeout = 60_000,
-            unreadOnly = true,
-            before = OffsetDateTime.now(),
-            delay = 3000,
-            since = OffsetDateTime.now().minusDays(1),
-            sort = "asc"
-        )
-        assertTrue(email.subject == "test-subject")
-    }}
+            val testSubject = "test-subject"
+            val confirmation = inboxController.sendEmailAndConfirm(
+                inboxId = inbox.id,
+                sendEmailOptions = SendEmailOptions(
+                    to = listOf(inbox.emailAddress),
+                    subject = testSubject
+                )
+            )
+            assertEquals(confirmation.inboxId, inbox.id)
+
+            val email = waitForController.waitForLatestEmail(
+                inboxId = inbox.id,
+                timeout = 60_000,
+                unreadOnly = true,
+                before = OffsetDateTime.now(),
+                delay = 3000,
+                since = OffsetDateTime.now().minusDays(1),
+                sort = "asc"
+            )
+            assertTrue(email.subject == "test-subject")
+        }
+    }
 }
 /*=================================================================================*/
 

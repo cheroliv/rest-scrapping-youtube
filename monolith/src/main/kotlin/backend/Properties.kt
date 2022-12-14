@@ -44,7 +44,7 @@ class ApplicationProperties(
         val port: Int = 0,
         val password: String = "",
         val property: Property = Property(),
-        val mailslurpToken:String = "",
+        val token:String = "",
     ) {
         class Property(
             val debug: Boolean = false,

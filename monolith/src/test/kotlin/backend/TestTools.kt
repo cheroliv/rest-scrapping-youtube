@@ -6,10 +6,9 @@ import backend.Constants.ADMIN
 import backend.Constants.DEFAULT_LANGUAGE
 import backend.Constants.ROLE_ADMIN
 import backend.Constants.ROLE_USER
-import backend.Constants.SPRING_PROFILE_DEVELOPMENT
-import backend.Constants.SPRING_PROFILE_MAILSLURP
-import backend.Constants.SPRING_PROFILE_TEST
+import backend.Constants.TEST
 import backend.Constants.SYSTEM_USER
+import backend.RandomUtils.generateActivationKey
 import com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS
@@ -40,11 +39,13 @@ const val BASE_URL_DEV = "http://localhost:8080"
 fun launcher(vararg profiles: String): ConfigurableApplicationContext =
     runApplication<BackendApplication>().apply {
         environment.run {
-            setDefaultProfiles(SPRING_PROFILE_DEVELOPMENT)
-            setActiveProfiles(SPRING_PROFILE_TEST)
-            setActiveProfiles(*profiles.toMutableList().apply {
-                activeProfiles.map { add(it) }
-            }.toSet().toTypedArray())
+            setActiveProfiles(
+                TEST,
+//                SPRING_PROFILE_DEVELOPMENT,
+                *profiles.toMutableList().apply {
+                    activeProfiles.map { add(it) }
+                }.toSet().toTypedArray()
+            )
         }
     }
 
@@ -53,7 +54,7 @@ fun createDataAccounts(accounts: Set<AccountCredentials>, dao: R2dbcEntityTempla
     assertEquals(0, countAccountAuthority(dao))
     accounts.map { acc ->
         AccountEntity(acc.copy(
-            activationKey = RandomUtils.generateActivationKey,
+            activationKey = generateActivationKey,
             langKey = DEFAULT_LANGUAGE,
             createdBy = SYSTEM_USER,
             createdDate = Instant.now(),
@@ -65,7 +66,12 @@ fun createDataAccounts(accounts: Set<AccountCredentials>, dao: R2dbcEntityTempla
         )).run {
             dao.insert(this).block()!!.id!!.let { uuid ->
                 authorities!!.map { authority ->
-                    dao.insert(AccountAuthorityEntity(userId = uuid, role = authority.role)).block()
+                    dao.insert(
+                        AccountAuthorityEntity(
+                            userId = uuid,
+                            role = authority.role
+                        )
+                    ).block()
                 }
             }
         }
@@ -94,7 +100,12 @@ fun createActivatedDataAccounts(accounts: Set<AccountCredentials>, dao: R2dbcEnt
         ).run {
             dao.insert(this).block()!!.id!!.let { uuid ->
                 authorities!!.map { authority ->
-                    dao.insert(AccountAuthorityEntity(userId = uuid, role = authority.role)).block()
+                    dao.insert(
+                        AccountAuthorityEntity(
+                            userId = uuid,
+                            role = authority.role
+                        )
+                    ).block()
                 }
             }
         }
@@ -124,7 +135,11 @@ fun saveAccount(model: AccountCredentials, dao: R2dbcEntityTemplate): Account? =
         model.id != null -> dao.update(
             AccountEntity(model).copy(
                 version = dao.selectOne(
-                    query(where("login").`is`(model.login!!).ignoreCase(true)),
+                    query(
+                        where("login")
+                            .`is`(model.login!!)
+                            .ignoreCase(true)
+                    ),
                     AccountEntity::class.java
                 ).block()!!.version
             )
@@ -133,7 +148,11 @@ fun saveAccount(model: AccountCredentials, dao: R2dbcEntityTemplate): Account? =
         else -> dao.insert(AccountEntity(model)).block()?.toModel
     }
 
-fun saveAccountAuthority(id: UUID, role: String, dao: R2dbcEntityTemplate): AccountAuthorityEntity? =
+fun saveAccountAuthority(
+    id: UUID,
+    role: String,
+    dao: R2dbcEntityTemplate
+): AccountAuthorityEntity? =
     dao.insert(AccountAuthorityEntity(userId = id, role = role)).block()
 
 

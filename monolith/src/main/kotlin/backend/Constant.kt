@@ -32,23 +32,24 @@ object Constants {
     const val HTTPS = "https"
     const val HTTP = "http"
     const val PROFILE_SEPARATOR = ","
+    val CLI_PROPS = mapOf("spring.main.web-application-type" to "none")
+    const val SPRING_PROFILE_CONF_DEFAULT_KEY = "spring.profiles.default"
+
 
     //Spring profiles
-    const val SPRING_PROFILE_DEVELOPMENT = "dev"
-    const val SPRING_PROFILE_PRODUCTION = "prod"
-    const val SPRING_PROFILE_CLOUD = "cloud"
-    const val SPRING_PROFILE_CONF_DEFAULT_KEY = "spring.profiles.default"
-    const val SPRING_PROFILE_TEST = "test"
-    const val SPRING_PROFILE_HEROKU = "heroku"
-    const val SPRING_PROFILE_AWS_ECS = "aws-ecs"
-    const val SPRING_PROFILE_AZURE = "azure"
-    const val SPRING_PROFILE_SWAGGER = "swagger"
-    const val SPRING_PROFILE_NO_LIQUIBASE = "no-liquibase"
-    const val SPRING_PROFILE_K8S = "k8s"
-    const val PROFILE_CLI = "cli"
-    val PROFILE_CLI_PROPS = mapOf("spring.main.web-application-type" to "none")
-    const val SPRING_PROFILE_GMAIL = "gmail"
-    const val SPRING_PROFILE_MAILSLURP = "mailslurp"
+    const val DEVELOPMENT = "dev"
+    const val PRODUCTION = "prod"
+    const val CLOUD = "cloud"
+    const val TEST = "test"
+    const val HEROKU = "heroku"
+    const val AWS_ECS = "aws-ecs"
+    const val AZURE = "azure"
+    const val SWAGGER = "swagger"
+    const val NO_LIQUIBASE = "no-liquibase"
+    const val K8S = "k8s"
+    const val CLI = "cli"
+    const val GMAIL = "gmail"
+    const val MAILSLURP = "mailslurp"
 
     //Config
     const val DEV_HOST = "localhost"

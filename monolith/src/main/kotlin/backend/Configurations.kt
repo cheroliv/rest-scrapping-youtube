@@ -12,8 +12,6 @@ package backend
 //import org.zalando.problem.spring.webflux.advice.security.SecurityProblemSupport
 import backend.Constants.FEATURE_POLICY
 import backend.Constants.REQUEST_PARAM_LANG
-import backend.Constants.SPRING_PROFILE_CONF_DEFAULT_KEY
-import backend.Constants.SPRING_PROFILE_DEVELOPMENT
 import backend.Log.log
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
@@ -84,14 +82,14 @@ import java.util.concurrent.Future
 
 @SpringBootApplication
 @EnableConfigurationProperties(ApplicationProperties::class)
-class BackendApplication/*=================================================================================*/
+class BackendApplication
+/*=================================================================================*/
 
 object BackendBootstrap {
     @JvmStatic
-    fun main(args: Array<String>) = runApplication<BackendApplication>(*args) {
-        setDefaultProperties(hashMapOf<String, Any>(SPRING_PROFILE_CONF_DEFAULT_KEY to SPRING_PROFILE_DEVELOPMENT))
-        setAdditionalProfiles(SPRING_PROFILE_DEVELOPMENT)
-    }.run { bootstrapLog(this) }
+    fun main(args: Array<String>) = runApplication<BackendApplication>(*args).run {
+        bootstrapLog(this)
+    }
 }/*=================================================================================*/
 
 //object CliBootstrap {
@@ -166,10 +164,10 @@ class MonolithConfiguration(
 
 
     @Bean
-    fun gmailSender(): JavaMailSender = JavaMailSenderGmail()
+    fun gmailSender(): JavaMailSender = SenderGmail()
 
     @Bean
-    fun mailSlurpSender(): JavaMailSender = JavaMailSenderSlurp()
+    fun mailSlurpSender(): JavaMailSender = SenderMailSlurp()
 
     @Bean
     @Primary
@@ -208,7 +206,7 @@ class MonolithConfiguration(
     @Bean
     fun constraintViolationProblemModule() = ConstraintViolationProblemModule()
 
-    @Profile("!${Constants.SPRING_PROFILE_PRODUCTION}")
+    @Profile("!${Constants.PRODUCTION}")
     fun reactorConfiguration() = Hooks.onOperatorDebug()
 
     @Bean

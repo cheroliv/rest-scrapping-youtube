@@ -35,9 +35,11 @@ backend:
     exposed-headers: 'Authorization,Link,X-Total-Count'
     allow-credentials: true
     max-age: 1800
-server:
-  port: 8080
+
+
 spring:
+  profiles:
+    default: dev
   application:
     name: server
   datasource:
@@ -53,9 +55,15 @@ spring:
   messages:
     basename: i18n/messages
     encoding: UTF-8
+
+
 logging:
   level:
     org:
       springframework:
         r2dbc: INFO
         org.hibernate.SQL: INFO
+
+
+server:
+  port: 8080

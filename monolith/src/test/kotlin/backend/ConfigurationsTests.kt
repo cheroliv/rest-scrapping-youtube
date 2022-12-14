@@ -39,13 +39,13 @@ class ConfigurationsTests {
     @Test
     fun `MessageSource test message startupLog`() {
         val msg = "You have misconfigured your application!\n" +
-                "It should not run with both the ${Constants.SPRING_PROFILE_DEVELOPMENT}\n" +
-                "and ${Constants.SPRING_PROFILE_PRODUCTION} profiles at the same time."
+                "It should not run with both the ${Constants.DEVELOPMENT}\n" +
+                "and ${Constants.PRODUCTION} profiles at the same time."
         val i18nMsg = messageSource.getMessage(
             Constants.STARTUP_LOG_MSG_KEY,
             arrayOf(
-                Constants.SPRING_PROFILE_DEVELOPMENT,
-                Constants.SPRING_PROFILE_PRODUCTION
+                Constants.DEVELOPMENT,
+                Constants.PRODUCTION
             ),
             Locale.getDefault()
         )
