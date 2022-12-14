@@ -8,6 +8,7 @@ import backend.Constants.ROLE_ADMIN
 import backend.Constants.ROLE_USER
 import backend.Constants.SYSTEM_USER
 import backend.Constants.TEST
+import backend.Log.log
 import backend.RandomUtils.generateActivationKey
 import com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -47,7 +48,28 @@ fun launcher(vararg profiles: String): ConfigurableApplicationContext =
                 addActiveProfile(it)
             }
         })
-    })
+    }).apply {
+        log.info("defaultProfiles: ${
+            when {
+                !environment.defaultProfiles.isNullOrEmpty() ->
+                    environment
+                        .defaultProfiles
+                        .reduce { acc, s -> "$acc, $s" }
+
+                else -> ""
+            }
+        }")
+        log.info("activeProfiles: ${
+            when {
+                !environment.activeProfiles.isNullOrEmpty() ->
+                    environment
+                        .activeProfiles
+                        .reduce { acc, s -> "$acc, $s" }
+
+                else -> ""
+            }
+        }")
+    }
 
 
 fun createDataAccounts(accounts: Set<AccountCredentials>, dao: R2dbcEntityTemplate) {

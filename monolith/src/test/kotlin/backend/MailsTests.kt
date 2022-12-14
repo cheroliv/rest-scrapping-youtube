@@ -6,6 +6,7 @@ import backend.Constants.DEFAULT_LANGUAGE
 import backend.Constants.DEVELOPMENT
 import backend.Constants.GMAIL
 import backend.Constants.MAILSLURP
+import backend.Constants.TEST
 import backend.Log.log
 import backend.RandomUtils.generateResetKey
 import com.mailslurp.apis.InboxControllerApi
@@ -78,33 +79,14 @@ class MailSlurpServiceTests {
 
     @Test
     fun `verification des profiles`() {
-        log.info("defaultProfiles: ${
-            when {
-                !context.environment.defaultProfiles.isNullOrEmpty() ->
-                    context.environment
-                        .defaultProfiles
-                        .reduce { acc, s -> "$acc, $s" }
-
-                else -> ""
-            }
-        }")
-        log.info("activeProfiles: ${
-            when {
-                !context.environment.activeProfiles.isNullOrEmpty() ->
-                    context.environment
-                        .activeProfiles
-                        .reduce { acc, s -> "$acc, $s" }
-
-                else -> ""
-            }
-        }")
+        assertContains(context.environment.defaultProfiles, TEST)
+        assertContains(context.environment.activeProfiles, TEST)
+        assertContains(context.environment.activeProfiles, MAILSLURP)
     }
 
     @Test
     fun `check mailslurp token property`() {
         assertEquals(64,properties.mailslurp.token.length)
-        log.info("properties.mailslurp.token: ${properties.mailslurp.token}")
-        log.info("properties.message: ${properties.message}")
     }
 
     @Ignore
