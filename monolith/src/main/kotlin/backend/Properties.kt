@@ -22,21 +22,24 @@ import org.springframework.web.cors.CorsConfiguration
 )
 @ConstructorBinding
 class ApplicationProperties(
-    val message: String="",
+    val message: String = "",
     val item: String,
-    val goVisitMessage:String,
+    val goVisitMessage: String,
     val clientApp: ClientApp = ClientApp(),
     val database: Database = Database(),
-    val mailslurp:MailSlurp= MailSlurp(),
+    val mailslurp: MailSlurp = MailSlurp(),
     val mail: MailSmtp = MailSmtp(),
-    val gmail:GoogleMail=GoogleMail(),
+    val gmail: GoogleMail = GoogleMail(),
     val http: Http = Http(),
     val cache: Cache = Cache(),
     val security: Security = Security(),
     val cors: CorsConfiguration = CorsConfiguration(),
 ) {
-    class MailSlurp(val token:String="")
-    class GoogleMail(val token:String="")
+    class MailSlurp(
+        val token: String = ""
+    )
+
+    class GoogleMail(val token: String = "")
     class ClientApp(val name: String = "")
     class Database(val populatorPath: String = "")
     class MailSmtp(
@@ -44,7 +47,7 @@ class ApplicationProperties(
         val from: String = "",
         val baseUrl: String = "",
         val host: String = "",
-        val port: Int = 0,
+        val port: Int = -1,
         val password: String = "",
         val property: Property = Property(),
     ) {

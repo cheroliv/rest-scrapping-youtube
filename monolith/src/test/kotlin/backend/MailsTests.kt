@@ -86,7 +86,8 @@ class MailSlurpServiceTests {
 
     @Test
     fun `check mailslurp token property`() {
-        assertEquals(64,properties.mailslurp.token.length)
+        assertEquals(64, properties.mailslurp.token.length)
+        log.info("properties.mailslurp.token: ${properties.mailslurp.token}")
     }
 
     @Ignore

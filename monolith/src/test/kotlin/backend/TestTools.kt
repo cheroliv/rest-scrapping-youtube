@@ -277,3 +277,7 @@ fun <T : Any> equalsVerifier(clazz: KClass<T>) {
     }
 }
 
+val token64Zero
+    get() = mutableListOf<String>().apply {
+        repeat(64) { add(0.toString()) }
+    }.reduce { acc, i -> "$acc$i" }
