@@ -99,6 +99,8 @@ class SenderGmail : JavaMailSender {
 }
 
 /*=================================================================================*/
+//TODO: AbstractMailService
+
 @Service
 @Profile("!$GMAIL or !$MAILSLURP")
 class MailService(

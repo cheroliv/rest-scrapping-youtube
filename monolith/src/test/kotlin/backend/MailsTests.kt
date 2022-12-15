@@ -7,7 +7,6 @@ import backend.Constants.DEVELOPMENT
 import backend.Constants.GMAIL
 import backend.Constants.MAILSLURP
 import backend.Constants.TEST
-import backend.Log.log
 import backend.RandomUtils.generateResetKey
 import com.mailslurp.apis.InboxControllerApi
 import com.mailslurp.apis.WaitForControllerApi
@@ -38,7 +37,6 @@ import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.net.URI
 import java.nio.charset.Charset
-import java.time.OffsetDateTime
 import java.util.*
 import java.util.regex.Pattern
 import java.util.regex.Pattern.compile
@@ -49,29 +47,13 @@ import javax.mail.internet.MimeMultipart
 import kotlin.test.*
 
 /*=================================================================================*/
-@Ignore
-class GmailServiceTests {
-
-    private lateinit var context: ConfigurableApplicationContext
-    private lateinit var mailService: MailService
-    lateinit var javaMailSender: JavaMailSenderImpl
-
-    @BeforeAll
-    fun `lance le server en profile test`() {
-        context = launcher(GMAIL)
-    }
-
-    @AfterAll
-    fun `arrête le serveur`() = context.close()
-}
-
-/*=================================================================================*/
 class MailSlurpServiceTests {
 
     private lateinit var context: ConfigurableApplicationContext
     private lateinit var mailService: MailService
     private lateinit var javaMailSender: JavaMailSenderImpl
     private val properties: ApplicationProperties by lazy { context.getBean() }
+    private val inboxController by lazy{ InboxControllerApi(properties.mailslurp.token)}
 
     @BeforeAll
     fun `lance le server en profile test`() {
@@ -91,13 +73,10 @@ class MailSlurpServiceTests {
     @Test
     fun `check mailslurp token property`() {
         assertEquals(64, properties.mailslurp.token.length)
-        log.info("properties.mailslurp.token: ${properties.mailslurp.token}")
     }
 
-    @Ignore
     @Test
     fun `can create inboxes`() {
-        val inboxController = InboxControllerApi(properties.mailslurp.token)
         val inbox = inboxController.createInbox(
             null,
             null,
@@ -114,7 +93,6 @@ class MailSlurpServiceTests {
         assertTrue(inbox.emailAddress.contains("@mailslurp"))
     }
 
-    @Ignore
     @Test
     fun `can send and receive email`() {
         with(properties.mailslurp.token) {
@@ -144,17 +122,6 @@ class MailSlurpServiceTests {
                 )
             )
             assertEquals(confirmation.inboxId, inbox.id)
-
-            val email = waitForController.waitForLatestEmail(
-                inboxId = inbox.id,
-                timeout = 60_000,
-                unreadOnly = true,
-                before = OffsetDateTime.now(),
-                delay = 3000,
-                since = OffsetDateTime.now().minusDays(1),
-                sort = "asc"
-            )
-            assertTrue(email.subject == "test-subject")
         }
     }
 }
@@ -430,3 +397,21 @@ class DefaultMailServiceTests {
     }
 }
 /*=================================================================================*/
+@Ignore
+class GmailServiceTests {
+
+    private lateinit var context: ConfigurableApplicationContext
+    private lateinit var mailService: MailService
+    lateinit var javaMailSender: JavaMailSenderImpl
+
+    @BeforeAll
+    fun `lance le server en profile test`() {
+        context = launcher(GMAIL)
+    }
+
+    @AfterAll
+    fun `arrête le serveur`() = context.close()
+}
+
+/*=================================================================================*/
+
