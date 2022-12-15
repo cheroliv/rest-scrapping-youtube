@@ -157,8 +157,7 @@ class MonolithConfiguration(
 
     @Bean
     fun jdk8TimeModule(): Jdk8Module = Jdk8Module()
-//
-//
+
 //    @Bean
 //    fun gmailSender(): JavaMailSender = SenderGmail()
 //
