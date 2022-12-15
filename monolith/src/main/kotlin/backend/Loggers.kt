@@ -84,15 +84,25 @@ private fun startupLogMessage(
     serverPort: String?,
     contextPath: String,
     hostAddress: String,
-    profiles: String
+    profiles: String,
+    activeProfiles: String
 ): String = """${"\n\n\n"}
 ----------------------------------------------------------
 go visit $goVisitMessage    
 ----------------------------------------------------------
 Application '$appName' is running! Access URLs:
 Local:      $protocol://localhost:$serverPort$contextPath
-External:   $protocol://$hostAddress:$serverPort$contextPath
-Profile(s): $profiles
+External:   $protocol://$hostAddress:$serverPort$contextPath${
+    if (profiles.isNotBlank()) "\n" + buildString {
+        append("Profile(s): ")
+        append(profiles)
+    } else ""
+}${
+    if (activeProfiles.isNotBlank()) "\n" + buildString {
+        append("Active(s) profile(s): ")
+        append(activeProfiles)
+    } else ""
+}
 ----------------------------------------------------------
 ${"\n\n\n"}""".trimIndent()
 
@@ -103,29 +113,37 @@ ${"\n\n\n"}""".trimIndent()
 
 internal fun bootstrapLog(context: ApplicationContext) =
     log.info(
-            startupLogMessage(
-                appName = context.environment.getProperty(SPRING_APPLICATION_NAME),
-                protocol = if (context.environment.getProperty(SERVER_SSL_KEY_STORE) != null) HTTPS
-                else HTTP,
-                serverPort = context.environment.getProperty(SERVER_PORT),
-                contextPath = context.environment.getProperty(SERVER_SERVLET_CONTEXT_PATH) ?: EMPTY_CONTEXT_PATH,
-                hostAddress = try {
-                    getLocalHost().hostAddress
-                } catch (e: UnknownHostException) {
-                    log.warn(STARTUP_HOST_WARN_LOG_MSG)
-                    DEV_HOST
-                },
-                profiles = when {
-                    context.environment.defaultProfiles.isNotEmpty() ->
-                        context.environment
-                            .defaultProfiles
-                            .reduce { acc, s -> "$acc, $s" }
-                    else -> ""
-                },
-                goVisitMessage = context.getBean<ApplicationProperties>().goVisitMessage
-            )
-        )
+        startupLogMessage(
+            appName = context.environment.getProperty(SPRING_APPLICATION_NAME),
+            goVisitMessage = context.getBean<ApplicationProperties>().goVisitMessage,
+            protocol = if (context.environment.getProperty(SERVER_SSL_KEY_STORE) != null) HTTPS
+            else HTTP,
+            serverPort = context.environment.getProperty(SERVER_PORT),
+            contextPath = context.environment.getProperty(SERVER_SERVLET_CONTEXT_PATH) ?: EMPTY_CONTEXT_PATH,
+            hostAddress = try {
+                getLocalHost().hostAddress
+            } catch (e: UnknownHostException) {
+                log.warn(STARTUP_HOST_WARN_LOG_MSG)
+                DEV_HOST
+            },
+            profiles = when {
+                context.environment.defaultProfiles.isNotEmpty() ->
+                    context.environment
+                        .defaultProfiles
+                        .reduce { acc, s -> "$acc, $s" }
 
+                else -> ""
+            },
+            activeProfiles = when {
+                context.environment.activeProfiles.isNotEmpty() ->
+                    context.environment
+                        .activeProfiles
+                        .reduce { acc, s -> "$acc, $s" }
+
+                else -> ""
+            },
+        )
+    )
 
 
 /*=================================================================================*/

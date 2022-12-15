@@ -146,8 +146,6 @@ dependencies {
     //Spring Cloud
 //    implementation("org.springframework.cloud:spring-cloud-gcp-starter-storage")
 //    providedCompile ("com.google.appengine:appengine:+")
-
-
 }
 
 configurations {
