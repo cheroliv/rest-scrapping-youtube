@@ -24,21 +24,52 @@ plugins {
     jacoco
 }
 
-
-
-tasks.register<DefaultTask>("addMailSlurpConfiguration"){
+tasks.register<DefaultTask>("addMailSlurpConfiguration") {
     group = "application"
     description = "add a yaml spring configuration for mailSlurp properties, and add the file to .gitignore"
-    println("addMailSlurpConfiguration")
+    doFirst { println("addMailSlurpConfiguration") }
     //TODO: addMailSlurpConfiguration task
 //check if src/main/resources/application-mailslurp.yml exists?
 //when src/main/resources/application-mailslurp.yml dont exists then create file
 //check if .gitignore exists?
-//when .gitignore dont exists then create file and add src/main/resources/application-mailslurp.yml into .gitignore
-//when .gitgnore exists then check if  src/main/resources/application-mailslurp.yml if found into .gitignore
-//when src/main/resources/application-mailslurp.yml is not found into .gitignore then add src/main/resources/application-mailslurp.yml to .gitgnore
-
+//when .gitignore dont exists then create file
+// and add src/main/resources/application-mailslurp.yml into .gitignore
+//when .gitgnore exists then check if src/main/resources/application-mailslurp.yml is found into .gitignore
+//when src/main/resources/application-mailslurp.yml is not found into .gitignore
+// then add src/main/resources/application-mailslurp.yml to .gitgnore
 }
+
+open class DeployGAE : Exec() {
+    init {
+        workingDir = project.rootDir
+        this.commandLine(
+            "/snap/bin/gcloud",
+            "-v"
+//            "app",
+//            "deploy",
+//            "${projectDir.absolutePath}/src/main/appengine/app.yml"
+        )
+        standardOutput = ByteArrayOutputStream()
+    }
+}
+
+
+tasks.register<DeployGAE>("deployGAE") {
+    group = "application"
+    val cmd = "gcloud app deploy src/main/appengine/app.flexible.yml"
+    doLast { println(cmd) }
+}
+
+//springBoot.mainClass.set("backend.BackendBootstrap")
+///*
+//./gradlew -q cli --args='your args there'
+// */
+//tasks.register("cli") {
+//    group = "application"
+//    description = "Run backend cli"
+//    doFirst { springBoot.mainClass.set("backend.CliBootstrap") }
+//    finalizedBy("bootRun")
+//}
 
 
 dependencies {
@@ -63,10 +94,16 @@ dependencies {
     // Cucumber
     testImplementation("io.cucumber:cucumber-java8:${properties["cucumber_java.version"]}")
     testImplementation("io.cucumber:cucumber-java:${properties["cucumber_java.version"]}")
+    // testcontainer
+//    testImplementation("org.testcontainers:junit-jupiter")
+//    testImplementation("org.testcontainers:postgresql")
+//    testImplementation("org.testcontainers:r2dbc")
+    //testImplementation("com.tngtech.archunit:archunit-junit5-api:${properties["archunit_junit5_version"]}")
+    //testRuntimeOnly("com.tngtech.archunit:archunit-junit5-engine:${properties["archunit_junit5_version"]}")
+//    testImplementation( "org.springframework.cloud:spring-cloud-starter-contract-verifier")
     //blockhound
 //    implementation("io.projectreactor.tools:blockhound:${properties["blockhound_version"]}")
 //    testImplementation("io.projectreactor.tools:blockhound-junit-platform:${properties["blockhound_version"]}")
-
     //jackson mapping (json/xml)
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     //strings manipulation
@@ -79,17 +116,18 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     //spring actuator
     implementation("org.springframework.boot:spring-boot-starter-actuator")
-    //spring r2dbc
-    implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
-    //spring javax.mail
+    //Spring mail
     implementation("org.springframework.boot:spring-boot-starter-mail")
+    //spring thymeleaf for mail templating
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+    //MailSlurp
     implementation("com.mailslurp:mailslurp-client-kotlin:15.14.0")
     //Spring bean validation JSR 303
     implementation("org.springframework.boot:spring-boot-starter-validation")
-    //spring thymeleaf for mail templating
-    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     //spring webflux reactive http
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+    //spring r2dbc
+    implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
     //H2database
     runtimeOnly("com.h2database:h2")
     runtimeOnly("io.r2dbc:r2dbc-h2")
@@ -105,18 +143,7 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-jackson:${properties["jsonwebtoken.version"]}")
     //SSL
     implementation("io.netty:netty-tcnative-boringssl-static:${properties["boring_ssl.version"]}")
-
-
-
-    // testcontainer
-//    testImplementation("org.testcontainers:junit-jupiter")
-//    testImplementation("org.testcontainers:postgresql")
-//    testImplementation("org.testcontainers:r2dbc")
-    //testImplementation("com.tngtech.archunit:archunit-junit5-api:${properties["archunit_junit5_version"]}")
-    //testRuntimeOnly("com.tngtech.archunit:archunit-junit5-engine:${properties["archunit_junit5_version"]}")
-
-
-//    testImplementation( "org.springframework.cloud:spring-cloud-starter-contract-verifier")
+    //Spring Cloud
 //    implementation("org.springframework.cloud:spring-cloud-gcp-starter-storage")
 //    providedCompile ("com.google.appengine:appengine:+")
 
@@ -215,38 +242,3 @@ tasks.jacocoTestReport {
         xml.required.set(true)
     }
 }
-
-
-open class DeployGAE : Exec() {
-    init {
-        workingDir = project.rootDir
-        this.commandLine(
-            "/snap/bin/gcloud",
-            "-v"
-//            "app",
-//            "deploy",
-//            "${projectDir.absolutePath}/src/main/appengine/app.yml"
-        )
-        standardOutput = ByteArrayOutputStream()
-    }
-}
-
-
-tasks.register<DeployGAE>("deployGAE") {
-    group = "application"
-    val cmd = "gcloud app deploy src/main/appengine/app.flexible.yml"
-    doLast { println(cmd) }
-}
-
-//springBoot.mainClass.set("backend.BackendBootstrap")
-///*
-//./gradlew -q cli --args='your args there'
-// */
-//tasks.register("cli") {
-//    group = "application"
-//    description = "Run backend cli"
-//    doFirst { springBoot.mainClass.set("backend.CliBootstrap") }
-//    finalizedBy("bootRun")
-//}
-
-

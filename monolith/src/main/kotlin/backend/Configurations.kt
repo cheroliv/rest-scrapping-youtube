@@ -3,12 +3,15 @@
 package backend
 
 import backend.Constants.FEATURE_POLICY
+import backend.Constants.MAIL_DEBUG
+import backend.Constants.MAIL_SMTP_AUTH
+import backend.Constants.MAIL_TRANSPORT_PROTOCOL
+import backend.Constants.MAIL_TRANSPORT_STARTTLS_ENABLE
 import backend.Constants.REQUEST_PARAM_LANG
 import backend.Log.log
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import org.apache.commons.mail.EmailConstants.*
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler
 import org.springframework.beans.factory.DisposableBean
