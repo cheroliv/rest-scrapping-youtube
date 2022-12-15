@@ -7,21 +7,14 @@ import org.springframework.context.annotation.PropertySources
 import org.springframework.web.cors.CorsConfiguration
 
 
-/*=================================================================================*/
+///*=================================================================================*/
 
 @ConfigurationProperties(prefix = "backend", ignoreUnknownFields = false)
 @PropertySources(
-    PropertySource(
-        value = ["classpath:git.properties"],
-        ignoreResourceNotFound = true
-    ),
-    PropertySource(
-        value = ["classpath:META-INF/build-info.properties"],
-        ignoreResourceNotFound = true
-    )
+    PropertySource("classpath:git.properties", ignoreResourceNotFound = true),
+    PropertySource("classpath:META-INF/build-info.properties", ignoreResourceNotFound = true)
 )
-@ConstructorBinding
-class ApplicationProperties(
+class ApplicationProperties @ConstructorBinding constructor(
     val message: String = "",
     val item: String,
     val goVisitMessage: String,

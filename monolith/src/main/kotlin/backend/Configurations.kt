@@ -2,15 +2,6 @@
 
 package backend
 
-//import reactor.core.publisher.Hooks.onOperatorDebug
-
-//import org.springframework.boot.autoconfigure.web.reactive.ResourceHandlerRegistrationCustomizer
-//import org.springframework.context.annotation.Import
-//import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
-//import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
-//import org.springframework.security.core.userdetails.ReactiveUserDetailsService
-//import org.zalando.problem.spring.webflux.advice.security.SecurityProblemSupport
-import backend.Constants.DEVELOPMENT
 import backend.Constants.FEATURE_POLICY
 import backend.Constants.REQUEST_PARAM_LANG
 import backend.Log.log
@@ -26,7 +17,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.task.TaskExecutionProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
-import org.springframework.boot.web.reactive.context.StandardReactiveWebEnvironment
 import org.springframework.context.annotation.*
 import org.springframework.context.i18n.LocaleContext
 import org.springframework.context.i18n.SimpleLocaleContext
@@ -89,14 +79,8 @@ class BackendApplication
 
 object BackendBootstrap {
     @JvmStatic
-    fun main(args: Array<String>) = runApplication<BackendApplication>(
-        *args,
-        //The place where we can set env or context before running
-        init = {
-//            setEnvironment(StandardReactiveWebEnvironment().apply {
-//                setDefaultProfiles(DEVELOPMENT)
-//            })
-        }).run { bootstrapLog(this) }
+    fun main(args: Array<String>) = runApplication<BackendApplication>(*args)
+        .run { bootstrapLog(this) }
 }/*=================================================================================*/
 
 //object CliBootstrap {

@@ -12,6 +12,10 @@ import backend.RandomUtils.generateResetKey
 import com.mailslurp.apis.InboxControllerApi
 import com.mailslurp.apis.WaitForControllerApi
 import com.mailslurp.models.SendEmailOptions
+//import jakarta.mail.Multipart
+//import jakarta.mail.internet.MimeBodyPart
+//import jakarta.mail.internet.MimeMessage
+//import jakarta.mail.internet.MimeMultipart
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
