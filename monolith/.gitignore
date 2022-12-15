@@ -9,4 +9,4 @@ bin
 .project
 server.code-workspace
 .settings
-/src/main/resources/application-mailslurp.yaml
+/src/main/resources/application-mailslurp.yml

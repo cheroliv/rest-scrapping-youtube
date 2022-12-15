@@ -24,6 +24,23 @@ plugins {
     jacoco
 }
 
+
+
+tasks.register<DefaultTask>("addMailSlurpConfiguration"){
+    group = "application"
+    description = "add a yaml spring configuration for mailSlurp properties, and add the file to .gitignore"
+    println("addMailSlurpConfiguration")
+    //TODO: addMailSlurpConfiguration task
+//check if src/main/resources/application-mailslurp.yml exists?
+//when src/main/resources/application-mailslurp.yml dont exists then create file
+//check if .gitignore exists?
+//when .gitignore dont exists then create file and add src/main/resources/application-mailslurp.yml into .gitignore
+//when .gitgnore exists then check if  src/main/resources/application-mailslurp.yml if found into .gitignore
+//when src/main/resources/application-mailslurp.yml is not found into .gitignore then add src/main/resources/application-mailslurp.yml to .gitgnore
+
+}
+
+
 dependencies {
 //    implementation(project(path = ":common"))
     //Kotlin lib: jdk8, reflexion, coroutines
@@ -32,11 +49,20 @@ dependencies {
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${properties["kotlinx_serialization_json.version"]}")
-    // kotlin TDD
+    // Kotlin Tests
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("io.projectreactor:reactor-test")
     testImplementation("org.mockito.kotlin:mockito-kotlin:${properties["mockito_kotlin_version"]}")
+    // Spring Test dependencies
+    testImplementation("org.springframework.boot:spring-boot-starter-test") { exclude(module = "mockito-core") }
+    // Mocking
+    testImplementation("io.mockk:mockk:${properties["mockk.version"]}")
+    testImplementation("com.github.tomakehurst:wiremock-jre8:${properties["wiremock.version"]}")
+    testImplementation("com.ninja-squad:springmockk:3.1.0")
+    // Cucumber
+    testImplementation("io.cucumber:cucumber-java8:${properties["cucumber_java.version"]}")
+    testImplementation("io.cucumber:cucumber-java:${properties["cucumber_java.version"]}")
     //blockhound
 //    implementation("io.projectreactor.tools:blockhound:${properties["blockhound_version"]}")
 //    testImplementation("io.projectreactor.tools:blockhound-junit-platform:${properties["blockhound_version"]}")
@@ -57,18 +83,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
     //spring javax.mail
     implementation("org.springframework.boot:spring-boot-starter-mail")
-    //to get mail constants
-    implementation("org.apache.commons:commons-email:${properties["commons_email.version"]}") {
-        setOf(
-            "junit",
-            "org.easymock",
-            "org.powermock",
-            "org.slf4j ",
-            "commons-io",
-            "org.subethamail",
-            "com.sun.mail"
-        ).map { exclude(it) }
-    }
+    implementation("com.mailslurp:mailslurp-client-kotlin:15.14.0")
     //Spring bean validation JSR 303
     implementation("org.springframework.boot:spring-boot-starter-validation")
     //spring thymeleaf for mail templating
@@ -90,15 +105,7 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-jackson:${properties["jsonwebtoken.version"]}")
     //SSL
     implementation("io.netty:netty-tcnative-boringssl-static:${properties["boring_ssl.version"]}")
-    // spring Test dependencies
-    testImplementation("org.springframework.boot:spring-boot-starter-test") { exclude(module = "mockito-core") }
-    // Mocking
-    testImplementation("io.mockk:mockk:${properties["mockk.version"]}")
-    testImplementation("com.github.tomakehurst:wiremock-jre8:${properties["wiremock.version"]}")
-    testImplementation("com.ninja-squad:springmockk:3.1.0")
-    // BDD - Cucumber
-    testImplementation("io.cucumber:cucumber-java8:${properties["cucumber_java.version"]}")
-    testImplementation("io.cucumber:cucumber-java:${properties["cucumber_java.version"]}")
+
 
 
     // testcontainer
@@ -113,7 +120,7 @@ dependencies {
 //    implementation("org.springframework.cloud:spring-cloud-gcp-starter-storage")
 //    providedCompile ("com.google.appengine:appengine:+")
 
-    implementation("com.mailslurp:mailslurp-client-kotlin:15.14.0")
+
 }
 
 configurations {
@@ -209,6 +216,7 @@ tasks.jacocoTestReport {
     }
 }
 
+
 open class DeployGAE : Exec() {
     init {
         workingDir = project.rootDir
@@ -240,3 +248,5 @@ tasks.register<DeployGAE>("deployGAE") {
 //    doFirst { springBoot.mainClass.set("backend.CliBootstrap") }
 //    finalizedBy("bootRun")
 //}
+
+
