@@ -1,9 +1,11 @@
 package backend
 
+import backend.Constants.JUMPLINE
 import backend.Constants.CLOUD
 import backend.Constants.DEVELOPMENT
 import backend.Constants.DEV_HOST
 import backend.Constants.EMPTY_CONTEXT_PATH
+import backend.Constants.EMPTY_STRING
 import backend.Constants.HTTP
 import backend.Constants.HTTPS
 import backend.Constants.PRODUCTION
@@ -77,6 +79,7 @@ internal fun checkProfileLog(context: ApplicationContext) =
 /*=================================================================================*/
 
 
+
 private fun startupLogMessage(
     appName: String?,
     goVisitMessage: String,
@@ -86,25 +89,25 @@ private fun startupLogMessage(
     hostAddress: String,
     profiles: String,
     activeProfiles: String
-): String = """${"\n\n\n"}
+): String = """$JUMPLINE$JUMPLINE$JUMPLINE
 ----------------------------------------------------------
 go visit $goVisitMessage    
 ----------------------------------------------------------
 Application '$appName' is running! Access URLs:
 Local:      $protocol://localhost:$serverPort$contextPath
 External:   $protocol://$hostAddress:$serverPort$contextPath${
-    if (profiles.isNotBlank()) "\n" + buildString {
+    if (profiles.isNotBlank()) JUMPLINE + buildString {
         append("Profile(s): ")
         append(profiles)
-    } else ""
+    } else EMPTY_STRING
 }${
-    if (activeProfiles.isNotBlank()) "\n" + buildString {
+    if (activeProfiles.isNotBlank()) JUMPLINE + buildString {
         append("Active(s) profile(s): ")
         append(activeProfiles)
-    } else ""
+    } else EMPTY_STRING
 }
 ----------------------------------------------------------
-${"\n\n\n"}""".trimIndent()
+$JUMPLINE$JUMPLINE""".trimIndent()
 
 
 /*=================================================================================*/
@@ -130,17 +133,17 @@ internal fun bootstrapLog(context: ApplicationContext) =
                 context.environment.defaultProfiles.isNotEmpty() ->
                     context.environment
                         .defaultProfiles
-                        .reduce { acc, s -> "$acc, $s" }
+                        .reduce { accumulator, profile -> "$accumulator, $profile" }
 
-                else -> ""
+                else -> EMPTY_STRING
             },
             activeProfiles = when {
                 context.environment.activeProfiles.isNotEmpty() ->
                     context.environment
                         .activeProfiles
-                        .reduce { acc, s -> "$acc, $s" }
+                        .reduce { accumulator, profile -> "$accumulator, $profile" }
 
-                else -> ""
+                else -> EMPTY_STRING
             },
         )
     )

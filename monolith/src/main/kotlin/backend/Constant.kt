@@ -7,6 +7,8 @@ import java.net.URI.create
 
 
 object Constants {
+    const val EMPTY_STRING = ""
+    const val JUMPLINE = "\n"
 
     //SignupController
     @JvmStatic
@@ -73,10 +75,10 @@ object Constants {
     const val INVALID_TOKEN = false
 
     //Email
-    const val MAIL_DEBUG="mail.debug"
-    const val MAIL_TRANSPORT_STARTTLS_ENABLE= "mail.smtp.starttls.enable"
-    const val MAIL_SMTP_AUTH="mail.smtp.auth"
-    const val MAIL_TRANSPORT_PROTOCOL="mail.transport.protocol"
+    const val MAIL_DEBUG = "mail.debug"
+    const val MAIL_TRANSPORT_STARTTLS_ENABLE = "mail.smtp.starttls.enable"
+    const val MAIL_SMTP_AUTH = "mail.smtp.auth"
+    const val MAIL_TRANSPORT_PROTOCOL = "mail.transport.protocol"
 
     //REST API
     //URIs
