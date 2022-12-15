@@ -77,7 +77,7 @@ class MailSlurpServiceTests {
 
     @Test
     fun `can create inboxes`() {
-        assertContains("@mailslurp",inboxController.createInbox(
+        assertContains(inboxController.createInbox(
             null,
             null,
             null,
@@ -89,7 +89,7 @@ class MailSlurpServiceTests {
             null,
             inboxType = "",
             virtualInbox = true
-        ).emailAddress)
+        ).emailAddress,"@mailslurp")
     }
 
     @Test
@@ -108,13 +108,13 @@ class MailSlurpServiceTests {
                 inboxType = "",
                 virtualInbox = true
             ).run {
-                assertEquals(id, inboxController.sendEmailAndConfirm(
+                assertEquals(inboxController.sendEmailAndConfirm(
                     inboxId = id,
                     sendEmailOptions = SendEmailOptions(
                         to = listOf(emailAddress),
                         subject = "test-subject"
                     )
-                ).inboxId)
+                ).inboxId, id)
             }
     }
 }
@@ -140,7 +140,7 @@ class DefaultMailServiceTests {
 
     @BeforeAll
     fun `lance le server en profile test`() {
-        context = launcher(DEVELOPMENT)
+        context = launcher()
     }
 
 

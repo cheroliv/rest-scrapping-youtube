@@ -100,6 +100,71 @@ class SenderGmail : JavaMailSender {
 
 /*=================================================================================*/
 //TODO: AbstractMailService
+abstract class AbstractMailService(
+private val properties: ApplicationProperties,
+private val messageSource: MessageSource,
+private val templateEngine: SpringTemplateEngine
+) {
+    @Async
+    abstract fun sendEmail(
+        to: String,
+        subject: String,
+        content: String,
+        isMultipart: Boolean,
+        isHtml: Boolean
+    )
+    @Async
+    fun sendEmailFromTemplate(
+        account: AccountCredentials,
+        templateName: String,
+        titleKey: String
+    ) {
+        when (account.email) {
+            null -> {
+                log.debug("Email doesn't exist for user '${account.login}'")
+                return
+            }
+
+            else -> forLanguageTag(account.langKey).apply {
+                sendEmail(
+                    account.email,
+                    messageSource.getMessage(titleKey, null, this),
+                    templateEngine.process(templateName, Context(this).apply {
+                        setVariable(USER, account)
+                        setVariable(BASE_URL, properties.mail.baseUrl)
+                    }),
+                    isMultipart = false,
+                    isHtml = true
+                )
+            }
+        }
+    }
+
+    @Async
+    fun sendActivationEmail(account: AccountCredentials): Unit = log.debug(
+        "Sending activation email to '{}'", account.email
+    ).run {
+        sendEmailFromTemplate(
+            account, "mail/activationEmail", "email.activation.title"
+        )
+    }
+
+    @Async
+    fun sendCreationEmail(account: AccountCredentials): Unit =
+        log.debug("Sending creation email to '${account.email}'").run {
+            sendEmailFromTemplate(
+                account, "mail/creationEmail", "email.activation.title"
+            )
+        }
+
+    @Async
+    fun sendPasswordResetMail(account: AccountCredentials): Unit =
+        log.debug("Sending password reset email to '${account.email}'").run {
+            sendEmailFromTemplate(
+                account, "mail/passwordResetEmail", "email.reset.title"
+            )
+        }
+}
 
 @Service
 @Profile("!$GMAIL or !$MAILSLURP")
