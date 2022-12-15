@@ -2,19 +2,17 @@
 
 package backend
 
+//import jakarta.mail.Multipart
+//import jakarta.mail.internet.MimeBodyPart
+//import jakarta.mail.internet.MimeMessage
+//import jakarta.mail.internet.MimeMultipart
 import backend.Constants.DEFAULT_LANGUAGE
-import backend.Constants.DEVELOPMENT
 import backend.Constants.GMAIL
 import backend.Constants.MAILSLURP
 import backend.Constants.TEST
 import backend.RandomUtils.generateResetKey
 import com.mailslurp.apis.InboxControllerApi
-import com.mailslurp.apis.WaitForControllerApi
 import com.mailslurp.models.SendEmailOptions
-//import jakarta.mail.Multipart
-//import jakarta.mail.internet.MimeBodyPart
-//import jakarta.mail.internet.MimeMessage
-//import jakarta.mail.internet.MimeMultipart
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
@@ -53,7 +51,7 @@ class MailSlurpServiceTests {
     private lateinit var mailService: MailService
     private lateinit var javaMailSender: JavaMailSenderImpl
     private val properties: ApplicationProperties by lazy { context.getBean() }
-    private val inboxController by lazy{ InboxControllerApi(properties.mailslurp.token)}
+    private val inboxController by lazy { InboxControllerApi(properties.mailslurp.token) }
 
     @BeforeAll
     fun `lance le server en profile test`() {
@@ -77,24 +75,7 @@ class MailSlurpServiceTests {
 
     @Test
     fun `can create inboxes`() {
-        assertContains(inboxController.createInbox(
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            inboxType = "",
-            virtualInbox = true
-        ).emailAddress,"@mailslurp")
-    }
-
-    @Test
-    fun `can send email`() {
-            // create inbox
+        assertContains(
             inboxController.createInbox(
                 null,
                 null,
@@ -107,15 +88,65 @@ class MailSlurpServiceTests {
                 null,
                 inboxType = "",
                 virtualInbox = true
-            ).run {
-                assertEquals(inboxController.sendEmailAndConfirm(
+            ).emailAddress, "@mailslurp"
+        )
+    }
+
+    @Test
+    fun `can send email`() {
+        // create inbox
+        inboxController.createInbox(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            inboxType = "",
+            virtualInbox = true
+        ).run {
+            assertEquals(
+                inboxController.sendEmailAndConfirm(
                     inboxId = id,
                     sendEmailOptions = SendEmailOptions(
                         to = listOf(emailAddress),
                         subject = "test-subject"
                     )
-                ).inboxId, id)
+                ).inboxId, id
+            )
+        }
+    }
+
+    @Test
+    fun `test JavaMailSender implementation`() {
+        // create inbox
+        inboxController.createInbox(
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            inboxType = "",
+            virtualInbox = true
+        ).run ibd@{
+            inboxController.sendEmailAndConfirm(
+                inboxId = id,
+                sendEmailOptions = SendEmailOptions(
+                    to = listOf(emailAddress),
+                    subject = "test-subject"
+                )
+            ).run {
+                assertEquals(inboxId, this@ibd.id)
+
             }
+        }
     }
 }
 /*=================================================================================*/
@@ -389,6 +420,7 @@ class DefaultMailServiceTests {
         return javaLangKey
     }
 }
+
 /*=================================================================================*/
 @Ignore
 class GmailServiceTests {

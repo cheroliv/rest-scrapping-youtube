@@ -5,6 +5,7 @@ import backend.Constants.GMAIL
 import backend.Constants.MAILSLURP
 import backend.Constants.USER
 import backend.Log.log
+import com.mailslurp.apis.InboxControllerApi
 import org.springframework.context.MessageSource
 import org.springframework.context.annotation.Profile
 import org.springframework.mail.MailException
@@ -23,149 +24,8 @@ import javax.mail.internet.MimeMessage
 import kotlin.text.Charsets.UTF_8
 
 /*=================================================================================*/
-@Service
-@Profile(MAILSLURP)
-class SenderMailSlurp : JavaMailSender {
-    override fun send(mimeMessage: MimeMessage) {
-        TODO("Not yet implemented")
-    }
 
-    override fun send(vararg mimeMessages: MimeMessage?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun send(mimeMessagePreparator: MimeMessagePreparator) {
-        TODO("Not yet implemented")
-    }
-
-    override fun send(vararg mimeMessagePreparators: MimeMessagePreparator?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun send(simpleMessage: SimpleMailMessage) {
-        TODO("Not yet implemented")
-    }
-
-    override fun send(vararg simpleMessages: SimpleMailMessage?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun createMimeMessage(): MimeMessage {
-        TODO("Not yet implemented")
-    }
-
-    override fun createMimeMessage(contentStream: InputStream): MimeMessage {
-        TODO("Not yet implemented")
-    }
-
-}
-
-/*=================================================================================*/
-@Service
-@Profile(GMAIL)
-class SenderGmail : JavaMailSender {
-    override fun send(mimeMessage: MimeMessage) {
-        TODO("Not yet implemented")
-    }
-
-    override fun send(vararg mimeMessages: MimeMessage?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun send(mimeMessagePreparator: MimeMessagePreparator) {
-        TODO("Not yet implemented")
-    }
-
-    override fun send(vararg mimeMessagePreparators: MimeMessagePreparator?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun send(simpleMessage: SimpleMailMessage) {
-        TODO("Not yet implemented")
-    }
-
-    override fun send(vararg simpleMessages: SimpleMailMessage?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun createMimeMessage(): MimeMessage {
-        TODO("Not yet implemented")
-    }
-
-    override fun createMimeMessage(contentStream: InputStream): MimeMessage {
-        TODO("Not yet implemented")
-    }
-
-}
-
-/*=================================================================================*/
-//TODO: AbstractMailService
-abstract class AbstractMailService(
-private val properties: ApplicationProperties,
-private val messageSource: MessageSource,
-private val templateEngine: SpringTemplateEngine
-) {
-    @Async
-    abstract fun sendEmail(
-        to: String,
-        subject: String,
-        content: String,
-        isMultipart: Boolean,
-        isHtml: Boolean
-    )
-    @Async
-    fun sendEmailFromTemplate(
-        account: AccountCredentials,
-        templateName: String,
-        titleKey: String
-    ) {
-        when (account.email) {
-            null -> {
-                log.debug("Email doesn't exist for user '${account.login}'")
-                return
-            }
-
-            else -> forLanguageTag(account.langKey).apply {
-                sendEmail(
-                    account.email,
-                    messageSource.getMessage(titleKey, null, this),
-                    templateEngine.process(templateName, Context(this).apply {
-                        setVariable(USER, account)
-                        setVariable(BASE_URL, properties.mail.baseUrl)
-                    }),
-                    isMultipart = false,
-                    isHtml = true
-                )
-            }
-        }
-    }
-
-    @Async
-    fun sendActivationEmail(account: AccountCredentials): Unit = log.debug(
-        "Sending activation email to '{}'", account.email
-    ).run {
-        sendEmailFromTemplate(
-            account, "mail/activationEmail", "email.activation.title"
-        )
-    }
-
-    @Async
-    fun sendCreationEmail(account: AccountCredentials): Unit =
-        log.debug("Sending creation email to '${account.email}'").run {
-            sendEmailFromTemplate(
-                account, "mail/creationEmail", "email.activation.title"
-            )
-        }
-
-    @Async
-    fun sendPasswordResetMail(account: AccountCredentials): Unit =
-        log.debug("Sending password reset email to '${account.email}'").run {
-            sendEmailFromTemplate(
-                account, "mail/passwordResetEmail", "email.reset.title"
-            )
-        }
-}
-
+@Async
 @Service
 @Profile("!$GMAIL or !$MAILSLURP")
 class MailService(
@@ -174,7 +34,6 @@ class MailService(
     private val messageSource: MessageSource,
     private val templateEngine: SpringTemplateEngine
 ) {
-    @Async
     fun sendEmail(
         to: String,
         subject: String,
@@ -202,7 +61,6 @@ class MailService(
         }
     }
 
-    @Async
     fun sendEmailFromTemplate(
         account: AccountCredentials,
         templateName: String,
@@ -229,7 +87,6 @@ class MailService(
         }
     }
 
-    @Async
     fun sendActivationEmail(account: AccountCredentials): Unit = log.debug(
         "Sending activation email to '{}'", account.email
     ).run {
@@ -238,7 +95,6 @@ class MailService(
         )
     }
 
-    @Async
     fun sendCreationEmail(account: AccountCredentials): Unit =
         log.debug("Sending creation email to '${account.email}'").run {
             sendEmailFromTemplate(
@@ -246,7 +102,6 @@ class MailService(
             )
         }
 
-    @Async
     fun sendPasswordResetMail(account: AccountCredentials): Unit =
         log.debug("Sending password reset email to '${account.email}'").run {
             sendEmailFromTemplate(
@@ -254,5 +109,84 @@ class MailService(
             )
         }
 }
+/*=================================================================================*/
+
+//@Service
+//@Profile(MAILSLURP)
+//class SenderMailSlurp(private val properties: ApplicationProperties) : JavaMailSenderImpl {
+//    private val inboxController by lazy { InboxControllerApi(properties.mailslurp.token) }
+//
+//    override fun send(mimeMessage: MimeMessage) {
+//
+//        TODO("Not yet implemented")
+//    }
+//
+//    override fun send(vararg mimeMessages: MimeMessage?) {
+//        TODO("Not yet implemented")
+//    }
+//
+//    override fun send(mimeMessagePreparator: MimeMessagePreparator) {
+//        TODO("Not yet implemented")
+//    }
+//
+//    override fun send(vararg mimeMessagePreparators: MimeMessagePreparator?) {
+//        TODO("Not yet implemented")
+//    }
+//
+//    override fun send(simpleMessage: SimpleMailMessage) {
+//        TODO("Not yet implemented")
+//    }
+//
+//    override fun send(vararg simpleMessages: SimpleMailMessage?) {
+//        TODO("Not yet implemented")
+//    }
+//
+//    override fun createMimeMessage(): MimeMessage {
+//        TODO("Not yet implemented")
+//    }
+//
+//    override fun createMimeMessage(contentStream: InputStream): MimeMessage {
+//        TODO("Not yet implemented")
+//    }
+//
+//}
+
+/*=================================================================================*/
+//@Service
+//@Profile(GMAIL)
+//class SenderGmail : JavaMailSenderImpl {
+//    override fun send(mimeMessage: MimeMessage) {
+//        TODO("Not yet implemented")
+//    }
+//
+//    override fun send(vararg mimeMessages: MimeMessage?) {
+//        TODO("Not yet implemented")
+//    }
+//
+//    override fun send(mimeMessagePreparator: MimeMessagePreparator) {
+//        TODO("Not yet implemented")
+//    }
+//
+//    override fun send(vararg mimeMessagePreparators: MimeMessagePreparator?) {
+//        TODO("Not yet implemented")
+//    }
+//
+//    override fun send(simpleMessage: SimpleMailMessage) {
+//        TODO("Not yet implemented")
+//    }
+//
+//    override fun send(vararg simpleMessages: SimpleMailMessage?) {
+//        TODO("Not yet implemented")
+//    }
+//
+//    override fun createMimeMessage(): MimeMessage {
+//        TODO("Not yet implemented")
+//    }
+//
+//    override fun createMimeMessage(contentStream: InputStream): MimeMessage {
+//        TODO("Not yet implemented")
+//    }
+//
+//}
 
 /*=================================================================================*/
