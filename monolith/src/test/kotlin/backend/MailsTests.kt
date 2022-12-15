@@ -77,7 +77,7 @@ class MailSlurpServiceTests {
 
     @Test
     fun `can create inboxes`() {
-        val inbox = inboxController.createInbox(
+        assertContains("@mailslurp",inboxController.createInbox(
             null,
             null,
             null,
@@ -89,17 +89,13 @@ class MailSlurpServiceTests {
             null,
             inboxType = "",
             virtualInbox = true
-        )
-        assertTrue(inbox.emailAddress.contains("@mailslurp"))
+        ).emailAddress)
     }
 
     @Test
-    fun `can send and receive email`() {
-        with(properties.mailslurp.token) {
+    fun `can send email`() {
             // create inbox
-            val inboxController = InboxControllerApi(this)
-            val waitForController = WaitForControllerApi(this)
-            val inbox = inboxController.createInbox(
+            inboxController.createInbox(
                 null,
                 null,
                 null,
@@ -111,18 +107,15 @@ class MailSlurpServiceTests {
                 null,
                 inboxType = "",
                 virtualInbox = true
-            )
-
-            val testSubject = "test-subject"
-            val confirmation = inboxController.sendEmailAndConfirm(
-                inboxId = inbox.id,
-                sendEmailOptions = SendEmailOptions(
-                    to = listOf(inbox.emailAddress),
-                    subject = testSubject
-                )
-            )
-            assertEquals(confirmation.inboxId, inbox.id)
-        }
+            ).run {
+                assertEquals(id, inboxController.sendEmailAndConfirm(
+                    inboxId = id,
+                    sendEmailOptions = SendEmailOptions(
+                        to = listOf(emailAddress),
+                        subject = "test-subject"
+                    )
+                ).inboxId)
+            }
     }
 }
 /*=================================================================================*/
