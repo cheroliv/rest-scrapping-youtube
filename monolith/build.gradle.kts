@@ -23,7 +23,8 @@ plugins {
     id("com.google.cloud.tools.appengine")
     jacoco
 }
-
+//TODO: CLI apiclient to setup mailsurp
+//create 2 inboxes: signup,password
 tasks.register<DefaultTask>("addMailSlurpConfiguration") {
     group = "application"
     description = "add a yaml spring configuration for mailSlurp properties, and add the file to .gitignore"

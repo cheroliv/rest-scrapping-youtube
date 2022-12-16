@@ -9,18 +9,14 @@ import com.mailslurp.apis.InboxControllerApi
 import org.springframework.context.MessageSource
 import org.springframework.context.annotation.Profile
 import org.springframework.mail.MailException
-import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
-import org.springframework.mail.javamail.MimeMessagePreparator
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.thymeleaf.context.Context
 import org.thymeleaf.spring5.SpringTemplateEngine
-import java.io.InputStream
 import java.util.Locale.forLanguageTag
 import javax.mail.MessagingException
-import javax.mail.internet.MimeMessage
 import kotlin.text.Charsets.UTF_8
 
 /*=================================================================================*/
@@ -111,82 +107,49 @@ class MailService(
 }
 /*=================================================================================*/
 
-//@Service
-//@Profile(MAILSLURP)
-//class SenderMailSlurp(private val properties: ApplicationProperties) : JavaMailSenderImpl {
-//    private val inboxController by lazy { InboxControllerApi(properties.mailslurp.token) }
-//
-//    override fun send(mimeMessage: MimeMessage) {
-//
-//        TODO("Not yet implemented")
-//    }
-//
-//    override fun send(vararg mimeMessages: MimeMessage?) {
-//        TODO("Not yet implemented")
-//    }
-//
-//    override fun send(mimeMessagePreparator: MimeMessagePreparator) {
-//        TODO("Not yet implemented")
-//    }
-//
-//    override fun send(vararg mimeMessagePreparators: MimeMessagePreparator?) {
-//        TODO("Not yet implemented")
-//    }
-//
-//    override fun send(simpleMessage: SimpleMailMessage) {
-//        TODO("Not yet implemented")
-//    }
-//
-//    override fun send(vararg simpleMessages: SimpleMailMessage?) {
-//        TODO("Not yet implemented")
-//    }
-//
-//    override fun createMimeMessage(): MimeMessage {
-//        TODO("Not yet implemented")
-//    }
-//
-//    override fun createMimeMessage(contentStream: InputStream): MimeMessage {
-//        TODO("Not yet implemented")
-//    }
-//
-//}
+@Service
+@Profile(MAILSLURP)
+class MailSlurpService(
+    private val properties: ApplicationProperties,
+    private val mailSender: JavaMailSender,
+    private val messageSource: MessageSource,
+    private val templateEngine: SpringTemplateEngine
+) : MailService(properties, mailSender, messageSource, templateEngine) {
+    private val inboxController by lazy { InboxControllerApi(properties.mailslurp.token) }
+
+    override fun sendEmail(
+        to: String,
+        subject: String,
+        content: String,
+        isMultipart: Boolean,
+        isHtml: Boolean
+    ) {
+
+        TODO("Not yet implemented")
+    }
+
+}
 
 /*=================================================================================*/
-//@Service
-//@Profile(GMAIL)
-//class SenderGmail : JavaMailSenderImpl {
-//    override fun send(mimeMessage: MimeMessage) {
-//        TODO("Not yet implemented")
-//    }
-//
-//    override fun send(vararg mimeMessages: MimeMessage?) {
-//        TODO("Not yet implemented")
-//    }
-//
-//    override fun send(mimeMessagePreparator: MimeMessagePreparator) {
-//        TODO("Not yet implemented")
-//    }
-//
-//    override fun send(vararg mimeMessagePreparators: MimeMessagePreparator?) {
-//        TODO("Not yet implemented")
-//    }
-//
-//    override fun send(simpleMessage: SimpleMailMessage) {
-//        TODO("Not yet implemented")
-//    }
-//
-//    override fun send(vararg simpleMessages: SimpleMailMessage?) {
-//        TODO("Not yet implemented")
-//    }
-//
-//    override fun createMimeMessage(): MimeMessage {
-//        TODO("Not yet implemented")
-//    }
-//
-//    override fun createMimeMessage(contentStream: InputStream): MimeMessage {
-//        TODO("Not yet implemented")
-//    }
-//
-//}
+@Service
+@Profile(GMAIL)
+class GmailService(
+    private val properties: ApplicationProperties,
+    private val mailSender: JavaMailSender,
+    private val messageSource: MessageSource,
+    private val templateEngine: SpringTemplateEngine
+) : MailService(properties, mailSender, messageSource, templateEngine) {
 
+    override fun sendEmail(
+        to: String,
+        subject: String,
+        content: String,
+        isMultipart: Boolean,
+        isHtml: Boolean
+    ) {
+
+        TODO("Not yet implemented")
+    }
+
+}
 /*=================================================================================*/
