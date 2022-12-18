@@ -5,7 +5,6 @@ import backend.Constants.GMAIL
 import backend.Constants.MAILSLURP
 import backend.Constants.USER
 import backend.Log.log
-import com.mailslurp.apis.InboxControllerApi
 import org.springframework.context.MessageSource
 import org.springframework.context.annotation.Profile
 import org.springframework.mail.MailException
@@ -83,28 +82,20 @@ class MailService(
         }
     }
 
-    fun sendActivationEmail(account: AccountCredentials): Unit = log.debug(
-        "Sending activation email to '{}'", account.email
-    ).run {
-        sendEmailFromTemplate(
-            account, "mail/activationEmail", "email.activation.title"
-        )
-    }
+    fun sendActivationEmail(account: AccountCredentials): Unit = sendEmailFromTemplate(
+        account, "mail/activationEmail", "email.activation.title"
+    ).run { log.debug("Sending activation email to '${account.email}'") }
 
     fun sendCreationEmail(account: AccountCredentials): Unit =
-        log.debug("Sending creation email to '${account.email}'").run {
-            sendEmailFromTemplate(
-                account, "mail/creationEmail", "email.activation.title"
-            )
-        }
+        sendEmailFromTemplate(
+            account, "mail/creationEmail", "email.activation.title"
+        ).run { log.debug("Sending creation email to '${account.email}'") }
 
-    fun sendPasswordResetMail(account: AccountCredentials): Unit =
-        log.debug("Sending password reset email to '${account.email}'").run {
-            sendEmailFromTemplate(
-                account, "mail/passwordResetEmail", "email.reset.title"
-            )
-        }
+    fun sendPasswordResetMail(account: AccountCredentials): Unit = sendEmailFromTemplate(
+        account, "mail/passwordResetEmail", "email.reset.title"
+    ).run { log.debug("Sending password reset email to '${account.email}'") }
 }
+
 /*=================================================================================*/
 
 @Service
@@ -114,21 +105,7 @@ class MailServiceSlurp(
     private val mailSender: JavaMailSender,
     private val messageSource: MessageSource,
     private val templateEngine: SpringTemplateEngine
-) : MailService(properties, mailSender, messageSource, templateEngine) {
-
-
-    override fun sendEmail(
-        to: String,
-        subject: String,
-        content: String,
-        isMultipart: Boolean,
-        isHtml: Boolean
-    ) {
-
-        TODO("Not yet implemented")
-    }
-
-}
+) : MailService(properties, mailSender, messageSource, templateEngine)
 
 /*=================================================================================*/
 @Service
@@ -138,18 +115,5 @@ class MailServiceGmail(
     private val mailSender: JavaMailSender,
     private val messageSource: MessageSource,
     private val templateEngine: SpringTemplateEngine
-) : MailService(properties, mailSender, messageSource, templateEngine) {
-
-    override fun sendEmail(
-        to: String,
-        subject: String,
-        content: String,
-        isMultipart: Boolean,
-        isHtml: Boolean
-    ) {
-
-        TODO("Not yet implemented")
-    }
-
-}
+) : MailService(properties, mailSender, messageSource, templateEngine)
 /*=================================================================================*/
