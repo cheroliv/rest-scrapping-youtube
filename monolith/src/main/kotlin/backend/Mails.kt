@@ -3,6 +3,11 @@ package backend
 import backend.Constants.BASE_URL
 import backend.Constants.GMAIL
 import backend.Constants.MAILSLURP
+import backend.Constants.TEMPLATE_NAME_CREATION
+import backend.Constants.TEMPLATE_NAME_PASSWORD
+import backend.Constants.TEMPLATE_NAME_SIGNUP
+import backend.Constants.TITLE_KEY_PASSWORD
+import backend.Constants.TITLE_KEY_SIGNUP
 import backend.Constants.USER
 import backend.Log.log
 import org.springframework.context.MessageSource
@@ -82,17 +87,16 @@ class MailService(
         }
     }
 
-    fun sendActivationEmail(account: AccountCredentials): Unit = sendEmailFromTemplate(
-        account, "mail/activationEmail", "email.activation.title"
+    fun sendActivationEmail(account: AccountCredentials) = sendEmailFromTemplate(
+        account, TEMPLATE_NAME_SIGNUP, TITLE_KEY_SIGNUP
     ).run { log.debug("Sending activation email to '${account.email}'") }
 
-    fun sendCreationEmail(account: AccountCredentials): Unit =
-        sendEmailFromTemplate(
-            account, "mail/creationEmail", "email.activation.title"
-        ).run { log.debug("Sending creation email to '${account.email}'") }
+    fun sendCreationEmail(account: AccountCredentials) = sendEmailFromTemplate(
+        account, TEMPLATE_NAME_CREATION, TITLE_KEY_SIGNUP
+    ).run { log.debug("Sending creation email to '${account.email}'") }
 
-    fun sendPasswordResetMail(account: AccountCredentials): Unit = sendEmailFromTemplate(
-        account, "mail/passwordResetEmail", "email.reset.title"
+    fun sendPasswordResetMail(account: AccountCredentials) = sendEmailFromTemplate(
+        account, TEMPLATE_NAME_PASSWORD, TITLE_KEY_PASSWORD
     ).run { log.debug("Sending password reset email to '${account.email}'") }
 }
 

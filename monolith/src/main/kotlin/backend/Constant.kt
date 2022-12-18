@@ -116,6 +116,16 @@ object Constants {
     const val ADMIN = "admin"
     const val BASE_URL = "baseUrl"
 
+    const val TEMPLATE_NAME_SIGNUP = "mail/activationEmail"
+
+    const val TITLE_KEY_SIGNUP = "email.activation.title"
+
+    const val TEMPLATE_NAME_CREATION = "mail/creationEmail"
+
+    const val TEMPLATE_NAME_PASSWORD = "mail/passwordResetEmail"
+
+    const val TITLE_KEY_PASSWORD = "email.reset.title"
+
     // Regex for acceptable logins
     const val LOGIN_REGEX =
         "^(?>[a-zA-Z0-9!$&*+=?^_`{|}~.-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)|(?>[_.@A-Za-z0-9-]+)$"
