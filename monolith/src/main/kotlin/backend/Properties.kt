@@ -20,10 +20,8 @@ class ApplicationProperties @ConstructorBinding constructor(
     val goVisitMessage: String,
     val clientApp: ClientApp = ClientApp(),
     val database: Database = Database(),
-//    val mailslurp: MailSlurp = MailSlurp(),
     val mail: Mail = Mail(),
     val mailbox: MailBox = MailBox(),
-    val gmail: GoogleMail = GoogleMail(),
     val http: Http = Http(),
     val cache: Cache = Cache(),
     val security: Security = Security(),
@@ -35,25 +33,6 @@ class ApplicationProperties @ConstructorBinding constructor(
         val contact: Mail = Mail(),
         val test: Mail = Mail(),
     )
-    /*
-        #  mailbox:
-        #    activation:
-        #      name: activation
-        #      token: activation-mail-token-default
-        #    resetPassword:
-        #      name: reset-password
-        #      token: reset-password-mail-token-default
-        #    contact:
-        #      name: contact
-        #      token: contact-mail-token-default
-     */
-
-//    class MailSlurp(
-//        val name: String = "",
-//        val token: String = ""
-//    )
-
-    class GoogleMail(val token: String = "")
     class ClientApp(val name: String = "")
     class Database(val populatorPath: String = "")
     class Mail(

@@ -46,8 +46,7 @@ import javax.mail.internet.MimeMultipart
 import kotlin.test.*
 
 /*=================================================================================*/
-class MailSlurpServiceTests
-{
+class MailSlurpServiceTests {
 
     private lateinit var context: ConfigurableApplicationContext
     private lateinit var mailService: MailService
