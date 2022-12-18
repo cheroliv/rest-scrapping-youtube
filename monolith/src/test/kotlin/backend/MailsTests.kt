@@ -6,11 +6,11 @@ package backend
 //import jakarta.mail.internet.MimeBodyPart
 //import jakarta.mail.internet.MimeMessage
 //import jakarta.mail.internet.MimeMultipart
+import backend.ApplicationProperties.Mail
 import backend.Constants.DEFAULT_LANGUAGE
 import backend.Constants.GMAIL
 import backend.Constants.MAILSLURP
 import backend.Constants.TEST
-import backend.Log.log
 import backend.RandomUtils.generateResetKey
 import com.mailslurp.apis.InboxControllerApi
 import com.mailslurp.models.SendEmailOptions
@@ -51,8 +51,8 @@ class MailSlurpServiceTests {
     private lateinit var context: ConfigurableApplicationContext
     private lateinit var mailService: MailService
     private lateinit var javaMailSender: JavaMailSenderImpl
-    private val properties: ApplicationProperties by lazy { context.getBean() }
-    private val api by lazy { InboxControllerApi(properties.mailbox.test.token) }
+    private val token: String by lazy { context.getBean<ApplicationProperties>().mailbox.test.token }
+    private val api by lazy { InboxControllerApi(token) }
     @BeforeAll
     fun `lance le server en profile test`() {
         context = launcher(MAILSLURP)
@@ -69,12 +69,7 @@ class MailSlurpServiceTests {
     }
 
     @Test
-    fun `check mailslurp token property`() {
-        assertEquals(64, properties.mailbox.test.token.length)
-        log.info(properties.mailbox.contact.token)
-        log.info(properties.mailbox.signup.token)
-        log.info(properties.mailbox.password.token)
-    }
+    fun `check mailslurp token property`() = assertEquals(64, token.length)
 
     @Test//TODO: select an inbox instead of create
     @Ignore("inbox creation is limited plan")
