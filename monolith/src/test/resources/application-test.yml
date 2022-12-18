@@ -10,7 +10,7 @@ backend:
     from: backend-r2dbc-jwt@localhost
     password: password
     enabled: true
-    host: smtp.gmail.com
+    host: smtp.acme.com
     port: 587
     property:
       debug: true
