@@ -6,7 +6,6 @@ package backend
 //import jakarta.mail.internet.MimeBodyPart
 //import jakarta.mail.internet.MimeMessage
 //import jakarta.mail.internet.MimeMultipart
-import backend.ApplicationProperties.Mail
 import backend.Constants.DEFAULT_LANGUAGE
 import backend.Constants.GMAIL
 import backend.Constants.MAILSLURP
@@ -49,10 +48,9 @@ import kotlin.test.*
 class MailSlurpServiceTests {
 
     private lateinit var context: ConfigurableApplicationContext
-    private lateinit var mailService: MailService
-    private lateinit var javaMailSender: JavaMailSenderImpl
     private val token: String by lazy { context.getBean<ApplicationProperties>().mailbox.test.token }
     private val api by lazy { InboxControllerApi(token) }
+
     @BeforeAll
     fun `lance le server en profile test`() {
         context = launcher(MAILSLURP)
@@ -91,7 +89,8 @@ class MailSlurpServiceTests {
         )
     }
 
-    @Test @Ignore//TODO: select an inbox instead of create
+    @Test
+    @Ignore//TODO: select an inbox instead of create
     fun `can send email`() {
         // create inbox
         api.createInbox(
