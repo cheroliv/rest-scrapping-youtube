@@ -21,7 +21,7 @@ class ApplicationProperties @ConstructorBinding constructor(
     val clientApp: ClientApp = ClientApp(),
     val database: Database = Database(),
     val mailslurp: MailSlurp = MailSlurp(),
-    val mail: MailSmtp = MailSmtp(),
+    val mail: Mail = Mail(),
     val gmail: GoogleMail = GoogleMail(),
     val http: Http = Http(),
     val cache: Cache = Cache(),
@@ -29,13 +29,14 @@ class ApplicationProperties @ConstructorBinding constructor(
     val cors: CorsConfiguration = CorsConfiguration(),
 ) {
     class MailSlurp(
+        val name:String="",
         val token: String = ""
     )
 
     class GoogleMail(val token: String = "")
     class ClientApp(val name: String = "")
     class Database(val populatorPath: String = "")
-    class MailSmtp(
+    class Mail(
         val enabled: Boolean = false,
         val from: String = "",
         val baseUrl: String = "",
