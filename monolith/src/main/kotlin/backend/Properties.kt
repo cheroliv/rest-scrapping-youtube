@@ -22,14 +22,34 @@ class ApplicationProperties @ConstructorBinding constructor(
     val database: Database = Database(),
     val mailslurp: MailSlurp = MailSlurp(),
     val mail: Mail = Mail(),
+    val mailbox: MailBox = MailBox(),
     val gmail: GoogleMail = GoogleMail(),
     val http: Http = Http(),
     val cache: Cache = Cache(),
     val security: Security = Security(),
     val cors: CorsConfiguration = CorsConfiguration(),
 ) {
+    class MailBox(
+        val signup: Mail = Mail(),
+        val password: Mail = Mail(),
+        val contact: Mail = Mail(),
+        val test: Mail = Mail(),
+    )
+    /*
+        #  mailbox:
+        #    activation:
+        #      name: activation
+        #      token: activation-mail-token-default
+        #    resetPassword:
+        #      name: reset-password
+        #      token: reset-password-mail-token-default
+        #    contact:
+        #      name: contact
+        #      token: contact-mail-token-default
+     */
+
     class MailSlurp(
-        val name:String="",
+        val name: String = "",
         val token: String = ""
     )
 
@@ -37,15 +57,17 @@ class ApplicationProperties @ConstructorBinding constructor(
     class ClientApp(val name: String = "")
     class Database(val populatorPath: String = "")
     class Mail(
+        val name: String = "",
+        val token: String = "",
         val enabled: Boolean = false,
         val from: String = "",
         val baseUrl: String = "",
         val host: String = "",
         val port: Int = -1,
         val password: String = "",
-        val property: Property = Property(),
+        val property: SmtpProperty = SmtpProperty(),
     ) {
-        class Property(
+        class SmtpProperty(
             val debug: Boolean = false,
             val transport: Transport = Transport(),
             val smtp: Smtp = Smtp()

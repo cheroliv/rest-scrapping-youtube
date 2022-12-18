@@ -1,7 +1,6 @@
 ##############################################################################
 backend:
   message: hello test
-  item: monolith
   clientApp:
     name: 'server'
   database:

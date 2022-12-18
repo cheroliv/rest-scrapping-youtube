@@ -10,6 +10,7 @@ import backend.Constants.DEFAULT_LANGUAGE
 import backend.Constants.GMAIL
 import backend.Constants.MAILSLURP
 import backend.Constants.TEST
+import backend.Log.log
 import backend.RandomUtils.generateResetKey
 import com.mailslurp.apis.InboxControllerApi
 import com.mailslurp.models.SendEmailOptions
@@ -72,6 +73,9 @@ class MailSlurpServiceTests
     @Test
     fun `check mailslurp token property`() {
         assertEquals(64, properties.mailslurp.token.length)
+        log.info(properties.mailslurp.token)
+        log.info(properties.mailbox.test.token)
+
     }
 
     @Test
