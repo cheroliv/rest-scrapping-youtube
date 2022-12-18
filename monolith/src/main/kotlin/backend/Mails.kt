@@ -102,6 +102,7 @@ class MailService(
 
 /*=================================================================================*/
 
+@Async
 @Service
 @Profile(MAILSLURP)
 class MailServiceSlurp(
@@ -112,6 +113,7 @@ class MailServiceSlurp(
 ) : MailService(properties, mailSender, messageSource, templateEngine)
 
 /*=================================================================================*/
+@Async
 @Service
 @Profile(GMAIL)
 class MailServiceGmail(

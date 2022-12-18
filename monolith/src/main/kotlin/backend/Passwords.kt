@@ -1,5 +1,9 @@
 package backend
 
+import backend.Constants.ACCOUNT_API
+import backend.Constants.RESET_PASSWORD_API_FINISH
+import backend.Constants.RESET_PASSWORD_API_INIT
+import backend.Log.log
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PostMapping
@@ -12,7 +16,7 @@ import javax.validation.constraints.Email
 /*=================================================================================*/
 
 @RestController
-@RequestMapping(Constants.ACCOUNT_API)
+@RequestMapping(ACCOUNT_API)
 class ResetPasswordController(
     private val resetPasswordService: ResetPasswordService,
     private val mailService: MailService
@@ -24,11 +28,11 @@ class ResetPasswordController(
      *
      * @param mail the mail of the user.
      */
-    @PostMapping(Constants.RESET_PASSWORD_API_INIT)
-    suspend fun requestPasswordReset(@RequestBody @Email mail: String): Unit =
+    @PostMapping(RESET_PASSWORD_API_INIT)
+    suspend fun requestPasswordReset(@RequestBody @Email mail: String) =
         with(resetPasswordService.requestPasswordReset(mail)) {
             when {
-                this == null -> Log.log.warn("Password reset requested for non existing mail")
+                this == null -> log.warn("Password reset requested for non existing mail")
                 else -> mailService.sendPasswordResetMail(this)
             }
         }
@@ -40,7 +44,7 @@ class ResetPasswordController(
      * @throws InvalidPasswordProblem {@code 400 (Bad Request)} if the password is incorrect.
      * @throws RuntimeException         {@code 500 (Internal BackendApplication Error)} if the password could not be reset.
      */
-    @PostMapping(Constants.RESET_PASSWORD_API_FINISH)
+    @PostMapping(RESET_PASSWORD_API_FINISH)
     suspend fun finishPasswordReset(@RequestBody keyAndPassword: KeyAndPassword): Unit =
         with(InvalidPasswordException()) {
             when {
@@ -58,7 +62,7 @@ class ResetPasswordController(
 
 /*=================================================================================*/
 @RestController
-@RequestMapping(Constants.ACCOUNT_API)
+@RequestMapping(ACCOUNT_API)
 class ChangePasswordController(
     private val changePasswordService: ChangePasswordService
 ) {
@@ -101,7 +105,7 @@ class ResetPasswordService(
                 this != null && resetDate?.isAfter(
                     Instant.now().minusSeconds(86400)
                 ) == true -> {
-                    Log.log.debug("Reset account password for reset key $key")
+                    log.debug("Reset account password for reset key $key")
                     return@completePasswordReset toCredentialsModel
                     //                return saveUser(
                     //                apply {
@@ -112,7 +116,7 @@ class ResetPasswordService(
                 }
 
                 else -> {
-                    Log.log.debug("$key is not a valid reset account password key")
+                    log.debug("$key is not a valid reset account password key")
                     return@completePasswordReset null
                 }
             }
