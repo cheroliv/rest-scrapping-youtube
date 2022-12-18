@@ -20,7 +20,7 @@ class ApplicationProperties @ConstructorBinding constructor(
     val goVisitMessage: String,
     val clientApp: ClientApp = ClientApp(),
     val database: Database = Database(),
-    val mailslurp: MailSlurp = MailSlurp(),
+//    val mailslurp: MailSlurp = MailSlurp(),
     val mail: Mail = Mail(),
     val mailbox: MailBox = MailBox(),
     val gmail: GoogleMail = GoogleMail(),
@@ -48,10 +48,10 @@ class ApplicationProperties @ConstructorBinding constructor(
         #      token: contact-mail-token-default
      */
 
-    class MailSlurp(
-        val name: String = "",
-        val token: String = ""
-    )
+//    class MailSlurp(
+//        val name: String = "",
+//        val token: String = ""
+//    )
 
     class GoogleMail(val token: String = "")
     class ClientApp(val name: String = "")

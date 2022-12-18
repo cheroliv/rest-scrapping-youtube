@@ -109,13 +109,13 @@ class MailService(
 
 @Service
 @Profile(MAILSLURP)
-class MailSlurpService(
+class MailServiceSlurp(
     private val properties: ApplicationProperties,
     private val mailSender: JavaMailSender,
     private val messageSource: MessageSource,
     private val templateEngine: SpringTemplateEngine
 ) : MailService(properties, mailSender, messageSource, templateEngine) {
-    private val inboxController by lazy { InboxControllerApi(properties.mailslurp.token) }
+
 
     override fun sendEmail(
         to: String,
@@ -133,7 +133,7 @@ class MailSlurpService(
 /*=================================================================================*/
 @Service
 @Profile(GMAIL)
-class GmailService(
+class MailServiceGmail(
     private val properties: ApplicationProperties,
     private val mailSender: JavaMailSender,
     private val messageSource: MessageSource,

@@ -53,8 +53,7 @@ class MailSlurpServiceTests
     private lateinit var mailService: MailService
     private lateinit var javaMailSender: JavaMailSenderImpl
     private val properties: ApplicationProperties by lazy { context.getBean() }
-//    private val inboxController by lazy { InboxControllerApi(properties.mailslurp.token) }
-
+    private val api by lazy { InboxControllerApi(properties.mailbox.test.token) }
     @BeforeAll
     fun `lance le server en profile test`() {
         context = launcher(MAILSLURP)
@@ -72,18 +71,17 @@ class MailSlurpServiceTests
 
     @Test
     fun `check mailslurp token property`() {
-        assertEquals(64, properties.mailslurp.token.length)
-        log.info(properties.mailslurp.token)
-        log.info(properties.mailbox.test.token)
-
+        assertEquals(64, properties.mailbox.test.token.length)
+        log.info(properties.mailbox.contact.token)
+        log.info(properties.mailbox.signup.token)
+        log.info(properties.mailbox.password.token)
     }
 
-    @Test
+    @Test//TODO: select an inbox instead of create
     @Ignore("inbox creation is limited plan")
     fun `can create inboxes`() {
-        val inboxController by lazy { InboxControllerApi(properties.mailslurp.token) }
         assertContains(
-            inboxController.createInbox(
+            api.createInbox(
                 null,
                 null,
                 null,
@@ -99,11 +97,10 @@ class MailSlurpServiceTests
         )
     }
 
-    @Test @Ignore//TODO: select an inbox
+    @Test @Ignore//TODO: select an inbox instead of create
     fun `can send email`() {
-        val inboxController by lazy { InboxControllerApi(properties.mailslurp.token) }
         // create inbox
-        inboxController.createInbox(
+        api.createInbox(
             null,
             null,
             null,
@@ -117,7 +114,7 @@ class MailSlurpServiceTests
             virtualInbox = true
         ).run {
             assertEquals(
-                inboxController.sendEmailAndConfirm(
+                api.sendEmailAndConfirm(
                     inboxId = id,
                     sendEmailOptions = SendEmailOptions(
                         to = listOf(emailAddress),
