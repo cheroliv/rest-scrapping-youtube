@@ -158,14 +158,7 @@ class MonolithConfiguration(
     @Bean
     fun jdk8TimeModule(): Jdk8Module = Jdk8Module()
 
-//    @Bean
-//    fun gmailSender(): JavaMailSender = SenderGmail()
-//
-//    @Bean
-//    fun mailSlurpSender(): JavaMailSender = SenderMailSlurp(properties)
-
     @Bean
-    @Primary
     fun javaMailSender(): JavaMailSender = JavaMailSenderImpl().apply {
         host = properties.mail.host
         port = properties.mail.port
