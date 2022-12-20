@@ -154,7 +154,7 @@ class DefaultMailServiceTests {
         doNothing()
             .`when`(javaMailSender)
             .send(any(MimeMessage::class.java))
-        mailService = MailService(
+        mailService = MailServiceSmtp(
             properties,
             javaMailSender,
             messageSource,
