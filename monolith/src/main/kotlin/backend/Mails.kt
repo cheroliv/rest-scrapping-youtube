@@ -11,6 +11,7 @@ import backend.Constants.TITLE_KEY_SIGNUP
 import backend.Constants.USER
 import backend.Log.log
 import org.springframework.context.MessageSource
+import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import org.springframework.mail.MailException
 import org.springframework.mail.javamail.JavaMailSender
@@ -32,17 +33,14 @@ interface MailService {
         isMultipart: Boolean,
         isHtml: Boolean
     )
-
-    fun sendPasswordResetMail(account: AccountCredentials)
-    fun sendActivationEmail(account: AccountCredentials)
-    fun sendCreationEmail(account: AccountCredentials)
     fun sendEmailFromTemplate(
         account: AccountCredentials,
         templateName: String,
         titleKey: String
     )
-
-
+    fun sendPasswordResetMail(account: AccountCredentials)
+    fun sendActivationEmail(account: AccountCredentials)
+    fun sendCreationEmail(account: AccountCredentials)
 }
 /*=================================================================================*/
 
@@ -51,6 +49,15 @@ abstract class AbstractMailService(
     private val messageSource: MessageSource,
     private val templateEngine: SpringTemplateEngine
 ) : MailService {
+
+    abstract override fun sendEmail(
+        to: String,
+        subject: String,
+        content: String,
+        isMultipart: Boolean,
+        isHtml: Boolean
+    )
+
     override fun sendEmailFromTemplate(
         account: AccountCredentials,
         templateName: String,
@@ -93,13 +100,14 @@ abstract class AbstractMailService(
 /*=================================================================================*/
 @Async
 @Service
-@Profile("!$GMAIL or !$MAILSLURP")
+@Primary
+@Profile("!$MAILSLURP & !$GMAIL")
 class MailServiceSmtp(
     private val properties: ApplicationProperties,
     private val mailSender: JavaMailSender,
     private val messageSource: MessageSource,
     private val templateEngine: SpringTemplateEngine
-) : MailService, AbstractMailService(
+) : AbstractMailService(
     properties,
     messageSource,
     templateEngine
@@ -133,46 +141,46 @@ class MailServiceSmtp(
 }
 
 /*=================================================================================*/
-//@Async
-//@Service
-//@Profile(MAILSLURP)
-//class MailServiceSlurp(
-//    private val properties: ApplicationProperties,
-//    private val messageSource: MessageSource,
-//    private val templateEngine: SpringTemplateEngine
-//) : MailService, AbstractMailService(
-//    properties,
-//    messageSource,
-//    templateEngine
-//) {
-//    override fun sendEmail(
-//        to: String,
-//        subject: String,
-//        content: String,
-//        isMultipart: Boolean,
-//        isHtml: Boolean
-//    ) {}
-//}
+@Service
+@Profile(MAILSLURP)
+class MailServiceSlurp(
+    private val properties: ApplicationProperties,
+    private val messageSource: MessageSource,
+    private val templateEngine: SpringTemplateEngine
+) : AbstractMailService(
+    properties,
+    messageSource,
+    templateEngine
+) {
+    @Async
+    override fun sendEmail(
+        to: String,
+        subject: String,
+        content: String,
+        isMultipart: Boolean,
+        isHtml: Boolean
+    ) = log.info(MailServiceSlurp::class.java.name)
+}
 /*=================================================================================*/
-//@Async
-//@Service
-//@Profile(GMAIL)
-//class MailServiceGmail(
-//    private val properties: ApplicationProperties,
-//    private val messageSource: MessageSource,
-//    private val templateEngine: SpringTemplateEngine
-//) : MailService, AbstractMailService(
-//    properties,
-//    messageSource,
-//    templateEngine
-//) {
-//    override fun sendEmail(
-//        to: String,
-//        subject: String,
-//        content: String,
-//        isMultipart: Boolean,
-//        isHtml: Boolean
-//    ) {}
-//}
 
+@Service
+@Profile(GMAIL)
+class MailServiceGmail(
+    private val properties: ApplicationProperties,
+    private val messageSource: MessageSource,
+    private val templateEngine: SpringTemplateEngine
+) : AbstractMailService(
+    properties,
+    messageSource,
+    templateEngine
+) {
+    @Async
+    override fun sendEmail(
+        to: String,
+        subject: String,
+        content: String,
+        isMultipart: Boolean,
+        isHtml: Boolean
+    ) = log.info(MailServiceGmail::class.java.name)
+}
 /*=================================================================================*/

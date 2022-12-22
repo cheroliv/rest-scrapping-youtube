@@ -3,6 +3,7 @@
 package backend
 
 import backend.Constants.FEATURE_POLICY
+import backend.Constants.MAILSLURP
 import backend.Constants.MAIL_DEBUG
 import backend.Constants.MAIL_SMTP_AUTH
 import backend.Constants.MAIL_TRANSPORT_PROTOCOL

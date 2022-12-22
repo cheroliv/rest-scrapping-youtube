@@ -7,6 +7,8 @@ package backend
 //import jakarta.mail.internet.MimeMessage
 //import jakarta.mail.internet.MimeMultipart
 import backend.Constants.DEFAULT_LANGUAGE
+import backend.Constants.DEVELOPMENT
+import backend.Constants.DEFAULT
 import backend.Constants.GMAIL
 import backend.Constants.MAILSLURP
 import backend.Constants.TEST
@@ -64,6 +66,18 @@ class MailSlurpServiceTests {
         assertContains(context.environment.defaultProfiles, TEST)
         assertContains(context.environment.activeProfiles, TEST)
         assertContains(context.environment.activeProfiles, MAILSLURP)
+        assertFalse(context.environment.activeProfiles.contains(GMAIL))
+        assertFalse(context.environment.activeProfiles.contains(DEFAULT))
+        assertFalse(context.environment.activeProfiles.contains(DEVELOPMENT))
+        //uncomment to get some outputs who show which implementation is injected
+//        @Suppress("BooleanLiteralArgument")
+//        context.getBean<MailService>().sendEmail(
+//            "null",
+//            "null",
+//            "null",
+//            false,
+//            true
+//        )
     }
 
     @Test
@@ -332,10 +346,13 @@ class DefaultMailServiceTests {
         }
     }
 
+    @Suppress("MemberVisibilityCanBePrivate")
     val languages = arrayOf(
         "en", "fr", "de", "it", "es"
     )
+    @Suppress("PropertyName","MemberVisibilityCanBePrivate")
     val PATTERN_LOCALE_3: Pattern = compile("([a-z]{2})-([a-zA-Z]{4})-([a-z]{2})")
+    @Suppress("PropertyName","MemberVisibilityCanBePrivate")
     val PATTERN_LOCALE_2: Pattern = compile("([a-z]{2})-([a-z]{2})")
 
     @Test

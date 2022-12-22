@@ -39,6 +39,7 @@ object Constants {
 
 
     //Spring profiles
+    const val DEFAULT = "default"
     const val DEVELOPMENT = "dev"
     const val PRODUCTION = "prod"
     const val CLOUD = "cloud"
