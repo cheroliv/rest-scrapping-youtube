@@ -16,6 +16,7 @@ import backend.Constants.SPRING_APPLICATION_NAME
 import backend.Constants.STARTUP_HOST_WARN_LOG_MSG
 import backend.Constants.STARTUP_LOG_MSG_KEY
 import backend.Log.log
+import jakarta.annotation.PostConstruct
 import org.apache.logging.log4j.LogManager.getLogger
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.getBean
@@ -26,7 +27,6 @@ import java.net.InetAddress.getLocalHost
 import java.net.UnknownHostException
 import java.util.*
 import java.util.Locale.getDefault
-import javax.annotation.PostConstruct
 
 /*=================================================================================*/
 object Log {

@@ -2,10 +2,10 @@
 
 package backend
 
-//import jakarta.mail.Multipart
-//import jakarta.mail.internet.MimeBodyPart
-//import jakarta.mail.internet.MimeMessage
-//import jakarta.mail.internet.MimeMultipart
+import jakarta.mail.Multipart
+import jakarta.mail.internet.MimeBodyPart
+import jakarta.mail.internet.MimeMessage
+import jakarta.mail.internet.MimeMultipart
 import backend.Constants.DEFAULT_LANGUAGE
 import backend.Constants.DEVELOPMENT
 import backend.Constants.DEFAULT
@@ -30,7 +30,7 @@ import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.MessageSource
 import org.springframework.mail.MailSendException
 import org.springframework.mail.javamail.JavaMailSenderImpl
-import org.thymeleaf.spring5.SpringWebFluxTemplateEngine
+import org.thymeleaf.spring6.SpringWebFluxTemplateEngine
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
@@ -40,10 +40,6 @@ import java.nio.charset.Charset
 import java.util.*
 import java.util.regex.Pattern
 import java.util.regex.Pattern.compile
-import javax.mail.Multipart
-import javax.mail.internet.MimeBodyPart
-import javax.mail.internet.MimeMessage
-import javax.mail.internet.MimeMultipart
 import kotlin.test.*
 
 /*=================================================================================*/

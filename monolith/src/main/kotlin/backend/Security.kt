@@ -42,7 +42,6 @@ import org.springframework.security.core.userdetails.User as UserSecurity
 
 
 
-
 @Component("userDetailsService")
 class DomainUserDetailsService(
     private val accountRepository: AccountRepository
