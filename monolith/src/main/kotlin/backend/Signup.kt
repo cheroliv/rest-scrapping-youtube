@@ -1,15 +1,27 @@
 package backend
 
-import org.springframework.http.HttpStatus
+import backend.Constants.ACCOUNT_API
+import backend.Constants.ACTIVATE_API
+import backend.Constants.ACTIVATE_API_KEY
+import backend.Constants.DEFAULT_LANGUAGE
+import backend.Constants.ROLE_USER
+import backend.Constants.SIGNUP_API
+import backend.Constants.SYSTEM_USER
+import backend.Constants.MSG_WRONG_ACTIVATION_KEY
+import backend.Log.log
+import backend.RandomUtils.generateActivationKey
+import org.springframework.http.HttpStatus.CREATED
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
-import java.time.Instant
+import java.time.Instant.now
 import javax.validation.Valid
+
 
 /*=================================================================================*/
 @RestController
-@RequestMapping(Constants.ACCOUNT_API)
+@RequestMapping(ACCOUNT_API)
 class SignupController(
     private val signupService: SignupService
 ) {
@@ -23,8 +35,8 @@ class SignupController(
      * @throws backend.EmailAlreadyUsedProblem {@code 400 (Bad Request)} if the email is already used.
      * @throws backend.LoginAlreadyUsedProblem {@code 400 (Bad Request)} if the login is already used.
      */
-    @PostMapping(Constants.SIGNUP_API)
-    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping(SIGNUP_API)
+    @ResponseStatus(CREATED)
     suspend fun signup(
         @RequestBody @Valid accountCredentials: AccountCredentials
     ) = signupService.signup(accountCredentials)
@@ -35,19 +47,21 @@ class SignupController(
      * @param key the activation key.
      * @throws RuntimeException `500 (Internal BackendApplication Error)` if the user couldn't be activated.
      */
-    @GetMapping(Constants.ACTIVATE_API)
-    suspend fun activateAccount(@RequestParam(value = Constants.ACTIVATE_API_KEY) key: String) {
+    @GetMapping(ACTIVATE_API)
+    suspend fun activateAccount(@RequestParam(value = ACTIVATE_API_KEY) key: String) {
         when {
-            !signupService.activate(key) -> throw SignupException("No user was found for this activation key")
+            !signupService.activate(key) -> throw SignupException(MSG_WRONG_ACTIVATION_KEY)
         }
     }
 }
+
 /*=================================================================================*/
 @Service
 @Transactional
 class SignupService(
     private val accountRepository: AccountRepository,
-    private val mailService: MailService
+    private val mailService: MailService,
+    private val passwordEncoder: PasswordEncoder,
 ) {
 
     @Throws(
@@ -61,18 +75,18 @@ class SignupService(
         }
         loginValidation(account)
         emailValidation(account)
-        val createdDate = Instant.now()
+        val createdDate = now()
         account.copy(
-            //TODO: hash password
-            activationKey = RandomUtils.generateActivationKey,
-            authorities = setOf(Constants.ROLE_USER),
+            password = passwordEncoder.encode(account.password),
+            activationKey = generateActivationKey,
+            authorities = setOf(ROLE_USER),
             langKey = when {
-                account.langKey.isNullOrBlank() -> Constants.DEFAULT_LANGUAGE
+                account.langKey.isNullOrBlank() -> DEFAULT_LANGUAGE
                 else -> account.langKey
             },
-            createdBy = Constants.SYSTEM_USER,
+            createdBy = SYSTEM_USER,
             createdDate = createdDate,
-            lastModifiedBy = Constants.SYSTEM_USER,
+            lastModifiedBy = SYSTEM_USER,
             lastModifiedDate = createdDate,
             activated = false
         ).run {
@@ -109,12 +123,11 @@ class SignupService(
                 return when {
                     this == null -> false
                     else -> {
-                        save(
-                            copy(
-                                activated = true, activationKey = null
-                            )
-                        ).apply {
-                            if (id != null) Log.log.info("activation: $login")
+                        save(copy(
+                            activated = true,
+                            activationKey = null
+                        )).run {
+                            if (id != null) log.info("activation: $login")
                         }
                         true
                     }

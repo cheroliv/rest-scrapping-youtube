@@ -139,6 +139,7 @@ class MailServiceSmtp(
 }
 
 /*=================================================================================*/
+@Async
 @Service
 @Profile(MAILSLURP)
 class MailServiceSlurp(
@@ -150,7 +151,6 @@ class MailServiceSlurp(
     messageSource,
     templateEngine
 ) {
-    @Async
     override fun sendEmail(
         to: String,
         subject: String,
@@ -161,6 +161,7 @@ class MailServiceSlurp(
 }
 /*=================================================================================*/
 
+@Async
 @Service
 @Profile(GMAIL)
 class MailServiceGmail(
@@ -172,7 +173,6 @@ class MailServiceGmail(
     messageSource,
     templateEngine
 ) {
-    @Async
     override fun sendEmail(
         to: String,
         subject: String,

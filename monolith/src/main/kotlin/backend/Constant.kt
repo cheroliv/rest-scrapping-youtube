@@ -36,6 +36,7 @@ object Constants {
     const val PROFILE_SEPARATOR = ","
     val CLI_PROPS = mapOf("spring.main.web-application-type" to "none")
     const val SPRING_PROFILE_CONF_DEFAULT_KEY = "spring.profiles.default"
+    const val MSG_WRONG_ACTIVATION_KEY = "No user was found for this activation key"
 
 
     //Spring profiles

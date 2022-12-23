@@ -4,6 +4,8 @@
 
 package backend
 
+import backend.Constants.ACTIVATE_API_PARAM
+import backend.Constants.ACTIVATE_API_PATH
 import backend.Constants.DEFAULT_LANGUAGE
 import backend.Constants.ROLE_ADMIN
 import backend.Constants.SIGNUP_API_PATH
@@ -378,10 +380,10 @@ internal class SignupTests {
         RandomUtils.generateActivationKey.run {
             client
                 .get()
-                .uri("${Constants.ACTIVATE_API_PATH}${Constants.ACTIVATE_API_PARAM}", this)
+                .uri("$ACTIVATE_API_PATH$ACTIVATE_API_PARAM", this)
                 .exchange()
                 .returnResult<Unit>().url.let {
-                    assertEquals(URI("$BASE_URL_DEV${Constants.ACTIVATE_API_PATH}$this"), it)
+                    assertEquals(URI("$BASE_URL_DEV$ACTIVATE_API_PATH$this"), it)
                 }
         }
     }
@@ -390,7 +392,7 @@ internal class SignupTests {
     fun `test activate avec une mauvaise clé`() {
         client
             .get()
-            .uri("${Constants.ACTIVATE_API_PATH}${Constants.ACTIVATE_API_PARAM}", "wrongActivationKey")
+            .uri("$ACTIVATE_API_PATH$ACTIVATE_API_PARAM", "wrongActivationKey")
             .exchange()
             .expectStatus()
             .is5xxServerError
@@ -408,7 +410,7 @@ internal class SignupTests {
         client
             .get()
             .uri(
-                "${Constants.ACTIVATE_API_PATH}${Constants.ACTIVATE_API_PARAM}",
+                "$ACTIVATE_API_PATH$ACTIVATE_API_PARAM",
                 findOneByLogin(defaultAccount.login!!, dao)!!.apply {
                     assertTrue(activationKey!!.isNotBlank())
                     assertFalse(activated)
