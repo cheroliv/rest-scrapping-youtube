@@ -11,7 +11,6 @@ import backend.Constants.TITLE_KEY_SIGNUP
 import backend.Constants.USER
 import backend.Log.log
 import org.springframework.context.MessageSource
-import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import org.springframework.mail.MailException
 import org.springframework.mail.javamail.JavaMailSender
@@ -100,7 +99,6 @@ abstract class AbstractMailService(
 /*=================================================================================*/
 @Async
 @Service
-@Primary
 @Profile("!$MAILSLURP & !$GMAIL")
 class MailServiceSmtp(
     private val properties: ApplicationProperties,
