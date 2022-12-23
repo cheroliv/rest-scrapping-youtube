@@ -32,4 +32,3 @@ pluginManagement {
 
 rootProject.name = "kotlin-springboot-monolith"
 include(":monolith")
-include(":desktop")

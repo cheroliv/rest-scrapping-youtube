@@ -24,6 +24,3 @@ Open terminal and run : ```./gradlew :monolith:cucumber```
 ==== **to run the app**
 Open terminal and run : ```./gradlew :monolith:bootRun``` +
 and launch http://localhost:8080/
-
-==== **to run desktop app**
-Open terminal and run : ```./gradlew :desktop:run``` +
