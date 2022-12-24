@@ -310,7 +310,7 @@ class AsyncTasksConfiguration(
 
         @Suppress("OVERRIDE_DEPRECATION")
         override fun execute(task: Runnable, startTimeout: Long): Unit =
-            executor.execute(createWrappedRunnable(task), startTimeout)
+            executor.execute(createWrappedRunnable(task))
 
         private fun <T> createCallable(task: Callable<T>): Callable<T> = Callable {
             try {

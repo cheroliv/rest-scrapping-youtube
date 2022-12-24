@@ -40,27 +40,6 @@ tasks.register<DefaultTask>("addMailSlurpConfiguration") {
 // then add src/main/resources/application-mailslurp.yml to .gitgnore
 }
 
-open class DeployGAE : Exec() {
-    init {
-        workingDir = project.rootDir
-        this.commandLine(
-            "/snap/bin/gcloud",
-            "-v"
-//            "app",
-//            "deploy",
-//            "${projectDir.absolutePath}/src/main/appengine/app.yml"
-        )
-        standardOutput = ByteArrayOutputStream()
-    }
-}
-
-
-tasks.register<DeployGAE>("deployGAE") {
-    group = "application"
-    val cmd = "gcloud app deploy src/main/appengine/app.flexible.yml"
-    doLast { println(cmd) }
-}
-
 //springBoot.mainClass.set("backend.BackendBootstrap")
 ///*
 //./gradlew -q cli --args='your args there'

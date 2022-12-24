@@ -98,23 +98,24 @@ class TokenProvider(
             .security
             .authentication
             .jwt
-            .secret!!
-            .apply {
+            .secret
+            .run {
                 key = hmacShaKeyFor(
-                    if (!hasLength(this))
-                        log.warn(
+                    when {
+                        !hasLength(this) -> log.warn(
                             "Warning: the Jwt key used is not Base64-encoded. " +
                                     "We recommend using the `backend.security.authentication.jwt.base64-secret`" +
                                     " key for optimum security."
                         ).run { toByteArray(UTF_8) }
-                    else log.debug("Using a Base64-encoded Jwt secret key").run {
-                        BASE64.decode(
-                            properties
-                                .security
-                                .authentication
-                                .jwt
-                                .base64Secret
-                        )
+                        else -> log.debug("Using a Base64-encoded Jwt secret key").run {
+                            BASE64.decode(
+                                properties
+                                    .security
+                                    .authentication
+                                    .jwt
+                                    .base64Secret
+                            )
+                        }
                     }
                 )
             }
