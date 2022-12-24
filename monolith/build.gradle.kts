@@ -8,7 +8,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-import java.io.ByteArrayOutputStream
+/*=================================================================================*/
 
 plugins {
     kotlin("jvm")
@@ -23,6 +23,8 @@ plugins {
     id("com.google.cloud.tools.appengine")
     jacoco
 }
+/*=================================================================================*/
+
 //TODO: CLI apiclient to setup mailsurp
 //create 2 inboxes: signup,password
 tasks.register<DefaultTask>("addMailSlurpConfiguration") {
@@ -40,27 +42,6 @@ tasks.register<DefaultTask>("addMailSlurpConfiguration") {
 // then add src/main/resources/application-mailslurp.yml to .gitgnore
 }
 
-open class DeployGAE : Exec() {
-    init {
-        workingDir = project.rootDir
-        this.commandLine(
-            "/snap/bin/gcloud",
-            "-v"
-//            "app",
-//            "deploy",
-//            "${projectDir.absolutePath}/src/main/appengine/app.yml"
-        )
-        standardOutput = ByteArrayOutputStream()
-    }
-}
-
-
-tasks.register<DeployGAE>("deployGAE") {
-    group = "application"
-    val cmd = "gcloud app deploy src/main/appengine/app.flexible.yml"
-    doLast { println(cmd) }
-}
-
 //springBoot.mainClass.set("backend.BackendBootstrap")
 ///*
 //./gradlew -q cli --args='your args there'
@@ -72,6 +53,7 @@ tasks.register<DeployGAE>("deployGAE") {
 //    finalizedBy("bootRun")
 //}
 
+/*=================================================================================*/
 
 dependencies {
 //    implementation(project(path = ":common"))
@@ -148,6 +130,7 @@ dependencies {
 //    implementation("org.springframework.cloud:spring-cloud-gcp-starter-storage")
 //    providedCompile ("com.google.appengine:appengine:+")
 }
+/*=================================================================================*/
 
 configurations {
     compileOnly { extendsFrom(configurations.annotationProcessor.get()) }
@@ -159,6 +142,7 @@ configurations {
         ).map { exclude(it.first, it.second) }
     }
 }
+/*=================================================================================*/
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
@@ -166,6 +150,7 @@ tasks.withType<KotlinCompile> {
         jvmTarget = VERSION_18.toString()
     }
 }
+/*=================================================================================*/
 
 tasks.withType<Test> {
     useJUnitPlatform()
@@ -175,17 +160,20 @@ tasks.withType<Test> {
         ignoreFailures = true
     }
 }
+/*=================================================================================*/
 
 modernizer {
     failOnViolations = true
     includeTestClasses = true
 }
+/*=================================================================================*/
 
 tasks.register<Delete>("cleanResources") {
     description = "Delete directory build/resources"
     group = "build"
     delete("build/resources")
 }
+/*=================================================================================*/
 
 tasks.register<TestReport>("testReport") {
     description = "Generates an HTML test report from the results of testReport task."
@@ -193,6 +181,7 @@ tasks.register<TestReport>("testReport") {
     destinationDir = file("$buildDir/reports/tests")
     reportOn("test")
 }
+/*=================================================================================*/
 
 val cucumberRuntime: Configuration by configurations.creating {
     extendsFrom(configurations["testImplementation"])
@@ -228,6 +217,7 @@ tasks.register<DefaultTask>("cucumber") {
         }
     }
 }
+/*=================================================================================*/
 
 tasks.jacocoTestReport {
     // Give jacoco the file generated with the cucumber tests for the coverage.
@@ -241,3 +231,4 @@ tasks.jacocoTestReport {
         xml.required.set(true)
     }
 }
+/*=================================================================================*/
