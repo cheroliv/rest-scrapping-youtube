@@ -10,13 +10,13 @@ import backend.Constants.SYSTEM_USER
 import backend.Constants.MSG_WRONG_ACTIVATION_KEY
 import backend.Log.log
 import backend.RandomUtils.generateActivationKey
+import jakarta.validation.Valid
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import java.time.Instant.now
-import javax.validation.Valid
 
 
 /*=================================================================================*/
