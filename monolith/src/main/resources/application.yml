@@ -56,8 +56,9 @@ spring:
   messages:
     basename: i18n/messages
     encoding: UTF-8
-
-
+  webflux:
+    problemdetails:
+      enabled: true
 logging:
   level:
     org:

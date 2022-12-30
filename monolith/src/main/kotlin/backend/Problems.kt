@@ -8,6 +8,13 @@ import backend.Constants.EMAIL_ALREADY_USED_TYPE
 import backend.Constants.ERR_VALIDATION
 import backend.Constants.INVALID_PASSWORD_TYPE
 import backend.Constants.LOGIN_ALREADY_USED_TYPE
+import backend.HttpHeaderUtil.createFailureAlert
+import org.springframework.boot.autoconfigure.web.ErrorProperties
+import org.springframework.boot.autoconfigure.web.WebProperties
+import org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler
+import org.springframework.boot.autoconfigure.web.reactive.error.DefaultErrorWebExceptionHandler
+import org.springframework.boot.web.reactive.error.ErrorAttributes
+import org.springframework.context.ApplicationContext
 import org.springframework.core.env.Environment
 import org.springframework.dao.ConcurrencyFailureException
 import org.springframework.dao.DataAccessException
@@ -17,20 +24,31 @@ import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.support.WebExchangeBindException
+import org.springframework.web.reactive.function.server.RouterFunction
+import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.server.ServerWebExchange
-import org.zalando.problem.*
-import org.zalando.problem.Problem.builder
-import org.zalando.problem.Status.BAD_REQUEST
-import org.zalando.problem.spring.webflux.advice.ProblemHandling
-import org.zalando.problem.spring.webflux.advice.security.SecurityAdviceTrait
-import org.zalando.problem.violations.ConstraintViolationProblem
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Mono.just
 import java.io.Serializable
 import java.net.URI
-import org.zalando.problem.Problem.DEFAULT_TYPE as PROBLEM_DEFAULT_TYPE
+//import org.zalando.problem.Problem.DEFAULT_TYPE as PROBLEM_DEFAULT_TYPE
 
 /*=================================================================================*/
+class Foo(
+    errorAttributes: ErrorAttributes?,
+    resources: WebProperties.Resources?,
+    errorProperties: ErrorProperties?,
+    applicationContext: ApplicationContext?
+) : AbstractErrorWebExceptionHandler(
+    errorAttributes,
+    resources,
+//    errorProperties,
+    applicationContext
+) {
+    override fun getRoutingFunction(errorAttributes: ErrorAttributes?): RouterFunction<ServerResponse> {
+        TODO("Not yet implemented")
+    }
+}
 
 class LoginAlreadyUsedProblem :
     AlertProblem(
@@ -42,6 +60,7 @@ class LoginAlreadyUsedProblem :
     override fun getCause(): Exceptional? = super.cause
 
     companion object {
+
         private const val serialVersionUID = 1L
     }
 }
@@ -220,7 +239,7 @@ class ProblemTranslator(
         return create(
             problem,
             request,
-            HttpHeaderUtil.createFailureAlert(
+            createFailureAlert(
                 applicationName = properties.clientApp.name,
                 enableTranslation = true,
                 entityName = problem.entityName,
@@ -239,7 +258,7 @@ class ProblemTranslator(
         return create(
             problem,
             request,
-            HttpHeaderUtil.createFailureAlert(
+            createFailureAlert(
                 applicationName = properties.clientApp.name,
                 enableTranslation = true,
                 entityName = problem.entityName,
@@ -265,7 +284,7 @@ class ProblemTranslator(
     ): Mono<ResponseEntity<Problem>> =
         create(
             ex, request,
-            HttpHeaderUtil.createFailureAlert(
+            createFailureAlert(
                 applicationName = properties.clientApp.name,
                 enableTranslation = true,
                 entityName = ex.entityName,

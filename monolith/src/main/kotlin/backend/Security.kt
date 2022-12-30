@@ -4,6 +4,8 @@ package backend
 
 
 import backend.Constants.AUTHORITIES_KEY
+import backend.Constants.AUTHORIZATION_HEADER
+import backend.Constants.BEARER_START_WITH
 import backend.Constants.INVALID_TOKEN
 import backend.Constants.VALID_TOKEN
 import backend.Log.log
@@ -25,6 +27,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
+import org.springframework.security.core.context.ReactiveSecurityContextHolder.getContext
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService
 import org.springframework.security.core.userdetails.UserDetails
@@ -215,11 +218,11 @@ class JwtFilter(private val tokenProvider: TokenProvider) : WebFilter {
 
     private fun resolveToken(request: ServerHttpRequest): String? = request
         .headers
-        .getFirst(Constants.AUTHORIZATION_HEADER)
+        .getFirst(AUTHORIZATION_HEADER)
         .apply {
             return if (
                 !isNullOrBlank() &&
-                startsWith(Constants.BEARER_START_WITH)
+                startsWith(BEARER_START_WITH)
             ) substring(startIndex = 7)
             else null
         }
@@ -233,7 +236,7 @@ object SecurityUtils {
 
     suspend fun getCurrentUserLogin(): String =
         extractPrincipal(
-            ReactiveSecurityContextHolder.getContext()
+            getContext()
                 .awaitSingle()
                 .authentication
         )
@@ -247,28 +250,26 @@ object SecurityUtils {
         }
 
     suspend fun getCurrentUserJwt(): String =
-        ReactiveSecurityContextHolder.getContext()
+        getContext()
             .map(SecurityContext::getAuthentication)
             .filter { it.credentials is String }
             .map { it.credentials as String }
             .awaitSingle()
 
-    suspend fun isAuthenticated(): Boolean =
-        ReactiveSecurityContextHolder.getContext()
+    suspend fun isAuthenticated(): Boolean =        getContext()
             .map(SecurityContext::getAuthentication)
             .map(Authentication::getAuthorities)
             .map { roles: Collection<GrantedAuthority> ->
-                roles.map(transform = GrantedAuthority::getAuthority)
+                roles.map(GrantedAuthority::getAuthority)
                     .none { it == Constants.ROLE_ANONYMOUS }
             }.awaitSingle()
 
 
-    suspend fun isCurrentUserInRole(authority: String): Boolean =
-        ReactiveSecurityContextHolder.getContext()
+    suspend fun isCurrentUserInRole(authority: String): Boolean =        getContext()
             .map(SecurityContext::getAuthentication)
             .map(Authentication::getAuthorities)
             .map { roles: Collection<GrantedAuthority> ->
-                roles.map(transform = GrantedAuthority::getAuthority)
+                roles.map(GrantedAuthority::getAuthority)
                     .any { it == authority }
             }.awaitSingle()
 }
