@@ -8,6 +8,7 @@ import backend.Constants.EMAIL_ALREADY_USED_TYPE
 import backend.Constants.ERR_VALIDATION
 import backend.Constants.INVALID_PASSWORD_TYPE
 import backend.Constants.LOGIN_ALREADY_USED_TYPE
+import backend.HttpHeaderUtil.createFailureAlert
 import org.springframework.core.env.Environment
 import org.springframework.dao.ConcurrencyFailureException
 import org.springframework.dao.DataAccessException
@@ -220,7 +221,7 @@ class ProblemTranslator(
         return create(
             problem,
             request,
-            HttpHeaderUtil.createFailureAlert(
+            createFailureAlert(
                 applicationName = properties.clientApp.name,
                 enableTranslation = true,
                 entityName = problem.entityName,
@@ -229,25 +230,42 @@ class ProblemTranslator(
             )
         )
     }
-
     @ExceptionHandler
     fun handleUsernameAlreadyUsedException(
         ex: UsernameAlreadyUsedException,
         request: ServerWebExchange
-    ): Mono<ResponseEntity<Problem>> {
-        val problem = LoginAlreadyUsedProblem()
+    ): Mono<ResponseEntity<Problem>> = LoginAlreadyUsedProblem().run {
         return create(
-            problem,
+            this,
             request,
-            HttpHeaderUtil.createFailureAlert(
-                applicationName = properties.clientApp.name,
-                enableTranslation = true,
-                entityName = problem.entityName,
-                errorKey = problem.errorKey,
-                defaultMessage = problem.message
+            createFailureAlert(
+                properties.clientApp.name,
+                true,
+                entityName,
+                errorKey,
+                message
             )
         )
+
     }
+//    @ExceptionHandler
+//    fun handleUsernameAlreadyUsedException(
+//        ex: UsernameAlreadyUsedException,
+//        request: ServerWebExchange
+//    ): Mono<ResponseEntity<Problem>> {
+//        val problem = LoginAlreadyUsedProblem()
+//        return create(
+//            problem,
+//            request,
+//            HttpHeaderUtil.createFailureAlert(
+//                applicationName = properties.clientApp.name,
+//                enableTranslation = true,
+//                entityName = problem.entityName,
+//                errorKey = problem.errorKey,
+//                defaultMessage = problem.message
+//            )
+//        )
+//    }
 
     @ExceptionHandler
     fun handleInvalidPasswordException(
@@ -265,7 +283,7 @@ class ProblemTranslator(
     ): Mono<ResponseEntity<Problem>> =
         create(
             ex, request,
-            HttpHeaderUtil.createFailureAlert(
+            createFailureAlert(
                 applicationName = properties.clientApp.name,
                 enableTranslation = true,
                 entityName = ex.entityName,
