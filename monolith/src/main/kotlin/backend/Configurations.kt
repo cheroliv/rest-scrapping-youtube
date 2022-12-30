@@ -9,7 +9,6 @@ import backend.Constants.MAIL_TRANSPORT_PROTOCOL
 import backend.Constants.MAIL_TRANSPORT_STARTTLS_ENABLE
 import backend.Constants.REQUEST_PARAM_LANG
 import backend.Log.log
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler
@@ -23,7 +22,6 @@ import org.springframework.boot.runApplication
 import org.springframework.context.annotation.*
 import org.springframework.context.i18n.LocaleContext
 import org.springframework.context.i18n.SimpleLocaleContext
-import org.springframework.core.annotation.Order
 import org.springframework.core.task.AsyncTaskExecutor
 import org.springframework.data.web.ReactivePageableHandlerMethodArgumentResolver
 import org.springframework.data.web.ReactiveSortHandlerMethodArgumentResolver
@@ -59,13 +57,7 @@ import org.springframework.web.reactive.config.DelegatingWebFluxConfiguration
 import org.springframework.web.reactive.config.EnableWebFlux
 import org.springframework.web.reactive.config.WebFluxConfigurer
 import org.springframework.web.server.ServerWebExchange
-import org.springframework.web.server.WebExceptionHandler
 import org.springframework.web.server.i18n.LocaleContextResolver
-import org.zalando.problem.jackson.ProblemModule
-import org.zalando.problem.spring.webflux.advice.ProblemExceptionHandler
-import org.zalando.problem.spring.webflux.advice.ProblemHandling
-import org.zalando.problem.spring.webflux.advice.security.SecurityProblemSupport
-import org.zalando.problem.violations.ConstraintViolationProblemModule
 import reactor.core.publisher.Hooks
 import java.util.Locale.forLanguageTag
 import java.util.Locale.getDefault
@@ -134,12 +126,10 @@ class LocaleSupportConfiguration : DelegatingWebFluxConfiguration() {
 @EnableWebFlux
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
-@Import(SecurityProblemSupport::class)
 class MonolithConfiguration(
     private val properties: ApplicationProperties,
     private val userDetailsService: ReactiveUserDetailsService,
     private val tokenProvider: TokenProvider,
-    private val problemSupport: SecurityProblemSupport,
 ) : WebFluxConfigurer {
 
     override fun addFormatters(registry: FormatterRegistry) {
@@ -177,22 +167,22 @@ class MonolithConfiguration(
     }
 
 
-    /**
-     * The handler must have precedence over
-     * WebFluxResponseStatusExceptionHandler
-     * and Spring Boot's ErrorWebExceptionHandler
-     */
-    @Bean
-    @Order(-2)
-    fun problemHandler(
-        mapper: ObjectMapper, problemHandling: ProblemHandling
-    ): WebExceptionHandler = ProblemExceptionHandler(mapper, problemHandling)
-
-    @Bean
-    fun problemModule(): ProblemModule = ProblemModule()
-
-    @Bean
-    fun constraintViolationProblemModule() = ConstraintViolationProblemModule()
+//    /**
+//     * The handler must have precedence over
+//     * WebFluxResponseStatusExceptionHandler
+//     * and Spring Boot's ErrorWebExceptionHandler
+//     */
+//    @Bean
+//    @Order(-2)
+//    fun problemHandler(
+//        mapper: ObjectMapper, problemHandling: ProblemHandling
+//    ): WebExceptionHandler = ProblemExceptionHandler(mapper, problemHandling)
+//
+//    @Bean
+//    fun problemModule(): ProblemModule = ProblemModule()
+//
+//    @Bean
+//    fun constraintViolationProblemModule() = ConstraintViolationProblemModule()
 
     @Profile("!${Constants.PRODUCTION}")
     fun reactorConfiguration() = Hooks.onOperatorDebug()
@@ -259,8 +249,11 @@ class MonolithConfiguration(
             )
         )
     ).csrf().disable().addFilterAt(SpaWebFilter(), AUTHENTICATION).addFilterAt(JwtFilter(tokenProvider), HTTP_BASIC)
-        .authenticationManager(reactiveAuthenticationManager()).exceptionHandling().accessDeniedHandler(problemSupport)
-        .authenticationEntryPoint(problemSupport).and().headers()
+        .authenticationManager(reactiveAuthenticationManager())
+        .exceptionHandling()
+        .accessDeniedHandler(problemSupport)
+        .authenticationEntryPoint(problemSupport)
+        .and().headers()
         .contentSecurityPolicy(Constants.CONTENT_SECURITY_POLICY).and().referrerPolicy(STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
         .and().featurePolicy(FEATURE_POLICY).and().frameOptions().disable().and().authorizeExchange().pathMatchers("/")
         .permitAll().pathMatchers("/**").permitAll().pathMatchers("/*.*").permitAll()
