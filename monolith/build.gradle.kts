@@ -88,8 +88,6 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     //strings manipulation
     implementation("org.apache.commons:commons-lang3")
-    //Http Request Exception to Problem Response
-//    implementation("org.zalando:problem-spring-webflux:${properties["zalando_problem.version"]}")
     //spring conf
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     //spring dev tools
