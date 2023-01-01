@@ -87,7 +87,7 @@ dependencies {
     //jackson mapping (json/xml)
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     //strings manipulation
-    testImplementation("org.apache.commons:commons-lang3")
+    implementation("org.apache.commons:commons-lang3")
     //spring conf
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     //spring dev tools

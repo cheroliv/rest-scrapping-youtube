@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package backend
+package backend.accounts
 
 //import org.zalando.problem.Problem.DEFAULT_TYPE as PROBLEM_DEFAULT_TYPE
 /*
