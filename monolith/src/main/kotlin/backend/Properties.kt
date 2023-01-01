@@ -9,10 +9,19 @@ import org.springframework.web.cors.CorsConfiguration
 
 /*=================================================================================*/
 
-@ConfigurationProperties(prefix = "backend", ignoreUnknownFields = false)
+@ConfigurationProperties(
+    prefix = "backend",
+    ignoreUnknownFields = false
+)
 @PropertySources(
-    PropertySource("classpath:git.properties", ignoreResourceNotFound = true),
-    PropertySource("classpath:META-INF/build-info.properties", ignoreResourceNotFound = true)
+    PropertySource(
+        "classpath:git.properties",
+        ignoreResourceNotFound = true
+    ),
+    PropertySource(
+        "classpath:META-INF/build-info.properties",
+        ignoreResourceNotFound = true
+    )
 )
 class ApplicationProperties @ConstructorBinding constructor(
     val message: String = "",
