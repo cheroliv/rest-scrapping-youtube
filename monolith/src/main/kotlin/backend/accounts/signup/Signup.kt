@@ -41,7 +41,16 @@ class SignupController(
     @ResponseStatus(CREATED)
     suspend fun signup(
         @RequestBody @Valid accountCredentials: AccountCredentials
-    ) = signupService.signup(accountCredentials)
+    ) {
+//        try {
+            signupService.signup(accountCredentials)
+
+//        }catch (ipe:InvalidPasswordException){
+//
+//        }catch (eap:EmailAlreadyUsedProblem){
+//
+//        }
+    }
 
     /**
      * `GET  /activate` : activate the signed-up user.
