@@ -5,10 +5,10 @@ import backend.Constants.ACCOUNT_API
 import backend.Constants.ACTIVATE_API
 import backend.Constants.ACTIVATE_API_KEY
 import backend.Constants.DEFAULT_LANGUAGE
+import backend.Constants.MSG_WRONG_ACTIVATION_KEY
 import backend.Constants.ROLE_USER
 import backend.Constants.SIGNUP_API
 import backend.Constants.SYSTEM_USER
-import backend.Constants.MSG_WRONG_ACTIVATION_KEY
 import backend.Log.log
 import backend.accounts.*
 import backend.accounts.RandomUtils.generateActivationKey
@@ -41,16 +41,15 @@ class SignupController(
     @ResponseStatus(CREATED)
     suspend fun signup(
         @RequestBody @Valid accountCredentials: AccountCredentials
-    ) {
-//        try {
-            signupService.signup(accountCredentials)
-
-//        }catch (ipe:InvalidPasswordException){
-//
-//        }catch (eap:EmailAlreadyUsedProblem){
+    ) = try {
+        signupService.signup(accountCredentials)
+    } catch (ipe: InvalidPasswordException) {
+        throw ipe
+    }
+    //        catch (eap:EmailAlreadyUsedProblem){
 //
 //        }
-    }
+
 
     /**
      * `GET  /activate` : activate the signed-up user.
@@ -135,11 +134,9 @@ class SignupService(
                     this == null -> false
                     else -> {
                         save(copy(
-                            activated = true,
-                            activationKey = null
-                        )).run {
-                            if (id != null) log.info("activation: $login")
-                        }
+                                activated = true,
+                                activationKey = null
+                            )).run { if (id != null) log.info("activation: $login") }
                         true
                     }
                 }
