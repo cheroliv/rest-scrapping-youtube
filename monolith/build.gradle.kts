@@ -70,7 +70,7 @@ dependencies {
     // Mocking
     testImplementation("io.mockk:mockk:${properties["mockk.version"]}")
     testImplementation("com.github.tomakehurst:wiremock-jre8:${properties["wiremock.version"]}")
-    testImplementation("com.ninja-squad:springmockk:3.1.0")
+    testImplementation("com.ninja-squad:springmockk:${properties["springmockk.version"]}")
     // Cucumber
     testImplementation("io.cucumber:cucumber-java8:${properties["cucumber_java.version"]}")
     testImplementation("io.cucumber:cucumber-java:${properties["cucumber_java.version"]}")
@@ -87,7 +87,7 @@ dependencies {
     //jackson mapping (json/xml)
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     //strings manipulation
-    implementation("org.apache.commons:commons-lang3")
+    testImplementation("org.apache.commons:commons-lang3")
     //spring conf
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     //spring dev tools
@@ -99,7 +99,7 @@ dependencies {
     //spring thymeleaf for mail templating
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     //MailSlurp
-    implementation("com.mailslurp:mailslurp-client-kotlin:15.14.0")
+    implementation("com.mailslurp:mailslurp-client-kotlin:${properties["mailslurp-client-kotlin.version"]}")
     //Spring bean validation JSR 303
     implementation("org.springframework.boot:spring-boot-starter-validation")
     //spring webflux reactive http

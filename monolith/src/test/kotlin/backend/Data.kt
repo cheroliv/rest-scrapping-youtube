@@ -13,6 +13,7 @@ import backend.Constants.USER
 import backend.Data.accounts
 import backend.Data.defaultAccount
 import backend.Data.defaultAccountJson
+import backend.Log.log
 import backend.accounts.AccountCredentials
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.lang3.StringUtils.stripAccents
@@ -102,8 +103,8 @@ internal class DataTests {
 
     @Test
     fun `affiche moi du json`() {
-        Log.log.info(context.getBean<ObjectMapper>().writeValueAsString(accounts))
-        Log.log.info(context.getBean<ObjectMapper>().writeValueAsString(defaultAccount))
-        Log.log.info(defaultAccountJson)
+        log.info(context.getBean<ObjectMapper>().writeValueAsString(accounts))
+        log.info(context.getBean<ObjectMapper>().writeValueAsString(defaultAccount))
+        log.info(defaultAccountJson)
     }
 }

@@ -1,9 +1,8 @@
 package backend.accounts
 
-import org.springframework.security.core.AuthenticationException
 import backend.Constants.PASSWORD_MAX_LENGTH
 import backend.Constants.PASSWORD_MIN_LENGTH
-import org.apache.commons.lang3.StringUtils
+import org.springframework.security.core.AuthenticationException
 
 /*=================================================================================*/
 
@@ -22,10 +21,12 @@ class InvalidPasswordException :
         private const val serialVersionUID = 1L
     }
 
-    fun isPasswordLengthInvalid(password: String?): Boolean =
-        if (StringUtils.isEmpty(password)) false
-        else (password?.length!! < PASSWORD_MIN_LENGTH) ||
+    fun isPasswordLengthInvalid(password: String?) = when {
+        password == null -> false
+        password.isEmpty() -> false
+        else -> (password.length < PASSWORD_MIN_LENGTH) ||
                 (password.length > PASSWORD_MAX_LENGTH)
+    }
 }
 
 /*=================================================================================*/
