@@ -43,7 +43,7 @@ class BackendComponent(private val context: ApplicationContext) {
 }
 /*=================================================================================*/
 
-internal fun checkProfileLog(context: ApplicationContext) =
+private fun checkProfileLog(context: ApplicationContext) =
     context.environment.activeProfiles.run {
         when {
             contains(element = DEVELOPMENT) &&
@@ -74,6 +74,7 @@ internal fun checkProfileLog(context: ApplicationContext) =
             )
         }
     }
+
 
 
 /*=================================================================================*/

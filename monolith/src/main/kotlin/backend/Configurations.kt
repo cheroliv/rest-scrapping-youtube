@@ -9,18 +9,13 @@ import backend.Constants.MAIL_TRANSPORT_PROTOCOL
 import backend.Constants.MAIL_TRANSPORT_STARTTLS_ENABLE
 import backend.Constants.REQUEST_PARAM_LANG
 import backend.Log.log
-import backend.accounts.JwtFilter
-import backend.accounts.TokenProvider
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.InitializingBean
-import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.task.TaskExecutionProperties
-import org.springframework.boot.context.properties.EnableConfigurationProperties
-import org.springframework.boot.runApplication
 import org.springframework.context.annotation.*
 import org.springframework.context.i18n.LocaleContext
 import org.springframework.context.i18n.SimpleLocaleContext
@@ -67,40 +62,6 @@ import java.util.concurrent.Callable
 import java.util.concurrent.Executor
 import java.util.concurrent.Future
 
-/*=================================================================================*/
-
-@SpringBootApplication
-@EnableConfigurationProperties(ApplicationProperties::class)
-class BackendApplication
-/*=================================================================================*/
-
-object BackendBootstrap {
-    @JvmStatic
-    fun main(args: Array<String>) = runApplication<BackendApplication>(*args)
-        .run { bootstrapLog(this) }
-}
-
-/*=================================================================================*/
-
-//object CliBootstrap {
-//    @JvmStatic
-//    fun main(args: Array<String>) {
-//        runApplication<BackendApplication>(*args) {
-//            setAdditionalProfiles(Constants.PROFILE_CLI)
-//            setDefaultProperties(Constants.PROFILE_CLI_PROPS)
-//        }
-//        kotlin.system.exitProcess(Constants.NORMAL_TERMINATION)
-//    }
-//}
-
-/*=================================================================================*/
-//@org.springframework.stereotype.Component
-//@org.springframework.context.annotation.Profile(Constants.PROFILE_CLI)
-//class CliRunner : CommandLineRunner {
-//    override fun run(vararg args: String?) = runBlocking {
-//        log.info("command line interface: $args")
-//    }
-//}
 /*=================================================================================*/
 @Configuration
 class LocaleSupportConfiguration : DelegatingWebFluxConfiguration() {

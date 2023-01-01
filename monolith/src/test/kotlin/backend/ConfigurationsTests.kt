@@ -61,7 +61,7 @@ private val properties:ApplicationProperties by lazy { context.getBean() }
     @Test
     fun `test go visit message`(){
         assertEquals(
-            "https://github.com/cheroliv/kotlin-springboot-monolith",
+            "https://github.com/cheroliv/kotlin-springboot",
             properties.goVisitMessage
         )
 

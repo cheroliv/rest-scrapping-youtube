@@ -7,7 +7,7 @@ import org.springframework.context.annotation.PropertySources
 import org.springframework.web.cors.CorsConfiguration
 
 
-///*=================================================================================*/
+/*=================================================================================*/
 
 @ConfigurationProperties(prefix = "backend", ignoreUnknownFields = false)
 @PropertySources(

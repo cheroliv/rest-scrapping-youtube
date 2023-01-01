@@ -1,10 +1,8 @@
 @file:Suppress("unused")
 
-package backend.accounts
+package backend
 
 
-import backend.ApplicationProperties
-import backend.Constants
 import backend.Constants.AUTHORITIES_KEY
 import backend.Constants.AUTHORIZATION_HEADER
 import backend.Constants.BEARER_START_WITH
@@ -20,8 +18,6 @@ import io.jsonwebtoken.jackson.io.JacksonSerializer
 import io.jsonwebtoken.lang.Strings.hasLength
 import io.jsonwebtoken.security.Keys.hmacShaKeyFor
 import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.reactor.mono
-import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -31,11 +27,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.core.context.ReactiveSecurityContextHolder.getContext
 import org.springframework.security.core.context.SecurityContext
-import org.springframework.security.core.userdetails.ReactiveUserDetailsService
 import org.springframework.security.core.userdetails.UserDetails
-import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
@@ -46,47 +39,7 @@ import kotlin.text.Charsets.UTF_8
 import org.springframework.security.core.userdetails.User as UserSecurity
 
 
-
-@Component("userDetailsService")
-class DomainUserDetailsService(
-    private val accountRepository: AccountRepository
-) : ReactiveUserDetailsService {
-
-    @Transactional
-    override fun findByUsername(login: String): Mono<UserDetails> = log
-        .debug("Authenticating $login").run {
-            return if (EmailValidator().isValid(login, null)) mono {
-                accountRepository.findOneByEmailWithAuthorities(login).apply {
-                    if (this == null) throw UsernameNotFoundException(
-                        "User with email $login was not found in the database"
-                    )
-                }
-            }.map { createSpringSecurityUser(login, it) }
-            else mono {
-                accountRepository.findOneByLoginWithAuthorities(login).apply {
-                    if (this == null) throw UsernameNotFoundException(
-                        "User $login was not found in the database"
-                    )
-                }
-            }.map { createSpringSecurityUser(login, it) }
-        }
-
-
-    private fun createSpringSecurityUser(
-        lowercaseLogin: String,
-        account: AccountCredentials
-    ): UserSecurity = if (!account.activated) {
-        throw UserNotActivatedException(
-            "User $lowercaseLogin was not activated"
-        )
-    } else UserSecurity(
-        account.login!!,
-        account.password!!,
-        account.authorities!!.map {
-            SimpleGrantedAuthority(it)
-        }
-    )
-}
+/*=================================================================================*/
 
 @Component
 class TokenProvider(
@@ -112,6 +65,7 @@ class TokenProvider(
                                     "We recommend using the `backend.security.authentication.jwt.base64-secret`" +
                                     " key for optimum security."
                         ).run { toByteArray(UTF_8) }
+
                         else -> log.debug("Using a Base64-encoded Jwt secret key").run {
                             BASE64.decode(
                                 properties
@@ -258,22 +212,22 @@ object SecurityUtils {
             .map { it.credentials as String }
             .awaitSingle()
 
-    suspend fun isAuthenticated(): Boolean =        getContext()
-            .map(SecurityContext::getAuthentication)
-            .map(Authentication::getAuthorities)
-            .map { roles: Collection<GrantedAuthority> ->
-                roles.map(GrantedAuthority::getAuthority)
-                    .none { it == Constants.ROLE_ANONYMOUS }
-            }.awaitSingle()
+    suspend fun isAuthenticated(): Boolean = getContext()
+        .map(SecurityContext::getAuthentication)
+        .map(Authentication::getAuthorities)
+        .map { roles: Collection<GrantedAuthority> ->
+            roles.map(GrantedAuthority::getAuthority)
+                .none { it == Constants.ROLE_ANONYMOUS }
+        }.awaitSingle()
 
 
-    suspend fun isCurrentUserInRole(authority: String): Boolean =        getContext()
-            .map(SecurityContext::getAuthentication)
-            .map(Authentication::getAuthorities)
-            .map { roles: Collection<GrantedAuthority> ->
-                roles.map(GrantedAuthority::getAuthority)
-                    .any { it == authority }
-            }.awaitSingle()
+    suspend fun isCurrentUserInRole(authority: String): Boolean = getContext()
+        .map(SecurityContext::getAuthentication)
+        .map(Authentication::getAuthorities)
+        .map { roles: Collection<GrantedAuthority> ->
+            roles.map(GrantedAuthority::getAuthority)
+                .any { it == authority }
+        }.awaitSingle()
 }
 
 /*=================================================================================*/

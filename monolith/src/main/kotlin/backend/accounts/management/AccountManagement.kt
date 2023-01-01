@@ -1,15 +1,70 @@
 @file:Suppress("unused")
 
-package backend.accounts
+package backend.accounts.management
 
 
 import backend.Constants.AUTHORITY_API
+import backend.Log.log
+import backend.accounts.AccountCredentials
+import backend.accounts.AccountRepository
+import backend.accounts.AuthorityRepository
+import backend.accounts.UserNotActivatedException
+import kotlinx.coroutines.reactor.mono
+import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator
 import org.springframework.context.ApplicationContext
 import org.springframework.http.HttpStatus.OK
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.userdetails.ReactiveUserDetailsService
+import org.springframework.security.core.userdetails.User
+import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.core.userdetails.UsernameNotFoundException
+import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
+import reactor.core.publisher.Mono
 import java.util.*
 
+/*=================================================================================*/
+
+@Component("userDetailsService")
+class DomainUserDetailsService(
+    private val accountRepository: AccountRepository
+) : ReactiveUserDetailsService {
+
+    @Transactional
+    override fun findByUsername(login: String): Mono<UserDetails> = log
+        .debug("Authenticating $login").run {
+            return if (EmailValidator().isValid(login, null)) mono {
+                accountRepository.findOneByEmailWithAuthorities(login).apply {
+                    if (this == null) throw UsernameNotFoundException(
+                        "User with email $login was not found in the database"
+                    )
+                }
+            }.map { createSpringSecurityUser(login, it) }
+            else mono {
+                accountRepository.findOneByLoginWithAuthorities(login).apply {
+                    if (this == null) throw UsernameNotFoundException(
+                        "User $login was not found in the database"
+                    )
+                }
+            }.map { createSpringSecurityUser(login, it) }
+        }
+
+
+    private fun createSpringSecurityUser(
+        lowercaseLogin: String,
+        account: AccountCredentials
+    ): User = if (!account.activated)
+        throw UserNotActivatedException("User $lowercaseLogin was not activated")
+    else User(
+        account.login!!,
+        account.password!!,
+        account.authorities!!.map {
+            SimpleGrantedAuthority(it)
+        }
+    )
+}
 
 /*=================================================================================*/
 @RestController
@@ -394,7 +449,7 @@ class AuthorityController(
 //import backend.BackendApplication.Log.log
 //import common.domain.Avatar
 //import backend.http.util.PaginationUtil.generatePaginationHttpHeaders
-////import backend.accounts.UserService
+////import backend.accounts.management.UserService
 //import kotlinx.coroutines.flow.Flow
 //import kotlinx.coroutines.flow.toCollection
 //import org.springframework.data.domain.PageImpl
