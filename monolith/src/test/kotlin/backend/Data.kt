@@ -13,6 +13,7 @@ import backend.Constants.USER
 import backend.Data.accounts
 import backend.Data.defaultAccount
 import backend.Data.defaultAccountJson
+import backend.accounts.AccountCredentials
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.lang3.StringUtils.stripAccents
 import org.junit.jupiter.api.AfterAll

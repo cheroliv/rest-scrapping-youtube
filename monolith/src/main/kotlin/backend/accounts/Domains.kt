@@ -1,20 +1,21 @@
 @file:Suppress("unused")
 
-package backend
+package backend.accounts
 
 import backend.Constants.IMAGE_URL_DEFAULT
 import backend.Constants.LOGIN_REGEX
 import backend.Constants.PASSWORD_MAX_LENGTH
 import backend.Constants.PASSWORD_MIN_LENGTH
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Pattern
+import jakarta.validation.constraints.Size
 import org.apache.commons.lang3.RandomStringUtils
 import java.security.SecureRandom
 import java.time.Instant
 import java.util.*
-import javax.validation.constraints.NotBlank
-import javax.validation.constraints.NotNull
-import javax.validation.constraints.Pattern
-import javax.validation.constraints.Size
-import javax.validation.constraints.Email as EmailConstraints
+import jakarta.validation.constraints.Email as EmailConstraints
+
 /*=================================================================================*/
 /**
  * Représente l'account domain model sans le password
@@ -105,7 +106,7 @@ data class AccountCredentials(
         id = id,
         login = login,
         firstName = firstName,
-        lastName=lastName,
+        lastName = lastName,
         email = email,
         activated = activated,
         langKey = langKey,
@@ -130,6 +131,7 @@ data class KeyAndPassword(
     val key: String? = null,
     val newPassword: String? = null
 )
+
 /*=================================================================================*/
 data class Login(
     @field:NotNull
@@ -142,6 +144,7 @@ data class Login(
     String? = null,
     val rememberMe: Boolean? = null
 )
+
 /*=================================================================================*/
 data class PasswordChange(
     val currentPassword: String? = null,

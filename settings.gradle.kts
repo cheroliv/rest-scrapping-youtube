@@ -30,5 +30,5 @@ pluginManagement {
     }
 }
 
-rootProject.name = "kotlin-springboot-monolith"
+rootProject.name = "kotlin-springboot"
 include(":monolith")

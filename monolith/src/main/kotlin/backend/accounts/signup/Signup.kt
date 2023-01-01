@@ -1,5 +1,6 @@
-package backend
+package backend.accounts.signup
 
+import backend.*
 import backend.Constants.ACCOUNT_API
 import backend.Constants.ACTIVATE_API
 import backend.Constants.ACTIVATE_API_KEY
@@ -9,7 +10,8 @@ import backend.Constants.SIGNUP_API
 import backend.Constants.SYSTEM_USER
 import backend.Constants.MSG_WRONG_ACTIVATION_KEY
 import backend.Log.log
-import backend.RandomUtils.generateActivationKey
+import backend.accounts.*
+import backend.accounts.RandomUtils.generateActivationKey
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.security.crypto.password.PasswordEncoder

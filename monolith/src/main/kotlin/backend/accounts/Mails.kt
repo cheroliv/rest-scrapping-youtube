@@ -1,5 +1,6 @@
-package backend
+package backend.accounts
 
+import backend.ApplicationProperties
 import backend.Constants.BASE_URL
 import backend.Constants.GMAIL
 import backend.Constants.MAILSLURP

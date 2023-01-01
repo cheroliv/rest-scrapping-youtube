@@ -1,13 +1,16 @@
 @file:Suppress("unused")
 
-package backend
+package backend.accounts
 
 
+import backend.ApplicationProperties
+import backend.Constants
 import backend.Constants.AUTHORITIES_KEY
 import backend.Constants.AUTHORIZATION_HEADER
 import backend.Constants.BEARER_START_WITH
 import backend.Constants.INVALID_TOKEN
 import backend.Constants.VALID_TOKEN
+import backend.Log
 import backend.Log.log
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts

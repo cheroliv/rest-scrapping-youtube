@@ -1,7 +1,8 @@
 @file:Suppress("NonAsciiCharacters")
 
-package backend
+package backend.accounts
 
+import backend.ApplicationProperties
 import jakarta.mail.Multipart
 import jakarta.mail.internet.MimeBodyPart
 import jakarta.mail.internet.MimeMessage
@@ -12,7 +13,8 @@ import backend.Constants.DEFAULT
 import backend.Constants.GMAIL
 import backend.Constants.MAILSLURP
 import backend.Constants.TEST
-import backend.RandomUtils.generateResetKey
+import backend.accounts.RandomUtils.generateResetKey
+import backend.launcher
 import com.mailslurp.apis.InboxControllerApi
 import com.mailslurp.models.SendEmailOptions
 import org.assertj.core.api.Assertions

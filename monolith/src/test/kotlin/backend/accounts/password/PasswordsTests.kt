@@ -1,10 +1,13 @@
 @file:Suppress("NonAsciiCharacters")
 
-package backend
+package backend.accounts.password
 
 //import org.assertj.core.api.Assertions.assertThat
 //import org.springframework.test.web.reactive.server.returnResult
 //import java.net.URI
+import backend.BASE_URL_DEV
+import backend.deleteAllAccounts
+import backend.launcher
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll

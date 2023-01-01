@@ -1,9 +1,11 @@
-package backend
+package backend.accounts.password
 
+import backend.*
 import backend.Constants.ACCOUNT_API
 import backend.Constants.RESET_PASSWORD_API_FINISH
 import backend.Constants.RESET_PASSWORD_API_INIT
 import backend.Log.log
+import backend.accounts.*
 import jakarta.validation.constraints.Email
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -57,7 +59,6 @@ class ResetPasswordController(
                 ) == null -> throw ResetPasswordException("No user was found for this reset key")
             }
         }
-
 }
 
 /*=================================================================================*/

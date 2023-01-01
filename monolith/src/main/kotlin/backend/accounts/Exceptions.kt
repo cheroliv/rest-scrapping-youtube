@@ -1,4 +1,4 @@
-package backend
+package backend.accounts
 
 import org.springframework.security.core.AuthenticationException
 import backend.Constants.PASSWORD_MAX_LENGTH

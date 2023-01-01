@@ -1,14 +1,17 @@
 @file:Suppress("NonAsciiCharacters")
 
-package backend
+package backend.accounts
 
+import backend.*
 import backend.Constants.DEFAULT_LANGUAGE
 import backend.Constants.ROLE_ADMIN
 import backend.Constants.ROLE_ANONYMOUS
 import backend.Constants.ROLE_USER
 import backend.Constants.SYSTEM_USER
 import backend.Constants.USER
-import backend.RandomUtils.generateActivationKey
+import backend.Data
+import backend.accounts.*
+import backend.accounts.RandomUtils.generateActivationKey
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterAll

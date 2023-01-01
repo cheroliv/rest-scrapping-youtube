@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package backend
+package backend.accounts
 
 
 import backend.Constants.AUTHORITY_API
@@ -19,13 +19,11 @@ class AuthorityController(
 ) {
     @GetMapping
     @ResponseStatus(OK)
-    suspend fun getAuthorities() = authorityRepository
-        .findAll()
+    suspend fun getAuthorities() = authorityRepository.findAll()
 
     @GetMapping("count")
     @ResponseStatus(OK)
-    suspend fun count() = authorityRepository
-        .count()
+    suspend fun count() = authorityRepository.count()
 }
 
 
@@ -396,7 +394,7 @@ class AuthorityController(
 //import backend.BackendApplication.Log.log
 //import common.domain.Avatar
 //import backend.http.util.PaginationUtil.generatePaginationHttpHeaders
-////import backend.UserService
+////import backend.accounts.UserService
 //import kotlinx.coroutines.flow.Flow
 //import kotlinx.coroutines.flow.toCollection
 //import org.springframework.data.domain.PageImpl

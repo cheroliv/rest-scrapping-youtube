@@ -2,10 +2,10 @@
 
 package features
 
-import backend.Account
-import backend.AccountCredentials
+import backend.accounts.Account
+import backend.accounts.AccountCredentials
 import backend.Log.log
-import backend.RandomUtils
+import backend.accounts.RandomUtils
 import backend.BackendApplication
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.cucumber.datatable.DataTable

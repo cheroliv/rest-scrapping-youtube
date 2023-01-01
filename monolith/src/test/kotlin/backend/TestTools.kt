@@ -9,7 +9,11 @@ import backend.Constants.ROLE_USER
 import backend.Constants.SYSTEM_USER
 import backend.Constants.TEST
 import backend.Log.log
-import backend.RandomUtils.generateActivationKey
+import backend.accounts.Account
+import backend.accounts.RandomUtils.generateActivationKey
+import backend.accounts.AccountAuthorityEntity
+import backend.accounts.AccountCredentials
+import backend.accounts.AccountEntity
 import com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS

@@ -1,7 +1,8 @@
 @file:Suppress("unused")
 
-package backend
+package backend.accounts
 
+import backend.Constants
 import com.fasterxml.jackson.annotation.JsonIgnore
 import org.springframework.data.annotation.*
 import org.springframework.data.domain.Persistable
@@ -9,10 +10,10 @@ import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.time.Instant
 import java.util.*
-import javax.validation.constraints.NotNull
-import javax.validation.constraints.Pattern
-import javax.validation.constraints.Size
-import javax.validation.constraints.Email as EmailConstraint
+import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Pattern
+import jakarta.validation.constraints.Size
+import jakarta.validation.constraints.Email as EmailConstraint
 
 
 /*=================================================================================*/

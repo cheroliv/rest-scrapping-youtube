@@ -4,10 +4,10 @@
     "RedundantUnitReturnType"
 )
 
-package backend
+package backend.accounts
 
 
-import backend.AuthorityRecord.Companion.ROLE_COLUMN
+import backend.accounts.AuthorityRecord.Companion.ROLE_COLUMN
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
@@ -163,10 +163,12 @@ class AccountRepositoryR2dbc(
             AccountEntity(model).run {
                 insert(this).toMono().awaitSingleOrNull()?.id.run {
                     if (this != null) authorities?.map {
-                        insert(AccountAuthorityEntity(
+                        insert(
+                            AccountAuthorityEntity(
                             userId = this,
                             role = it.role
-                        )).awaitSingle()
+                        )
+                        ).awaitSingle()
                     }
                 }
             }

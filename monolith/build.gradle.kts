@@ -134,7 +134,7 @@ configurations {
             "org.junit.vintage" to "junit-vintage-engine",
             "org.springframework.boot" to "spring-boot-starter-tomcat",
             "org.apache.tomcat" to null
-        ).map { exclude(it.first, it.second) }
+        ).forEach { exclude(it.first, it.second) }
     }
 }
 
@@ -209,13 +209,9 @@ tasks.register<DefaultTask>("cucumber") {
 
 tasks.jacocoTestReport {
     // Give jacoco the file generated with the cucumber tests for the coverage.
-    executionData(
-        files(
+    executionData(files(
             "$buildDir/jacoco/test.exec",
             "$buildDir/results/jacoco/cucumber.exec"
-        )
-    )
-    reports {
-        xml.required.set(true)
-    }
+        ))
+    reports { xml.required.set(true) }
 }
