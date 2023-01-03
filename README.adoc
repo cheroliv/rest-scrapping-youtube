@@ -16,11 +16,11 @@
 * Password reset and update
 
 ==== **to test the app**
-Open terminal and run : ```./gradlew :monolith:check```
+Open terminal and run : ```./gradlew check```
 
 ==== **to BDD test the app**
-Open terminal and run : ```./gradlew :monolith:cucumber```
+Open terminal and run : ```./gradlew cucumber```
 
 ==== **to run the app**
-Open terminal and run : ```./gradlew :monolith:bootRun``` +
+Open terminal and run : ```./gradlew bootRun``` +
 and launch http://localhost:8080/
