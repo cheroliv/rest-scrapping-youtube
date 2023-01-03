@@ -10,10 +10,10 @@ import backend.Constants.SYSTEM_USER
 import backend.Constants.TEST
 import backend.Log.log
 import backend.accounts.Account
-import backend.accounts.RandomUtils.generateActivationKey
 import backend.accounts.AccountAuthorityEntity
 import backend.accounts.AccountCredentials
 import backend.accounts.AccountEntity
+import backend.accounts.RandomUtils.generateActivationKey
 import com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS
@@ -42,9 +42,23 @@ import kotlin.test.assertTrue
 
 const val BASE_URL_DEV = "http://localhost:8080"
 
-
+fun ByteArray.log(): ByteArray = apply {
+    log.info(map { it.toInt().toChar().toString() }
+        .reduce { request: String, s: String -> request + s.run{
+            return@run when {
+                s=="," && request.last().isDigit() -> ",\n"
+                else -> s
+            }
+        } }
+        .replace("{\"", "\n{\n\t\"")
+        .replace("\"}", "\"\n}")
+        .replace("\",\"", "\",\n\t\"")
+    )
+}
+//167271065351
+//1672710790496
 fun launcher(vararg profiles: String): ConfigurableApplicationContext =
-    runApplication<BackendApplication>(init = {
+    runApplication<BackendApplication> {
         setEnvironment(StandardReactiveWebEnvironment().apply {
             setDefaultProfiles(TEST)
             addActiveProfile(TEST)
@@ -52,7 +66,7 @@ fun launcher(vararg profiles: String): ConfigurableApplicationContext =
                 addActiveProfile(it)
             }
         })
-    }).apply {
+    }.apply {
         log.info("defaultProfiles: ${
             when {
                 !environment.defaultProfiles.isNullOrEmpty() ->

@@ -13,7 +13,10 @@ import backend.Log.log
 import backend.accounts.*
 import backend.accounts.RandomUtils.generateActivationKey
 import jakarta.validation.Valid
+import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.CREATED
+import org.springframework.http.HttpStatusCode
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -37,6 +40,7 @@ class SignupController(
      * @throws backend.EmailAlreadyUsedProblem {@code 400 (Bad Request)} if the email is already used.
      * @throws backend.LoginAlreadyUsedProblem {@code 400 (Bad Request)} if the login is already used.
      */
+    @Throws(InvalidPasswordProblem::class)
     @PostMapping(SIGNUP_API)
     @ResponseStatus(CREATED)
     suspend fun signup(
@@ -44,7 +48,7 @@ class SignupController(
     ) = try {
         signupService.signup(accountCredentials)
     } catch (ipe: InvalidPasswordException) {
-        throw ipe
+        throw InvalidPasswordProblem(ipe)
     }
     //        catch (eap:EmailAlreadyUsedProblem){
 //

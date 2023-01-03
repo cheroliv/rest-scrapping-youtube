@@ -2,6 +2,13 @@
 
 package backend.accounts
 
+import backend.Constants.INVALID_PASSWORD_TYPE
+import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatus.BAD_REQUEST
+import org.springframework.http.HttpStatusCode
+import org.springframework.http.ProblemDetail.forStatusAndDetail
+import org.springframework.web.ErrorResponseException
+
 //import org.zalando.problem.Problem.DEFAULT_TYPE as PROBLEM_DEFAULT_TYPE
 /*
 
@@ -31,6 +38,80 @@ public class BookmarkNotFoundException extends ErrorResponseException {
 }
  */
 /*=================================================================================*/
+
+//class InvalidPasswordProblem : AbstractThrowableProblem(
+//    INVALID_PASSWORD_TYPE,
+//    "Incorrect password",
+//    BAD_REQUEST
+//) {
+//    override fun getCause(): Exceptional? = super.cause
+//
+//    companion object {
+//        private const val serialVersionUID = 1L
+//    }
+//}
+/*{
+  "type": "https://www.cheroliv.com/problem/constraint-violation",
+  "title": "Data binding and validation failure",
+  "status": 400,
+  "path": "/api/register",
+  "message": "error.validation",
+  "fieldErrors": [
+    {
+      "objectName": "managedUserVM",
+      "field": "password",
+      "message": "la taille doit être comprise entre 4 et 100"
+    }
+  ]
+}*/
+/*
+{
+  "type": "https://www.cheroliv.com/problem/constraint-violation",
+  "title": "Data binding and validation failure",
+  "status": 400,
+  "path": "/api/register",
+  "message": "error.validation",
+  "fieldErrors": [
+    {
+      "objectName": "managedUserVM",
+      "field": "email",
+      "message": "doit être une adresse électronique syntaxiquement correcte"
+    },
+    {
+      "objectName": "managedUserVM",
+      "field": "password",
+      "message": "la taille doit être comprise entre 4 et 100"
+    },
+    {
+      "objectName": "managedUserVM",
+      "field": "login",
+      "message": "doit correspondre à \"^(?>[a-zA-Z0-9!$&*+=?^_`{|}~.-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)|(?>[_.@A-Za-z0-9-]+)$\""
+    },
+    {
+      "objectName": "managedUserVM",
+      "field": "login",
+      "message": "la taille doit être comprise entre 1 et 50"
+    },
+    {
+      "objectName": "managedUserVM",
+      "field": "login",
+      "message": "ne doit pas être vide"
+    }
+  ]
+}
+*/
+class InvalidPasswordProblem(
+    exception: InvalidPasswordException
+) : ErrorResponseException(
+    BAD_REQUEST,
+    forStatusAndDetail(BAD_REQUEST, exception.message!!).apply {
+        type = INVALID_PASSWORD_TYPE
+        title = "Incorrect password"
+    },
+    exception
+)
+
+/*=================================================================================*/
 //class Foo(
 //    errorAttributes: ErrorAttributes?,
 //    resources: WebProperties.Resources?,
@@ -58,20 +139,6 @@ public class BookmarkNotFoundException extends ErrorResponseException {
 //
 //    companion object {
 //
-//        private const val serialVersionUID = 1L
-//    }
-//}
-
-/*=================================================================================*/
-
-//class InvalidPasswordProblem : AbstractThrowableProblem(
-//    INVALID_PASSWORD_TYPE,
-//    "Incorrect password",
-//    BAD_REQUEST
-//) {
-//    override fun getCause(): Exceptional? = super.cause
-//
-//    companion object {
 //        private const val serialVersionUID = 1L
 //    }
 //}
