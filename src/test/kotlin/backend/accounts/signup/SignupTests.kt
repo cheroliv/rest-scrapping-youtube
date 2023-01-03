@@ -7,7 +7,6 @@ import backend.Constants.BASE_URL_DEV
 import backend.Data.defaultAccount
 import backend.accounts.AccountCredentials
 import backend.accounts.RandomUtils
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
