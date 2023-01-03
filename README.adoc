@@ -7,9 +7,9 @@
 * webflux
 * spring data r2dbc
 * rest api
-* spring security
-* kotlin
+* spring security jwt
 * kotlin coroutines
+* Http problem details
 
 .features:
 * Signup account
