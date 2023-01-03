@@ -39,6 +39,7 @@ plugins {
     id("com.google.cloud.tools.appengine")
     jacoco
 }
+
 group = properties["artifact.group"].toString()
 version = properties["artifact.version"].toString()
 

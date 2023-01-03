@@ -1,6 +1,6 @@
-= kotlin-springboot-monolith
+= kotlin-springboot
 
-== *springboot monolith codebase*
+== *springboot codebase*
 
 .stack:
 * springboot
