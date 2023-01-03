@@ -148,7 +148,7 @@ internal class SignupTests {
             .isBadRequest
             .returnResult<Unit>()
             .responseBodyContent!!
-            .logHttpBody
+            .logBody
             .isNotEmpty()
             .run { assertTrue(this) }
         assertEquals(0, countAccount(dao))

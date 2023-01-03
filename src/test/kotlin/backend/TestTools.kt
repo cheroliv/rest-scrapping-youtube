@@ -42,7 +42,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 
-val ByteArray.logHttpBody: ByteArray
+val ByteArray.logBody: ByteArray
     get() = apply {
         log.info(map { it.toInt().toChar().toString() }
             .reduce { request, s ->
@@ -57,7 +57,7 @@ val ByteArray.logHttpBody: ByteArray
             .replace("\",\"", "\",\n\t\"")
         )
     }
-val ByteArray.logHttpBodyRaw: ByteArray
+val ByteArray.logBodyRaw: ByteArray
     get() = apply {
         log.info(map { it.toInt().toChar().toString() }
             .reduce { request, s -> request + s })
