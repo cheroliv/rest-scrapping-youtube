@@ -166,7 +166,6 @@ internal class SignupTests {
             .isBadRequest
             .returnResult<Unit>()
             .responseBodyContent!!.isNotEmpty().run { assertTrue(this) }
-
         assertEquals(0, countAccount(dao))
     }
 
