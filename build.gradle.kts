@@ -9,9 +9,6 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-import java.io.ByteArrayOutputStream
-
-
 
 buildscript {
     repositories {
@@ -73,15 +70,15 @@ tasks.register<DefaultTask>("addMailSlurpConfiguration") {
 //    finalizedBy("bootRun")
 //}
 
-    repositories {
-        google()
-        mavenCentral()
-        maven("https://repo.spring.io/milestone")
-        maven("https://repo.spring.io/snapshot")
-        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap/")
-        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-        maven("https://jitpack.io")
-    }
+repositories {
+    google()
+    mavenCentral()
+    maven("https://repo.spring.io/milestone")
+    maven("https://repo.spring.io/snapshot")
+    maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap/")
+    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+    maven("https://jitpack.io")
+}
 
 dependencies {
 //    implementation(project(path = ":common"))
@@ -240,18 +237,11 @@ tasks.register<DefaultTask>("cucumber") {
 
 tasks.jacocoTestReport {
     // Give jacoco the file generated with the cucumber tests for the coverage.
-    executionData(files(
+    executionData(
+        files(
             "$buildDir/jacoco/test.exec",
             "$buildDir/results/jacoco/cucumber.exec"
-        ))
+        )
+    )
     reports { xml.required.set(true) }
-}
-
-tasks.register<DefaultTask>("foo"){
-    doLast{
-        "7".map{
-        }
-//        println()
-//        println("foobar")
-    }
 }

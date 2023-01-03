@@ -9,6 +9,10 @@ import java.net.URI.create
 object Constants {
     const val EMPTY_STRING = ""
     const val JUMPLINE = "\n"
+    const val VIRGULE = ","
+    const val BASE_URL_DEV = "http://localhost:8080"
+
+
 
     //SignupController
     @JvmStatic

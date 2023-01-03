@@ -1,9 +1,13 @@
+@file:Suppress("NonAsciiCharacters")
+
 package backend.accounts.signup
 
 import backend.*
+import backend.Constants.BASE_URL_DEV
 import backend.Data.defaultAccount
 import backend.accounts.AccountCredentials
 import backend.accounts.RandomUtils
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -13,6 +17,7 @@ import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON
 import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.test.web.reactive.server.WebTestClient.bindToServer
 import org.springframework.test.web.reactive.server.returnResult
 import java.net.URI
 import kotlin.test.*
@@ -22,7 +27,7 @@ internal class SignupTests {
     private lateinit var context: ConfigurableApplicationContext
 
     private val client: WebTestClient by lazy {
-        WebTestClient.bindToServer()
+        bindToServer()
             .baseUrl(BASE_URL_DEV)
             .build()
     }
@@ -143,7 +148,7 @@ internal class SignupTests {
             .isBadRequest
             .returnResult<Unit>()
             .responseBodyContent!!
-            .log()
+            .logHttpBody
             .isNotEmpty()
             .run { assertTrue(this) }
         assertEquals(0, countAccount(dao))

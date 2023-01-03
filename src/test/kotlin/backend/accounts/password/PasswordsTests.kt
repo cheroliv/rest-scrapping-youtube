@@ -5,7 +5,7 @@ package backend.accounts.password
 //import org.assertj.core.api.Assertions.assertThat
 //import org.springframework.test.web.reactive.server.returnResult
 //import java.net.URI
-import backend.BASE_URL_DEV
+import backend.Constants.BASE_URL_DEV
 import backend.deleteAllAccounts
 import backend.launcher
 import org.junit.jupiter.api.AfterAll

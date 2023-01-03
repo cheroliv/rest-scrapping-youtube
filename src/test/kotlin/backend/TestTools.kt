@@ -8,6 +8,7 @@ import backend.Constants.ROLE_ADMIN
 import backend.Constants.ROLE_USER
 import backend.Constants.SYSTEM_USER
 import backend.Constants.TEST
+import backend.Constants.VIRGULE
 import backend.Log.log
 import backend.accounts.Account
 import backend.accounts.AccountAuthorityEntity
@@ -40,23 +41,29 @@ import kotlin.reflect.full.createInstance
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-const val BASE_URL_DEV = "http://localhost:8080"
 
-fun ByteArray.log(): ByteArray = apply {
-    log.info(map { it.toInt().toChar().toString() }
-        .reduce { request: String, s: String -> request + s.run{
-            return@run when {
-                s=="," && request.last().isDigit() -> ",\n"
-                else -> s
+val ByteArray.logHttpBody: ByteArray
+    get() = apply {
+        log.info(map { it.toInt().toChar().toString() }
+            .reduce { request, s ->
+                request + buildString {
+                    append(s)
+                    if (s == VIRGULE && request.last().isDigit())
+                        append("\n\t")
+                }
             }
-        } }
-        .replace("{\"", "\n{\n\t\"")
-        .replace("\"}", "\"\n}")
-        .replace("\",\"", "\",\n\t\"")
-    )
-}
-//167271065351
-//1672710790496
+            .replace("{\"", "\n{\n\t\"")
+            .replace("\"}", "\"\n}")
+            .replace("\",\"", "\",\n\t\"")
+        )
+    }
+val ByteArray.logHttpBodyRaw: ByteArray
+    get() = apply {
+        log.info(map { it.toInt().toChar().toString() }
+            .reduce { request, s -> request + s })
+    }
+
+
 fun launcher(vararg profiles: String): ConfigurableApplicationContext =
     runApplication<BackendApplication> {
         setEnvironment(StandardReactiveWebEnvironment().apply {
