@@ -14,8 +14,7 @@ class BackendApplication
 
 object BackendBootstrap {
     @JvmStatic
-    fun main(args: Array<String>) = runApplication<BackendApplication>(*args)
-        .run { bootstrapLog(this) }
+    fun main(args: Array<String>) = runApplication<BackendApplication>(*args).bootstrapLog()
 }
 
 /*=================================================================================*/

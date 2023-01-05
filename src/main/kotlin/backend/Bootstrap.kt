@@ -1,6 +1,5 @@
 package backend
 
-import backend.Constants.JUMPLINE
 import backend.Constants.CLOUD
 import backend.Constants.DEVELOPMENT
 import backend.Constants.DEV_HOST
@@ -8,6 +7,7 @@ import backend.Constants.EMPTY_CONTEXT_PATH
 import backend.Constants.EMPTY_STRING
 import backend.Constants.HTTP
 import backend.Constants.HTTPS
+import backend.Constants.JUMPLINE
 import backend.Constants.PRODUCTION
 import backend.Constants.SERVER_PORT
 import backend.Constants.SERVER_SERVLET_CONTEXT_PATH
@@ -35,51 +35,60 @@ object Log {
 }
 
 /*=================================================================================*/
+
 @Suppress("unused")
 @Component
 class BackendComponent(private val context: ApplicationContext) {
     @PostConstruct
-    private fun init() = checkProfileLog(context)
+    private fun init() = context.checkProfileLog()
 }
 /*=================================================================================*/
 
-private fun checkProfileLog(context: ApplicationContext) =
-    context.environment.activeProfiles.run {
-        when {
-            contains(element = DEVELOPMENT) &&
-                    contains(element = PRODUCTION)
-            -> log.error(
-                context.getBean<MessageSource>().getMessage(
-                    STARTUP_LOG_MSG_KEY,
-                    arrayOf(
-                        DEVELOPMENT,
-                        PRODUCTION
-                    ),
-                    getDefault()
-                )
+internal fun ApplicationContext.checkProfileLog(): ApplicationContext = apply {
+    environment.activeProfiles.run {
+        if (contains(DEVELOPMENT) && contains(PRODUCTION)) log.error(
+            getBean<MessageSource>().getMessage(
+                STARTUP_LOG_MSG_KEY,
+                arrayOf(DEVELOPMENT, PRODUCTION),
+                getDefault()
             )
-        }
-        when {
-            contains(DEVELOPMENT) &&
-                    contains(CLOUD)
-            -> log.error(
-                context.getBean<MessageSource>().getMessage(
-                    STARTUP_LOG_MSG_KEY,
-                    arrayOf(
-                        DEVELOPMENT,
-                        CLOUD
-                    ),
-                    getDefault()
-                )
+        )
+        if (contains(DEVELOPMENT) && contains(CLOUD)) log.error(
+            getBean<MessageSource>().getMessage(
+                STARTUP_LOG_MSG_KEY,
+                arrayOf(DEVELOPMENT, CLOUD),
+                getDefault()
             )
-        }
+        )
     }
-
-
+}
 
 /*=================================================================================*/
 
+internal fun ApplicationContext.bootstrapLog() = startupLogMessage(
+    appName = environment.getProperty(SPRING_APPLICATION_NAME),
+    goVisitMessage = getBean<ApplicationProperties>().goVisitMessage,
+    protocol = if (environment.getProperty(SERVER_SSL_KEY_STORE) != null) HTTPS
+    else HTTP,
+    serverPort = environment.getProperty(SERVER_PORT),
+    contextPath = environment.getProperty(SERVER_SERVLET_CONTEXT_PATH) ?: EMPTY_CONTEXT_PATH,
+    hostAddress = try {
+        getLocalHost().hostAddress
+    } catch (e: UnknownHostException) {
+        log.warn(STARTUP_HOST_WARN_LOG_MSG)
+        DEV_HOST
+    },
+    profiles = if (environment.defaultProfiles.isNotEmpty())
+        environment.defaultProfiles
+            .reduce { accumulator, profile -> "$accumulator, $profile" }
+    else EMPTY_STRING,
+    activeProfiles = if (environment.activeProfiles.isNotEmpty())
+        environment.activeProfiles
+            .reduce { accumulator, profile -> "$accumulator, $profile" }
+    else EMPTY_STRING,
+).run { log.info(this) }
 
+/*=================================================================================*/
 
 private fun startupLogMessage(
     appName: String?,
@@ -109,46 +118,5 @@ External:   $protocol://$hostAddress:$serverPort$contextPath${
 }
 ----------------------------------------------------------
 $JUMPLINE$JUMPLINE""".trimIndent()
-
-
-/*=================================================================================*/
-
-
-
-internal fun bootstrapLog(context: ApplicationContext) =
-    log.info(
-        startupLogMessage(
-            appName = context.environment.getProperty(SPRING_APPLICATION_NAME),
-            goVisitMessage = context.getBean<ApplicationProperties>().goVisitMessage,
-            protocol = if (context.environment.getProperty(SERVER_SSL_KEY_STORE) != null) HTTPS
-            else HTTP,
-            serverPort = context.environment.getProperty(SERVER_PORT),
-            contextPath = context.environment.getProperty(SERVER_SERVLET_CONTEXT_PATH) ?: EMPTY_CONTEXT_PATH,
-            hostAddress = try {
-                getLocalHost().hostAddress
-            } catch (e: UnknownHostException) {
-                log.warn(STARTUP_HOST_WARN_LOG_MSG)
-                DEV_HOST
-            },
-            profiles = when {
-                context.environment.defaultProfiles.isNotEmpty() ->
-                    context.environment
-                        .defaultProfiles
-                        .reduce { accumulator, profile -> "$accumulator, $profile" }
-
-                else -> EMPTY_STRING
-            },
-            activeProfiles = when {
-                context.environment.activeProfiles.isNotEmpty() ->
-                    context.environment
-                        .activeProfiles
-                        .reduce { accumulator, profile -> "$accumulator, $profile" }
-
-                else -> EMPTY_STRING
-            },
-        )
-    )
-
-
 /*=================================================================================*/
 
