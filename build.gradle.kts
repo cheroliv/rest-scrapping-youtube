@@ -60,14 +60,14 @@ tasks.register<DefaultTask>("addMailSlurpConfiguration") {
 // then add src/main/resources/application-mailslurp.yml to .gitgnore
 }
 
-//springBoot.mainClass.set("backend.BackendBootstrap")
+//springBoot.mainClass.set("webapp.BackendBootstrap")
 ///*
 //./gradlew -q cli --args='your args there'
 // */
 //tasks.register("cli") {
 //    group = "application"
-//    description = "Run backend cli"
-//    doFirst { springBoot.mainClass.set("backend.CliBootstrap") }
+//    description = "Run webapp cli"
+//    doFirst { springBoot.mainClass.set("webapp.CliBootstrap") }
 //    finalizedBy("bootRun")
 //}
 

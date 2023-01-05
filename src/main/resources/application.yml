@@ -1,4 +1,4 @@
-backend:
+webapp:
   message: hello
   item: item
   go-visit-message: https://github.com/cheroliv/kotlin-springboot
@@ -8,7 +8,7 @@ backend:
     populator-path: db/tables.sql
   mail:
     base-url: http://127.0.0.1:8080
-    from: backend-r2dbc-jwt@localhost
+    from: webapp-r2dbc-jwt@localhost
     password: password
     enabled: true
     host: smtp.acme.com
@@ -45,7 +45,7 @@ spring:
     name: server
   datasource:
     driver-class-name: org.h2.Driver
-    url: r2dbc:h2:file://././build/h2db/db/backend;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    url: r2dbc:h2:file://././build/h2db/db/webapp;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
     username: sa
     password: sa
   devtools:
