@@ -44,7 +44,7 @@ import kotlin.test.assertTrue
 
 val ByteArray.logBody: ByteArray
     get() = apply {
-        log.info(map { it.toInt().toChar().toString() }
+        map { it.toInt().toChar().toString() }
             .reduce { request, s ->
                 request + buildString {
                     append(s)
@@ -55,45 +55,40 @@ val ByteArray.logBody: ByteArray
             .replace("{\"", "\n{\n\t\"")
             .replace("\"}", "\"\n}")
             .replace("\",\"", "\",\n\t\"")
-        )
+            .run { log.info(this) }
+
     }
 val ByteArray.logBodyRaw: ByteArray
     get() = apply {
-        log.info(map { it.toInt().toChar().toString() }
-            .reduce { request, s -> request + s })
+        map { it.toInt().toChar().toString() }
+            .reduce { request, s -> request + s }
+            .run { log.info(this) }
     }
 
 
 fun launcher(vararg profiles: String): ConfigurableApplicationContext =
     runApplication<BackendApplication> {
+        /**
+         * before launching: configuration
+         */
         setEnvironment(StandardReactiveWebEnvironment().apply {
             setDefaultProfiles(TEST)
             addActiveProfile(TEST)
-            profiles.toSet().map {
-                addActiveProfile(it)
-            }
+            profiles.toSet().map { addActiveProfile(it) }
         })
     }.apply {
-        log.info("defaultProfiles: ${
-            when {
-                !environment.defaultProfiles.isNullOrEmpty() ->
-                    environment
-                        .defaultProfiles
-                        .reduce { acc, s -> "$acc, $s" }
+        /**
+         * after launching: verification & post construct
+         */
+        (if (!environment.defaultProfiles.isNullOrEmpty()) environment
+            .defaultProfiles
+            .reduce { acc, s -> "$acc, $s" }
+        else "").run { log.info("defaultProfiles: $this") }
 
-                else -> ""
-            }
-        }")
-        log.info("activeProfiles: ${
-            when {
-                !environment.activeProfiles.isNullOrEmpty() ->
-                    environment
-                        .activeProfiles
-                        .reduce { acc, s -> "$acc, $s" }
-
-                else -> ""
-            }
-        }")
+        (if (!environment.activeProfiles.isNullOrEmpty()) environment
+            .activeProfiles
+            .reduce { acc, s -> "$acc, $s" }
+        else "").run { log.info("activeProfiles: $this") }
     }
 
 
