@@ -4,7 +4,7 @@
 )
 
 
-import org.gradle.api.JavaVersion.VERSION_18
+import org.gradle.api.JavaVersion.*
 import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -167,10 +167,13 @@ configurations {
     }
 }
 
+java.sourceCompatibility=VERSION_1_8
+java.targetCompatibility=VERSION_17
+
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf(properties["free_compiler_args_value"].toString())
-        jvmTarget = VERSION_18.toString()
+        jvmTarget = VERSION_17.toString()
     }
 }
 
