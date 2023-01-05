@@ -100,9 +100,6 @@ dependencies {
     testImplementation("io.mockk:mockk:${properties["mockk.version"]}")
     testImplementation("com.github.tomakehurst:wiremock-jre8:${properties["wiremock.version"]}")
     testImplementation("com.ninja-squad:springmockk:${properties["springmockk.version"]}")
-    // Cucumber
-    testImplementation("io.cucumber:cucumber-java8:${properties["cucumber_java.version"]}")
-    testImplementation("io.cucumber:cucumber-java:${properties["cucumber_java.version"]}")
     // testcontainer
 //    testImplementation("org.testcontainers:junit-jupiter")
 //    testImplementation("org.testcontainers:postgresql")
@@ -152,7 +149,7 @@ dependencies {
     implementation("io.netty:netty-tcnative-boringssl-static:${properties["boring_ssl.version"]}")
     //Spring Cloud
 //    implementation("org.springframework.cloud:spring-cloud-gcp-starter-storage")
-//    providedCompile ("com.google.appengine:appengine:+")
+//    runtimeOnly ("com.google.appengine:appengine:+")
     runtimeOnly("org.springframework.boot:spring-boot-properties-migrator")
 }
 
@@ -202,50 +199,4 @@ tasks.register<TestReport>("testReport") {
     group = "report"
     destinationDir = file("$buildDir/reports/tests")
     reportOn("test")
-}
-
-val cucumberRuntime: Configuration by configurations.creating {
-    extendsFrom(configurations["testImplementation"])
-}
-
-tasks.register<DefaultTask>("cucumber") {
-    group = "verification"
-    dependsOn("assemble", "compileTestJava")
-    doLast {
-        javaexec {
-            mainClass.set("io.cucumber.core.cli.Main")
-            classpath = cucumberRuntime + sourceSets.main.get().output + sourceSets.test.get().output
-            // Change glue for your project package where the step definitions are.
-            // And where the feature files are.
-            args = listOf(
-                "--plugin",
-                "pretty",
-                "--glue",
-                "features",
-                "src/test/resources/features"
-            )
-            // Configure jacoco agent for the test coverage in the string interpolation.
-            jvmArgs = listOf(
-                "-javaagent:${
-                    zipTree(
-                        configurations
-                            .jacocoAgent
-                            .get()
-                            .singleFile
-                    ).filter { it.name == "jacocoagent.jar" }.singleFile
-                }=destfile=$buildDir/results/jacoco/cucumber.exec,append=false"
-            )
-        }
-    }
-}
-
-tasks.jacocoTestReport {
-    // Give jacoco the file generated with the cucumber tests for the coverage.
-    executionData(
-        files(
-            "$buildDir/jacoco/test.exec",
-            "$buildDir/results/jacoco/cucumber.exec"
-        )
-    )
-    reports { xml.required.set(true) }
 }
