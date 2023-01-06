@@ -1,4 +1,4 @@
-package webapp.accounts
+package accounts
 
 import webapp.ApplicationProperties
 import webapp.Constants.BASE_URL

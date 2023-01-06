@@ -4,10 +4,10 @@
     "RedundantUnitReturnType"
 )
 
-package webapp.accounts
+package accounts
 
 
-import webapp.accounts.AuthorityRecord.Companion.ROLE_COLUMN
+import accounts.AuthorityRecord.Companion.ROLE_COLUMN
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull

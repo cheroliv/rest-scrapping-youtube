@@ -1,28 +1,16 @@
 package webapp
 
-import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.context.properties.EnableConfigurationProperties
-import org.springframework.boot.runApplication
-import org.springframework.context.annotation.*
-
 /*=================================================================================*/
 
-@SpringBootApplication
-@EnableConfigurationProperties(ApplicationProperties::class)
-class BackendApplication
-/*=================================================================================*/
 
-object BackendBootstrap {
-    @JvmStatic
-    fun main(args: Array<String>) = runApplication<BackendApplication>(*args).bootstrapLog()
-}
+
 
 /*=================================================================================*/
 
 //object CliBootstrap {
 //    @JvmStatic
 //    fun main(args: Array<String>) {
-//        runApplication<BackendApplication>(*args) {
+//        runApplication<WebApplication>(*args) {
 //            setAdditionalProfiles(Constants.PROFILE_CLI)
 //            setDefaultProperties(Constants.PROFILE_CLI_PROPS)
 //        }

@@ -2,6 +2,7 @@
 
 package webapp.accounts
 
+import accounts.*
 import webapp.*
 import webapp.Constants.DEFAULT_LANGUAGE
 import webapp.Constants.ROLE_ADMIN
@@ -11,7 +12,7 @@ import webapp.Constants.SYSTEM_USER
 import webapp.Constants.USER
 import webapp.Data
 import webapp.accounts.*
-import webapp.accounts.RandomUtils.generateActivationKey
+import accounts.RandomUtils.generateActivationKey
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterAll
@@ -58,7 +59,7 @@ internal class AccountRepositoryR2dbcTest {
     private val accountRepository: AccountRepository by lazy { context.getBean<AccountRepositoryR2dbc>() }
 
     //    @BeforeAll
-//    fun `lance le server en profile test`() = runApplication<BackendApplication> {
+//    fun `lance le server en profile test`() = runApplication<WebApplication> {
 //        testLoader(this)
 //    }.run { context = this }
     @BeforeAll
@@ -204,7 +205,7 @@ internal class AccountAuthorityRepositoryR2dbcTest {
     private val accountAuthorityRepository: AccountAuthorityRepository by lazy { context.getBean<AccountAuthorityRepositoryR2dbc>() }
 
     //    @BeforeAll
-//    fun `lance le server en profile test`() = runApplication<BackendApplication> {
+//    fun `lance le server en profile test`() = runApplication<WebApplication> {
 //        testLoader(this)
 //    }.run { context = this }
     @BeforeAll

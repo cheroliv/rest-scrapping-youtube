@@ -2,13 +2,6 @@
 
 package webapp
 
-import webapp.Constants.FEATURE_POLICY
-import webapp.Constants.MAIL_DEBUG
-import webapp.Constants.MAIL_SMTP_AUTH
-import webapp.Constants.MAIL_TRANSPORT_PROTOCOL
-import webapp.Constants.MAIL_TRANSPORT_STARTTLS_ENABLE
-import webapp.Constants.REQUEST_PARAM_LANG
-import webapp.Log.log
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler
@@ -16,6 +9,7 @@ import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.boot.autoconfigure.task.TaskExecutionProperties
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.*
 import org.springframework.context.i18n.LocaleContext
 import org.springframework.context.i18n.SimpleLocaleContext
@@ -56,6 +50,13 @@ import org.springframework.web.reactive.config.WebFluxConfigurer
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.i18n.LocaleContextResolver
 import reactor.core.publisher.Hooks
+import webapp.Constants.FEATURE_POLICY
+import webapp.Constants.MAIL_DEBUG
+import webapp.Constants.MAIL_SMTP_AUTH
+import webapp.Constants.MAIL_TRANSPORT_PROTOCOL
+import webapp.Constants.MAIL_TRANSPORT_STARTTLS_ENABLE
+import webapp.Constants.REQUEST_PARAM_LANG
+import webapp.Log.log
 import java.util.Locale.forLanguageTag
 import java.util.Locale.getDefault
 import java.util.concurrent.Callable
@@ -72,7 +73,7 @@ class LocaleSupportConfiguration : DelegatingWebFluxConfiguration() {
         override fun resolveLocaleContext(exchange: ServerWebExchange): LocaleContext {
             var targetLocale = getDefault()
             val referLang = exchange.request.queryParams[REQUEST_PARAM_LANG]
-            if (referLang != null && referLang.isNotEmpty()) targetLocale = forLanguageTag(referLang[0])
+            if (!referLang.isNullOrEmpty()) targetLocale = forLanguageTag(referLang[0])
             return SimpleLocaleContext(targetLocale)
         }
 
@@ -89,6 +90,7 @@ class LocaleSupportConfiguration : DelegatingWebFluxConfiguration() {
 @EnableWebFlux
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
+@EnableConfigurationProperties(ApplicationProperties::class)
 class MonolithConfiguration(
     private val properties: ApplicationProperties,
     private val userDetailsService: ReactiveUserDetailsService,
@@ -117,16 +119,16 @@ class MonolithConfiguration(
         port = properties.mail.port
         username = properties.mail.from
         password = properties.mail.password
-        javaMailProperties.apply {
-            this[MAIL_TRANSPORT_PROTOCOL] = properties.mail.property.transport.protocol
-            this[MAIL_SMTP_AUTH] = properties.mail.property.smtp.auth
-            this[MAIL_TRANSPORT_STARTTLS_ENABLE] = properties.mail.property.smtp.starttls.enable
-            this[MAIL_DEBUG] = properties.mail.property.debug
-            this["spring.mail.test-connection"] = true
-            this["mail.smtp.ssl.trust"] = true
-            this["mail.connect_timeout"] = 60000
-            this["mail.auth_api_key"] = ""
-        }
+        mapOf(
+            MAIL_TRANSPORT_PROTOCOL to properties.mail.property.transport.protocol,
+            MAIL_SMTP_AUTH to properties.mail.property.smtp.auth,
+            MAIL_TRANSPORT_STARTTLS_ENABLE to properties.mail.property.smtp.starttls.enable,
+            MAIL_DEBUG to properties.mail.property.debug,
+            "spring.mail.test-connection" to true,
+            "mail.smtp.ssl.trust" to true,
+            "mail.connect_timeout" to 60000,
+            "mail.auth_api_key" to "",
+        ).forEach { javaMailProperties[it.key] = it.value }
     }
 
 

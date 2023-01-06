@@ -14,7 +14,7 @@ import webapp.Data.accounts
 import webapp.Data.defaultAccount
 import webapp.Data.defaultAccountJson
 import webapp.Log.log
-import webapp.accounts.AccountCredentials
+import accounts.AccountCredentials
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.lang3.StringUtils.stripAccents
 import org.junit.jupiter.api.AfterAll

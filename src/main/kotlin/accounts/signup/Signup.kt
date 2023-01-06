@@ -1,5 +1,6 @@
-package webapp.accounts.signup
+package accounts.signup
 
+import accounts.*
 import webapp.*
 import webapp.Constants.ACCOUNT_API
 import webapp.Constants.ACTIVATE_API
@@ -10,8 +11,7 @@ import webapp.Constants.ROLE_USER
 import webapp.Constants.SIGNUP_API
 import webapp.Constants.SYSTEM_USER
 import webapp.Log.log
-import webapp.accounts.*
-import webapp.accounts.RandomUtils.generateActivationKey
+import accounts.RandomUtils.generateActivationKey
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -56,7 +56,7 @@ class SignupController(
      * `GET  /activate` : activate the signed-up user.
      *
      * @param key the activation key.
-     * @throws RuntimeException `500 (Internal BackendApplication Error)` if the user couldn't be activated.
+     * @throws RuntimeException `500 (Internal WebApplication Error)` if the user couldn't be activated.
      */
     @GetMapping(ACTIVATE_API)
     suspend fun activateAccount(@RequestParam(value = ACTIVATE_API_KEY) key: String) {
@@ -109,10 +109,8 @@ class SignupService(
     @Throws(UsernameAlreadyUsedException::class)
     private suspend fun loginValidation(model: AccountCredentials) {
         accountRepository.findOneByLogin(model.login!!).run {
-            if (this != null) when {
-                !activated -> accountRepository.suppress(this.toAccount())
-                else -> throw UsernameAlreadyUsedException()
-            }
+            if (this != null) if (!activated) accountRepository.suppress(this.toAccount())
+            else throw UsernameAlreadyUsedException()
         }
     }
 
@@ -120,10 +118,8 @@ class SignupService(
     private suspend fun emailValidation(model: AccountCredentials) {
         accountRepository.findOneByEmail(model.email!!).run {
             if (this != null) {
-                when {
-                    !activated -> accountRepository.suppress(toAccount())
-                    else -> throw EmailAlreadyUsedException()
-                }
+                if (!activated) accountRepository.suppress(toAccount())
+                else throw EmailAlreadyUsedException()
             }
         }
     }
@@ -131,15 +127,13 @@ class SignupService(
     suspend fun activate(key: String): Boolean {
         accountRepository.run {
             with(findOneByActivationKey(key)) {
-                return when {
-                    this == null -> false
-                    else -> {
-                        save(copy(
-                                activated = true,
-                                activationKey = null
-                            )).run { if (id != null) log.info("activation: $login") }
-                        true
-                    }
+                return if (this == null) false
+                else {
+                    save(copy(
+                        activated = true,
+                        activationKey = null
+                    )).run { if (id != null) log.info("activation: $login") }
+                    true
                 }
             }
         }

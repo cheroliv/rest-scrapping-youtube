@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package webapp.accounts
+package accounts
 
 import webapp.Constants
 import com.fasterxml.jackson.annotation.JsonIgnore

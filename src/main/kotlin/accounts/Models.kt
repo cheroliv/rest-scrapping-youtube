@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package webapp.accounts
+package accounts
 
 import webapp.Constants.IMAGE_URL_DEFAULT
 import webapp.Constants.LOGIN_REGEX

@@ -1,70 +1,16 @@
 @file:Suppress("unused")
 
-package webapp.accounts.management
+package accounts.management
 
 
 import webapp.Constants.AUTHORITY_API
-import webapp.Log.log
-import webapp.accounts.AccountCredentials
-import webapp.accounts.AccountRepository
-import webapp.accounts.AuthorityRepository
-import webapp.accounts.UserNotActivatedException
-import kotlinx.coroutines.reactor.mono
-import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator
+import accounts.AuthorityRepository
 import org.springframework.context.ApplicationContext
 import org.springframework.http.HttpStatus.OK
-import org.springframework.security.core.authority.SimpleGrantedAuthority
-import org.springframework.security.core.userdetails.ReactiveUserDetailsService
-import org.springframework.security.core.userdetails.User
-import org.springframework.security.core.userdetails.UserDetails
-import org.springframework.security.core.userdetails.UsernameNotFoundException
-import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
-import reactor.core.publisher.Mono
 import java.util.*
 
-/*=================================================================================*/
-
-@Component("userDetailsService")
-class DomainUserDetailsService(
-    private val accountRepository: AccountRepository
-) : ReactiveUserDetailsService {
-
-    @Transactional
-    override fun findByUsername(login: String): Mono<UserDetails> = log
-        .debug("Authenticating $login").run {
-            return if (EmailValidator().isValid(login, null)) mono {
-                accountRepository.findOneByEmailWithAuthorities(login).apply {
-                    if (this == null) throw UsernameNotFoundException(
-                        "User with email $login was not found in the database"
-                    )
-                }
-            }.map { createSpringSecurityUser(login, it) }
-            else mono {
-                accountRepository.findOneByLoginWithAuthorities(login).apply {
-                    if (this == null) throw UsernameNotFoundException(
-                        "User $login was not found in the database"
-                    )
-                }
-            }.map { createSpringSecurityUser(login, it) }
-        }
-
-
-    private fun createSpringSecurityUser(
-        lowercaseLogin: String,
-        account: AccountCredentials
-    ): User = if (!account.activated)
-        throw UserNotActivatedException("User $lowercaseLogin was not activated")
-    else User(
-        account.login!!,
-        account.password!!,
-        account.authorities!!.map {
-            SimpleGrantedAuthority(it)
-        }
-    )
-}
 
 /*=================================================================================*/
 @RestController
@@ -80,6 +26,7 @@ class AuthorityController(
     @ResponseStatus(OK)
     suspend fun count() = authorityRepository.count()
 }
+/*=================================================================================*/
 
 
 //@RestController
@@ -107,7 +54,7 @@ class AuthorityController(
 ////     * {@code GET  /account} : get the current user.
 ////     *
 ////     * @return the current user.
-////     * @throws RuntimeException {@code 500 (Internal BackendApplication Error)} if the user couldn't be returned.
+////     * @throws RuntimeException {@code 500 (Internal WebApplication Error)} if the user couldn't be returned.
 ////     */
 ////    @GetMapping("account")
 ////    suspend fun getAccount(): Account = log.info("controller getAccount").run {
@@ -122,7 +69,7 @@ class AuthorityController(
 ////     *
 ////     * @param account the current user information.
 ////     * @throws EmailAlreadyUsedProblem {@code 400 (Bad Request)} if the email is already used.
-////     * @throws RuntimeException          {@code 500 (Internal BackendApplication Error)} if the user login wasn't found.
+////     * @throws RuntimeException          {@code 500 (Internal WebApplication Error)} if the user login wasn't found.
 ////     */
 ////    @PostMapping("account")
 ////    suspend fun saveAccount(@Valid @RequestBody account: Account): Unit {
@@ -179,7 +126,7 @@ class AuthorityController(
 ////     *
 ////     * @param keyAndPassword the generated key and the new password.
 ////     * @throws InvalidPasswordProblem {@code 400 (Bad Request)} if the password is incorrect.
-////     * @throws RuntimeException         {@code 500 (Internal BackendApplication Error)} if the password could not be reset.
+////     * @throws RuntimeException         {@code 500 (Internal WebApplication Error)} if the password could not be reset.
 ////     */
 ////    @PostMapping("account/reset-password/finish")
 ////    suspend fun finishPasswordReset(@RequestBody keyAndPassword: KeyAndPassword): Unit {
@@ -446,10 +393,10 @@ class AuthorityController(
 /*=================================================================================*/
 
 
-//import webapp.BackendApplication.Log.log
+//import webapp.WebApplication.Log.log
 //import common.domain.Avatar
 //import webapp.http.util.PaginationUtil.generatePaginationHttpHeaders
-////import webapp.accounts.management.UserService
+////import accounts.management.UserService
 //import kotlinx.coroutines.flow.Flow
 //import kotlinx.coroutines.flow.toCollection
 //import org.springframework.data.domain.PageImpl

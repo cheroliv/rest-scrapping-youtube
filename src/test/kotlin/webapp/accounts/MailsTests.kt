@@ -2,6 +2,9 @@
 
 package webapp.accounts
 
+import accounts.AccountCredentials
+import accounts.MailService
+import accounts.MailServiceSmtp
 import webapp.ApplicationProperties
 import jakarta.mail.Multipart
 import jakarta.mail.internet.MimeBodyPart
@@ -13,7 +16,7 @@ import webapp.Constants.DEFAULT
 import webapp.Constants.GMAIL
 import webapp.Constants.MAILSLURP
 import webapp.Constants.TEST
-import webapp.accounts.RandomUtils.generateResetKey
+import accounts.RandomUtils.generateResetKey
 import webapp.launcher
 import com.mailslurp.apis.InboxControllerApi
 import com.mailslurp.models.SendEmailOptions

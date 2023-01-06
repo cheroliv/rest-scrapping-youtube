@@ -1,5 +1,13 @@
 package webapp
 
+import org.apache.logging.log4j.LogManager.getLogger
+import org.apache.logging.log4j.Logger
+import org.springframework.beans.factory.getBean
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.runApplication
+import org.springframework.context.ApplicationContext
+import org.springframework.context.MessageSource
+import webapp.Bootstrap.startupLogMessage
 import webapp.Constants.CLOUD
 import webapp.Constants.DEVELOPMENT
 import webapp.Constants.DEV_HOST
@@ -16,32 +24,54 @@ import webapp.Constants.SPRING_APPLICATION_NAME
 import webapp.Constants.STARTUP_HOST_WARN_LOG_MSG
 import webapp.Constants.STARTUP_LOG_MSG_KEY
 import webapp.Log.log
-import jakarta.annotation.PostConstruct
-import org.apache.logging.log4j.LogManager.getLogger
-import org.apache.logging.log4j.Logger
-import org.springframework.beans.factory.getBean
-import org.springframework.context.ApplicationContext
-import org.springframework.context.MessageSource
-import org.springframework.stereotype.Component
 import java.net.InetAddress.getLocalHost
 import java.net.UnknownHostException
-import java.util.*
 import java.util.Locale.getDefault
 
 /*=================================================================================*/
-object Log {
-    @JvmStatic
-    val log: Logger by lazy { getLogger(Log.javaClass) }
-}
-
+@SpringBootApplication(scanBasePackages = ["webapp", "accounts"])
+class WebApplication
 /*=================================================================================*/
 
-@Suppress("unused")
-@Component
-class BackendComponent(private val context: ApplicationContext) {
-    @PostConstruct
-    private fun init() = context.checkProfileLog()
+object Bootstrap {
+    @JvmStatic
+    fun main(args: Array<String>) = runApplication<WebApplication>(*args)
+        .checkProfileLog()
+        .bootstrapLog()
+
+     @JvmStatic
+     fun startupLogMessage(
+        appName: String?,
+        goVisitMessage: String,
+        protocol: String,
+        serverPort: String?,
+        contextPath: String,
+        hostAddress: String,
+        profiles: String,
+        activeProfiles: String
+    ): String = """$JUMPLINE$JUMPLINE$JUMPLINE
+----------------------------------------------------------
+go visit $goVisitMessage    
+----------------------------------------------------------
+Application '$appName' is running!
+Access URLs
+    Local:      $protocol://localhost:$serverPort$contextPath
+    External:   $protocol://$hostAddress:$serverPort$contextPath${
+        if (profiles.isNotBlank()) JUMPLINE + buildString {
+            append("Profile(s): ")
+            append(profiles)
+        } else EMPTY_STRING
+    }${
+        if (activeProfiles.isNotBlank()) JUMPLINE + buildString {
+            append("Active(s) profile(s): ")
+            append(activeProfiles)
+        } else EMPTY_STRING
+    }
+----------------------------------------------------------
+$JUMPLINE$JUMPLINE""".trimIndent()
 }
+
+
 /*=================================================================================*/
 
 internal fun ApplicationContext.checkProfileLog(): ApplicationContext = apply {
@@ -88,36 +118,12 @@ internal fun ApplicationContext.bootstrapLog() = startupLogMessage(
     else EMPTY_STRING,
 ).run { log.info(this) }
 
+
 /*=================================================================================*/
 
-private fun startupLogMessage(
-    appName: String?,
-    goVisitMessage: String,
-    protocol: String,
-    serverPort: String?,
-    contextPath: String,
-    hostAddress: String,
-    profiles: String,
-    activeProfiles: String
-): String = """$JUMPLINE$JUMPLINE$JUMPLINE
-----------------------------------------------------------
-go visit $goVisitMessage    
-----------------------------------------------------------
-Application '$appName' is running!
-Access URLs
-    Local:      $protocol://localhost:$serverPort$contextPath
-    External:   $protocol://$hostAddress:$serverPort$contextPath${
-    if (profiles.isNotBlank()) JUMPLINE + buildString {
-        append("Profile(s): ")
-        append(profiles)
-    } else EMPTY_STRING
-}${
-    if (activeProfiles.isNotBlank()) JUMPLINE + buildString {
-        append("Active(s) profile(s): ")
-        append(activeProfiles)
-    } else EMPTY_STRING
+object Log {
+    @JvmStatic
+    val log: Logger by lazy { getLogger(Log.javaClass) }
 }
-----------------------------------------------------------
-$JUMPLINE$JUMPLINE""".trimIndent()
-/*=================================================================================*/
 
+/*=================================================================================*/

@@ -1,12 +1,11 @@
-package webapp.accounts.password
+package accounts.password
 
+import accounts.*
 import webapp.*
 import webapp.Constants.ACCOUNT_API
 import webapp.Constants.RESET_PASSWORD_API_FINISH
 import webapp.Constants.RESET_PASSWORD_API_INIT
 import webapp.Log.log
-import webapp.accounts.*
-import webapp.accounts.MailService
 import jakarta.validation.constraints.Email
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -34,10 +33,8 @@ class ResetPasswordController(
     @PostMapping(RESET_PASSWORD_API_INIT)
     suspend fun requestPasswordReset(@RequestBody @Email mail: String) =
         with(resetPasswordService.requestPasswordReset(mail)) {
-            when {
-                this == null -> log.warn("Password reset requested for non existing mail")
-                else -> mailService.sendPasswordResetMail(this)
-            }
+            if (this == null) log.warn("Password reset requested for non existing mail")
+            else mailService.sendPasswordResetMail(this)
         }
 
     /**
@@ -45,20 +42,19 @@ class ResetPasswordController(
      *
      * @param keyAndPassword the generated key and the new password.
      * @throws InvalidPasswordProblem {@code 400 (Bad Request)} if the password is incorrect.
-     * @throws RuntimeException         {@code 500 (Internal BackendApplication Error)} if the password could not be reset.
+     * @throws RuntimeException         {@code 500 (Internal WebApplication Error)} if the password could not be reset.
      */
     @PostMapping(RESET_PASSWORD_API_FINISH)
     suspend fun finishPasswordReset(@RequestBody keyAndPassword: KeyAndPassword): Unit =
         with(InvalidPasswordException()) {
-            when {
-                isPasswordLengthInvalid(keyAndPassword.newPassword) -> throw this
-                keyAndPassword.newPassword != null
-                        && keyAndPassword.key != null
-                        && resetPasswordService.completePasswordReset(
+            if (isPasswordLengthInvalid(keyAndPassword.newPassword)) throw this
+            else if (keyAndPassword.newPassword != null
+                && keyAndPassword.key != null
+                && resetPasswordService.completePasswordReset(
                     keyAndPassword.newPassword,
                     keyAndPassword.key
-                ) == null -> throw ResetPasswordException("No user was found for this reset key")
-            }
+                ) == null
+            ) throw ResetPasswordException("No user was found for this reset key")
         }
 }
 

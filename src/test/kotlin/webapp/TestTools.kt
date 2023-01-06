@@ -10,11 +10,11 @@ import webapp.Constants.SYSTEM_USER
 import webapp.Constants.TEST
 import webapp.Constants.VIRGULE
 import webapp.Log.log
-import webapp.accounts.Account
-import webapp.accounts.AccountAuthorityEntity
-import webapp.accounts.AccountCredentials
-import webapp.accounts.AccountEntity
-import webapp.accounts.RandomUtils.generateActivationKey
+import accounts.Account
+import accounts.AccountAuthorityEntity
+import accounts.AccountCredentials
+import accounts.AccountEntity
+import accounts.RandomUtils.generateActivationKey
 import com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS
@@ -67,7 +67,7 @@ val ByteArray.logBodyRaw: ByteArray
 
 
 fun launcher(vararg profiles: String): ConfigurableApplicationContext =
-    runApplication<BackendApplication> {
+    runApplication<WebApplication> {
         /**
          * before launching: configuration
          */

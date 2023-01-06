@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package webapp.accounts
+package accounts
 
 import webapp.Constants.INVALID_PASSWORD_TYPE
 import org.springframework.http.HttpStatus.BAD_REQUEST

@@ -1,4 +1,4 @@
-package webapp.accounts
+package accounts
 
 import webapp.Constants.PASSWORD_MAX_LENGTH
 import webapp.Constants.PASSWORD_MIN_LENGTH
