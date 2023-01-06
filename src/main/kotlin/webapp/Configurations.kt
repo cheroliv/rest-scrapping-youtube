@@ -56,7 +56,7 @@ import webapp.Constants.MAIL_SMTP_AUTH
 import webapp.Constants.MAIL_TRANSPORT_PROTOCOL
 import webapp.Constants.MAIL_TRANSPORT_STARTTLS_ENABLE
 import webapp.Constants.REQUEST_PARAM_LANG
-import webapp.Log.log
+import webapp.Bootstrap.log
 import java.util.Locale.forLanguageTag
 import java.util.Locale.getDefault
 import java.util.concurrent.Callable

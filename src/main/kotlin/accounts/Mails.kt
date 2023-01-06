@@ -10,7 +10,7 @@ import webapp.Constants.TEMPLATE_NAME_SIGNUP
 import webapp.Constants.TITLE_KEY_PASSWORD
 import webapp.Constants.TITLE_KEY_SIGNUP
 import webapp.Constants.USER
-import webapp.Log.log
+import webapp.Bootstrap.log
 import jakarta.mail.MessagingException
 import org.springframework.context.MessageSource
 import org.springframework.context.annotation.Profile

@@ -10,7 +10,7 @@ import webapp.Constants.MSG_WRONG_ACTIVATION_KEY
 import webapp.Constants.ROLE_USER
 import webapp.Constants.SIGNUP_API
 import webapp.Constants.SYSTEM_USER
-import webapp.Log.log
+import webapp.Bootstrap.log
 import accounts.RandomUtils.generateActivationKey
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus.CREATED

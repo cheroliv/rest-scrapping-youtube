@@ -1,5 +1,6 @@
+
+
 package webapp
-import webapp.Log.log
 import org.springframework.data.domain.Page
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
@@ -8,9 +9,12 @@ import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import org.springframework.web.util.UriComponentsBuilder
 import reactor.core.publisher.Mono
+import webapp.Bootstrap.log
 import java.io.UnsupportedEncodingException
-import java.net.URLEncoder
+import java.net.URLEncoder.encode
 import java.text.MessageFormat
+import kotlin.text.Charsets.UTF_8
+
 /*=================================================================================*/
 
 @Component
@@ -58,7 +62,7 @@ object HttpHeaderUtil {
     ): HttpHeaders = HttpHeaders().apply {
         add("X-$applicationName-alert", message)
         try {
-            add("X-$applicationName-params", URLEncoder.encode(param, Charsets.UTF_8))
+            add("X-$applicationName-params", @Suppress("Since15") encode(param, UTF_8))
         } catch (_: UnsupportedEncodingException) {
             // StandardCharsets are supported by every Java implementation so this exceptions will never happen
         }
@@ -81,10 +85,8 @@ object HttpHeaderUtil {
         param: String
     ): HttpHeaders = createAlert(
         applicationName,
-        when {
-            enableTranslation -> "$applicationName.$entityName.created"
-            else -> "A new $entityName is created with identifier $param"
-        },
+        if (enableTranslation) "$applicationName.$entityName.created"
+        else "A new $entityName is created with identifier $param",
         param
     )
 
@@ -105,10 +107,8 @@ object HttpHeaderUtil {
         param: String
     ): HttpHeaders = createAlert(
         applicationName,
-        when {
-            enableTranslation -> "$applicationName.$entityName.updated"
-            else -> "A $entityName is updated with identifier $param"
-        },
+        if (enableTranslation) "$applicationName.$entityName.updated"
+        else "A $entityName is updated with identifier $param",
         param
     )
 
@@ -129,10 +129,8 @@ object HttpHeaderUtil {
         param: String
     ): HttpHeaders = createAlert(
         applicationName,
-        when {
-            enableTranslation -> "$applicationName.$entityName.deleted"
-            else -> "A $entityName is deleted with identifier $param"
-        },
+        if (enableTranslation) "$applicationName.$entityName.deleted"
+        else "A $entityName is deleted with identifier $param",
         param
     )
 

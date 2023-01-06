@@ -8,7 +8,7 @@ import webapp.Constants.AUTHORIZATION_HEADER
 import webapp.Constants.BEARER_START_WITH
 import webapp.Constants.INVALID_TOKEN
 import webapp.Constants.VALID_TOKEN
-import webapp.Log.log
+import webapp.Bootstrap.log
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.Jwts.parserBuilder

@@ -5,7 +5,7 @@ import webapp.*
 import webapp.Constants.ACCOUNT_API
 import webapp.Constants.RESET_PASSWORD_API_FINISH
 import webapp.Constants.RESET_PASSWORD_API_INIT
-import webapp.Log.log
+import webapp.Bootstrap.log
 import jakarta.validation.constraints.Email
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

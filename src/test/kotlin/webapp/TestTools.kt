@@ -9,7 +9,7 @@ import webapp.Constants.ROLE_USER
 import webapp.Constants.SYSTEM_USER
 import webapp.Constants.TEST
 import webapp.Constants.VIRGULE
-import webapp.Log.log
+import webapp.Bootstrap.log
 import accounts.Account
 import accounts.AccountAuthorityEntity
 import accounts.AccountCredentials

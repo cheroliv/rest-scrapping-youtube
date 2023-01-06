@@ -10,7 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Mono
-import webapp.Log
+import webapp.Bootstrap.log
 
 @Component("userDetailsService")
 class DomainUserDetailsService(
@@ -18,7 +18,7 @@ class DomainUserDetailsService(
 ) : ReactiveUserDetailsService {
 
     @Transactional
-    override fun findByUsername(login: String): Mono<UserDetails> = Log.log
+    override fun findByUsername(login: String): Mono<UserDetails> = log
         .debug("Authenticating $login").run {
             return if (EmailValidator().isValid(login, null)) mono {
                 accountRepository.findOneByEmailWithAuthorities(login).apply {
