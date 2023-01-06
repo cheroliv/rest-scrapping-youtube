@@ -102,7 +102,10 @@ class InvalidPasswordProblem(
     exception: InvalidPasswordException
 ) : ErrorResponseException(
     BAD_REQUEST,
-    forStatusAndDetail(BAD_REQUEST, exception.message!!).apply {
+    forStatusAndDetail(
+        BAD_REQUEST,
+        exception.message!!
+    ).apply {
         type = INVALID_PASSWORD_TYPE
         title = "Incorrect password"
     },
