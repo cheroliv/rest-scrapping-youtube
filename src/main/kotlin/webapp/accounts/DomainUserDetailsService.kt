@@ -1,4 +1,4 @@
-package accounts
+package webapp.accounts
 
 import kotlinx.coroutines.reactor.mono
 import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator

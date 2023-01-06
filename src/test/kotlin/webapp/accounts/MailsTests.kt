@@ -2,24 +2,12 @@
 
 package webapp.accounts
 
-import accounts.AccountCredentials
-import accounts.MailService
-import accounts.MailServiceSmtp
-import webapp.ApplicationProperties
+import com.mailslurp.apis.InboxControllerApi
+import com.mailslurp.models.SendEmailOptions
 import jakarta.mail.Multipart
 import jakarta.mail.internet.MimeBodyPart
 import jakarta.mail.internet.MimeMessage
 import jakarta.mail.internet.MimeMultipart
-import webapp.Constants.DEFAULT_LANGUAGE
-import webapp.Constants.DEVELOPMENT
-import webapp.Constants.DEFAULT
-import webapp.Constants.GMAIL
-import webapp.Constants.MAILSLURP
-import webapp.Constants.TEST
-import accounts.RandomUtils.generateResetKey
-import webapp.launcher
-import com.mailslurp.apis.InboxControllerApi
-import com.mailslurp.models.SendEmailOptions
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
@@ -36,6 +24,15 @@ import org.springframework.context.MessageSource
 import org.springframework.mail.MailSendException
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.thymeleaf.spring6.SpringWebFluxTemplateEngine
+import webapp.ApplicationProperties
+import webapp.Constants.DEFAULT
+import webapp.Constants.DEFAULT_LANGUAGE
+import webapp.Constants.DEVELOPMENT
+import webapp.Constants.GMAIL
+import webapp.Constants.MAILSLURP
+import webapp.Constants.TEST
+import webapp.accounts.RandomUtils.generateResetKey
+import webapp.launcher
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream

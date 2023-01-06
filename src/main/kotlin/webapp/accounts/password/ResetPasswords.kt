@@ -1,11 +1,5 @@
-package accounts.password
+package webapp.accounts.password
 
-import accounts.*
-import webapp.*
-import webapp.Constants.ACCOUNT_API
-import webapp.Constants.RESET_PASSWORD_API_FINISH
-import webapp.Constants.RESET_PASSWORD_API_INIT
-import webapp.Bootstrap.log
 import jakarta.validation.constraints.Email
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -13,6 +7,13 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import webapp.*
+import webapp.Bootstrap.log
+import webapp.Constants.ACCOUNT_API
+import webapp.Constants.CHANGE_PASSWORD_API
+import webapp.Constants.RESET_PASSWORD_API_FINISH
+import webapp.Constants.RESET_PASSWORD_API_INIT
+import webapp.accounts.*
 import java.time.Instant
 
 /*=================================================================================*/
@@ -72,18 +73,16 @@ class ChangePasswordController(
      * @param passwordChange current and new password.
      * @throws InvalidPasswordProblem {@code 400 (Bad Request)} if the new password is incorrect.
      */
-    @PostMapping(Constants.CHANGE_PASSWORD_API)
+    @PostMapping(CHANGE_PASSWORD_API)
     suspend fun changePassword(@RequestBody passwordChange: PasswordChange): Unit =
         InvalidPasswordException().run {
-            when {
-                isPasswordLengthInvalid(passwordChange.newPassword) -> throw this
-
-                passwordChange.currentPassword != null
-                        && passwordChange.newPassword != null -> changePasswordService.changePassword(
-                    passwordChange.currentPassword,
-                    passwordChange.newPassword
-                )
-            }
+            if (isPasswordLengthInvalid(passwordChange.newPassword)) throw this
+            else if (passwordChange.currentPassword != null
+                && passwordChange.newPassword != null
+            ) changePasswordService.changePassword(
+                passwordChange.currentPassword,
+                passwordChange.newPassword
+            )
 
         }
 

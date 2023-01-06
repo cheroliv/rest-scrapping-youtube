@@ -28,7 +28,7 @@ import java.net.UnknownHostException
 import java.util.Locale.getDefault
 
 /*=================================================================================*/
-@SpringBootApplication(scanBasePackages = ["webapp", "accounts"])
+@SpringBootApplication
 class WebApplication
 /*=================================================================================*/
 
@@ -37,7 +37,7 @@ object Bootstrap {
     fun main(args: Array<String>) = runApplication<WebApplication>(*args)
         .checkProfileLog()
         .bootstrapLog()
-        .unit()
+        .`continue`()
 
     @JvmStatic
     val log: Logger by lazy { getLogger(Bootstrap.javaClass) }
@@ -45,7 +45,7 @@ object Bootstrap {
 
 /*=================================================================================*/
 @Suppress("UnusedReceiverParameter")
-fun ApplicationContext.unit() = Unit
+fun ApplicationContext.`continue`() = Unit
 
 /*=================================================================================*/
 

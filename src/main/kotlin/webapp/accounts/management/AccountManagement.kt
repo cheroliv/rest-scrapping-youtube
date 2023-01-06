@@ -1,10 +1,10 @@
 @file:Suppress("unused")
 
-package accounts.management
+package webapp.accounts.management
 
 
 import webapp.Constants.AUTHORITY_API
-import accounts.AuthorityRepository
+import webapp.accounts.AuthorityRepository
 import org.springframework.context.ApplicationContext
 import org.springframework.http.HttpStatus.OK
 import org.springframework.stereotype.Service
@@ -396,7 +396,7 @@ class AuthorityController(
 //import webapp.WebApplication.Log.log
 //import common.domain.Avatar
 //import webapp.http.util.PaginationUtil.generatePaginationHttpHeaders
-////import accounts.management.UserService
+////import webapp.accounts.management.UserService
 //import kotlinx.coroutines.flow.Flow
 //import kotlinx.coroutines.flow.toCollection
 //import org.springframework.data.domain.PageImpl

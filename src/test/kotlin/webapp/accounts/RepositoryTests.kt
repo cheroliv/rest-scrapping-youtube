@@ -2,7 +2,7 @@
 
 package webapp.accounts
 
-import accounts.*
+import webapp.accounts.*
 import webapp.*
 import webapp.Constants.DEFAULT_LANGUAGE
 import webapp.Constants.ROLE_ADMIN
@@ -12,7 +12,7 @@ import webapp.Constants.SYSTEM_USER
 import webapp.Constants.USER
 import webapp.Data
 import webapp.accounts.*
-import accounts.RandomUtils.generateActivationKey
+import webapp.accounts.RandomUtils.generateActivationKey
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterAll
