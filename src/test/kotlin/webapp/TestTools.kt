@@ -11,9 +11,9 @@ import webapp.Constants.TEST
 import webapp.Constants.VIRGULE
 import webapp.Bootstrap.log
 import webapp.accounts.models.Account
-import webapp.accounts.entities.AccountAuthorityEntity
+import webapp.accounts.models.entities.AccountAuthorityEntity
 import webapp.accounts.models.AccountCredentials
-import webapp.accounts.entities.AccountEntity
+import webapp.accounts.models.entities.AccountEntity
 import webapp.accounts.models.RandomUtils.generateActivationKey
 import com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY
 import com.fasterxml.jackson.databind.ObjectMapper

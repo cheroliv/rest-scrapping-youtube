@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package webapp.accounts.entities
+package webapp.accounts.models.entities
 
 import webapp.Constants
 import com.fasterxml.jackson.annotation.JsonIgnore
