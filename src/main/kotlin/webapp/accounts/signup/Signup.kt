@@ -1,6 +1,6 @@
 package webapp.accounts.signup
 
-import accounts.*
+import webapp.accounts.*
 import webapp.*
 import webapp.Constants.ACCOUNT_API
 import webapp.Constants.ACTIVATE_API
@@ -11,7 +11,7 @@ import webapp.Constants.ROLE_USER
 import webapp.Constants.SIGNUP_API
 import webapp.Constants.SYSTEM_USER
 import webapp.Bootstrap.log
-import webapp.accounts.RandomUtils.generateActivationKey
+import webapp.accounts.models.RandomUtils.generateActivationKey
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import webapp.accounts.*
+import webapp.accounts.models.AccountCredentials
 import java.time.Instant.now
 
 

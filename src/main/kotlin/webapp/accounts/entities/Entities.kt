@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package webapp.accounts
+package webapp.accounts.entities
 
 import webapp.Constants
 import com.fasterxml.jackson.annotation.JsonIgnore
@@ -13,6 +13,8 @@ import java.util.*
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
+import webapp.accounts.models.Account
+import webapp.accounts.models.AccountCredentials
 import jakarta.validation.constraints.Email as EmailConstraint
 
 

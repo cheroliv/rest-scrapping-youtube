@@ -10,11 +10,11 @@ import webapp.Constants.SYSTEM_USER
 import webapp.Constants.TEST
 import webapp.Constants.VIRGULE
 import webapp.Bootstrap.log
-import webapp.accounts.Account
-import webapp.accounts.AccountAuthorityEntity
-import webapp.accounts.AccountCredentials
-import webapp.accounts.AccountEntity
-import webapp.accounts.RandomUtils.generateActivationKey
+import webapp.accounts.models.Account
+import webapp.accounts.entities.AccountAuthorityEntity
+import webapp.accounts.models.AccountCredentials
+import webapp.accounts.entities.AccountEntity
+import webapp.accounts.models.RandomUtils.generateActivationKey
 import com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS

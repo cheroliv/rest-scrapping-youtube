@@ -5,8 +5,8 @@ package webapp.accounts.signup
 import webapp.*
 import webapp.Constants.BASE_URL_DEV
 import webapp.Data.defaultAccount
-import webapp.accounts.AccountCredentials
-import webapp.accounts.RandomUtils
+import webapp.accounts.models.AccountCredentials
+import webapp.accounts.models.RandomUtils
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll

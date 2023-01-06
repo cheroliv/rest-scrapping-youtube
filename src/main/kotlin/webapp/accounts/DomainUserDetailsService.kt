@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Mono
 import webapp.Bootstrap.log
+import webapp.accounts.models.AccountCredentials
 
 @Component("userDetailsService")
 class DomainUserDetailsService(

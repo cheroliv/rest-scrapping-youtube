@@ -11,8 +11,7 @@ import webapp.Constants.ROLE_USER
 import webapp.Constants.SYSTEM_USER
 import webapp.Constants.USER
 import webapp.Data
-import webapp.accounts.*
-import webapp.accounts.RandomUtils.generateActivationKey
+import webapp.accounts.models.RandomUtils.generateActivationKey
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterAll
