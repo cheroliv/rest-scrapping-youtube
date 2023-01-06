@@ -11,15 +11,16 @@ import webapp.Constants.ROLE_USER
 import webapp.Constants.SIGNUP_API
 import webapp.Constants.SYSTEM_USER
 import webapp.Bootstrap.log
-import webapp.accounts.models.RandomUtils.generateActivationKey
+import webapp.accounts.AccountUtils.generateActivationKey
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
-import webapp.accounts.*
+import webapp.accounts.MailService
 import webapp.accounts.models.AccountCredentials
+import webapp.accounts.AccountRepository
 import java.time.Instant.now
 
 

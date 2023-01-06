@@ -1,4 +1,4 @@
-package webapp.accounts
+package webapp.accounts.security
 
 import kotlinx.coroutines.reactor.mono
 import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator
@@ -10,7 +10,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Mono
-import webapp.Bootstrap.log
+import webapp.Bootstrap
+import webapp.accounts.AccountRepository
+import webapp.accounts.UserNotActivatedException
 import webapp.accounts.models.AccountCredentials
 
 @Component("userDetailsService")
@@ -19,7 +21,7 @@ class DomainUserDetailsService(
 ) : ReactiveUserDetailsService {
 
     @Transactional
-    override fun findByUsername(login: String): Mono<UserDetails> = log
+    override fun findByUsername(login: String): Mono<UserDetails> = Bootstrap.log
         .debug("Authenticating $login").run {
             return if (EmailValidator().isValid(login, null)) mono {
                 accountRepository.findOneByEmailWithAuthorities(login).apply {

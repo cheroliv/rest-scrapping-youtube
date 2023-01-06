@@ -4,9 +4,8 @@ package webapp.accounts.signup
 
 import webapp.*
 import webapp.Constants.BASE_URL_DEV
-import webapp.Data.defaultAccount
+import webapp.DataTests.defaultAccount
 import webapp.accounts.models.AccountCredentials
-import webapp.accounts.models.RandomUtils
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -18,6 +17,7 @@ import org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.WebTestClient.bindToServer
 import org.springframework.test.web.reactive.server.returnResult
+import webapp.accounts.*
 import java.net.URI
 import kotlin.test.*
 
@@ -381,7 +381,7 @@ internal class SignupTests {
 
     @Test
     fun `vérifie que la requête activate contient bien des données cohérentes`() {
-        RandomUtils.generateActivationKey.run {
+        AccountUtils.generateActivationKey.run {
             client
                 .get()
                 .uri("${Constants.ACTIVATE_API_PATH}${Constants.ACTIVATE_API_PARAM}", this)

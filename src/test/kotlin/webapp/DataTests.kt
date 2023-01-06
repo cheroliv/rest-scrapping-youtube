@@ -10,9 +10,9 @@ package webapp
 import webapp.Constants.ADMIN
 import webapp.Constants.DOMAIN_DEV_URL
 import webapp.Constants.USER
-import webapp.Data.accounts
-import webapp.Data.defaultAccount
-import webapp.Data.defaultAccountJson
+import webapp.DataTests.accounts
+import webapp.DataTests.defaultAccount
+import webapp.DataTests.defaultAccountJson
 import webapp.Bootstrap.log
 import webapp.accounts.models.AccountCredentials
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -24,7 +24,7 @@ import org.springframework.context.ConfigurableApplicationContext
 import kotlin.test.Test
 
 
-internal object Data {
+internal object DataTests {
     val adminAccount by lazy { accountCredentialsFactory(ADMIN) }
     val defaultAccount by lazy { accountCredentialsFactory(USER) }
     val accounts = setOf(adminAccount, defaultAccount)
@@ -89,7 +89,7 @@ val writers = listOf(
     "Michel Clouscard"
 )
 
-internal class DataTests {
+internal class DataTestsChecks {
 
     private lateinit var context: ConfigurableApplicationContext
 

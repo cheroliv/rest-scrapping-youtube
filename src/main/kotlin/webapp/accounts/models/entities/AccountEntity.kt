@@ -5,7 +5,6 @@ package webapp.accounts.models.entities
 import webapp.Constants
 import com.fasterxml.jackson.annotation.JsonIgnore
 import org.springframework.data.annotation.*
-import org.springframework.data.domain.Persistable
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.time.Instant
@@ -13,125 +12,10 @@ import java.util.*
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
-import webapp.accounts.models.Account
 import webapp.accounts.models.AccountCredentials
 import jakarta.validation.constraints.Email as EmailConstraint
 
 
-/*=================================================================================*/
-interface AuthorityRecord : Persistable<String> {
-    val role: String
-    override fun getId() = role
-    override fun isNew() = true
-
-    companion object {
-        const val ROLE_COLUMN = "role"
-    }
-}
-
-
-/*=================================================================================*/
-@Table("`authority`")
-data class AuthorityEntity(
-    @Id
-    @field:NotNull
-    @field:Size(max = 50)
-    @Column(AuthorityRecord.ROLE_COLUMN)
-    override val role: String
-) : AuthorityRecord
-
-
-
-/*=================================================================================*/
-@Table("`phone`")
-data class PhoneEntity(
-    @Id var id: UUID? = null,
-    @field:NotNull
-    @field:Pattern(regexp = Constants.LOGIN_REGEX)
-    @field:Size(min = 1, max = 50)
-    var value: String? = null
-)
-
-
-/*=================================================================================*/
-@Table("`country_phone_code`")
-data class CountryPhoneCodeEntity(
-    @Id val code: String,
-    val countryCode: String
-) : Persistable<String> {
-    override fun getId() = code
-    override fun isNew() = true
-}
-/*=================================================================================*/
-@Table("`email`")
-data class EmailEntity(@Id val value: @EmailConstraint String) : Persistable<String> {
-    override fun getId() = value
-    override fun isNew() = true
-}
-/*=================================================================================*/
-@Table("`user_authority`")
-data class AccountAuthorityEntity(
-    @Id var id: Long? = null,
-    @field:NotNull
-    val userId: UUID,
-    @field:NotNull
-    val role: String
-)
-/*=================================================================================*/
-interface AccountRecord<AUTH : AuthorityRecord> {
-    var id: UUID?
-    var login: String?
-    var password: String?
-    var firstName: String?
-    var lastName: String?
-    var email: String?
-    var activated: Boolean
-    var langKey: String?
-    var imageUrl: String?
-    var activationKey: String?
-    var resetKey: String?
-    var resetDate: Instant?
-    var authorities: MutableSet<AUTH>?
-    var createdBy: String?
-    var createdDate: Instant?
-    var lastModifiedBy: String?
-    var lastModifiedDate: Instant?
-    val toModel: Account
-        get() = Account(
-            id = id,
-            login = login,
-            firstName = firstName,
-            lastName = lastName,
-            email = email,
-            imageUrl = imageUrl,
-            activated = activated,
-            langKey = langKey,
-            createdBy = createdBy,
-            createdDate = createdDate,
-            lastModifiedBy = lastModifiedBy,
-            lastModifiedDate = lastModifiedDate,
-            authorities = authorities?.map { it.role }?.toSet()
-        )
-
-    val toCredentialsModel: AccountCredentials
-        get() = AccountCredentials(
-            id = id,
-            login = login,
-            firstName = firstName,
-            lastName = lastName,
-            email = email,
-            password = password,
-            activationKey = activationKey,
-            imageUrl = imageUrl,
-            activated = activated,
-            langKey = langKey,
-            createdBy = createdBy,
-            createdDate = createdDate,
-            lastModifiedBy = lastModifiedBy,
-            lastModifiedDate = lastModifiedDate,
-            authorities = authorities?.map { it.role }?.toSet()
-        )
-}
 /*=================================================================================*/
 @Table("`user`")
 data class AccountEntity @JvmOverloads constructor(

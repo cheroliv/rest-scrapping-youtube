@@ -1,4 +1,0 @@
-package webapp
-
-class SecurityTests {
-}
