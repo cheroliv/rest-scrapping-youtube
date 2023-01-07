@@ -1,5 +1,4 @@
 # Project exclude paths
-/.gradle/
 /browser/build/
 /build/
 /build/js/packages/section-browser/kotlin/
@@ -12,6 +11,11 @@ data
 section.code-workspace
 simple-server/bin
 kotlin-js-store/yarn.lock
-/monolith-webflux.zip
-kotlin-springboot-monolith.code-workspace
+
 local.properties
+private
+bin
+.classpath
+.project
+.settings
+/src/main/resources/application-mailslurp.yml

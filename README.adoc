@@ -1,26 +1,26 @@
-= kotlin-springboot-monolith
+= kotlin-springboot
 
-== *springboot monolith codebase*
+== *springboot codebase*
 
 .stack:
 * springboot
 * webflux
 * spring data r2dbc
 * rest api
-* spring security
-* kotlin
+* spring security jwt
 * kotlin coroutines
+* Http problem details
 
 .features:
 * Signup account
 * Password reset and update
 
 ==== **to test the app**
-Open terminal and run : ```./gradlew :monolith:check```
+Open terminal and run : ```./gradlew check```
 
 ==== **to BDD test the app**
-Open terminal and run : ```./gradlew :monolith:cucumber```
+Open terminal and run : ```./gradlew cucumber```
 
 ==== **to run the app**
-Open terminal and run : ```./gradlew :monolith:bootRun``` +
+Open terminal and run : ```./gradlew bootRun``` +
 and launch http://localhost:8080/
