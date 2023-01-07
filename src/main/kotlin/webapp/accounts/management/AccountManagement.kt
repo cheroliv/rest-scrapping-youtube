@@ -21,10 +21,6 @@ class AuthorityController(
     @GetMapping
     @ResponseStatus(OK)
     suspend fun getAuthorities() = authorityRepository.findAll()
-
-    @GetMapping("count")
-    @ResponseStatus(OK)
-    suspend fun count() = authorityRepository.count()
 }
 /*=================================================================================*/
 

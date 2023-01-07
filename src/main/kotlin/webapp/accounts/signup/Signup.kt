@@ -1,7 +1,13 @@
 package webapp.accounts.signup
 
-import webapp.accounts.*
+import jakarta.validation.Valid
+import org.springframework.http.HttpStatus.CREATED
+import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.bind.annotation.*
 import webapp.*
+import webapp.Bootstrap.log
 import webapp.Constants.ACCOUNT_API
 import webapp.Constants.ACTIVATE_API
 import webapp.Constants.ACTIVATE_API_KEY
@@ -10,17 +16,9 @@ import webapp.Constants.MSG_WRONG_ACTIVATION_KEY
 import webapp.Constants.ROLE_USER
 import webapp.Constants.SIGNUP_API
 import webapp.Constants.SYSTEM_USER
-import webapp.Bootstrap.log
+import webapp.accounts.*
 import webapp.accounts.AccountUtils.generateActivationKey
-import jakarta.validation.Valid
-import org.springframework.http.HttpStatus.CREATED
-import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.*
-import webapp.accounts.MailService
 import webapp.accounts.models.AccountCredentials
-import webapp.accounts.AccountRepository
 import java.time.Instant.now
 
 
@@ -63,9 +61,7 @@ class SignupController(
      */
     @GetMapping(ACTIVATE_API)
     suspend fun activateAccount(@RequestParam(value = ACTIVATE_API_KEY) key: String) {
-        when {
-            !signupService.activate(key) -> throw SignupException(MSG_WRONG_ACTIVATION_KEY)
-        }
+        if (!signupService.activate(key)) throw SignupException(MSG_WRONG_ACTIVATION_KEY)
     }
 }
 
@@ -94,10 +90,8 @@ class SignupService(
             password = passwordEncoder.encode(account.password),
             activationKey = generateActivationKey,
             authorities = setOf(ROLE_USER),
-            langKey = when {
-                account.langKey.isNullOrBlank() -> DEFAULT_LANGUAGE
-                else -> account.langKey
-            },
+            langKey = if (account.langKey.isNullOrBlank()) DEFAULT_LANGUAGE
+            else account.langKey,
             createdBy = SYSTEM_USER,
             createdDate = createdDate,
             lastModifiedBy = SYSTEM_USER,
@@ -112,7 +106,7 @@ class SignupService(
     @Throws(UsernameAlreadyUsedException::class)
     private suspend fun loginValidation(model: AccountCredentials) {
         accountRepository.findOneByLogin(model.login!!).run {
-            if (this != null) if (!activated) accountRepository.suppress(this.toAccount())
+            if (this != null) if (!activated) accountRepository.delete(this.toAccount())
             else throw UsernameAlreadyUsedException()
         }
     }
@@ -121,18 +115,17 @@ class SignupService(
     private suspend fun emailValidation(model: AccountCredentials) {
         accountRepository.findOneByEmail(model.email!!).run {
             if (this != null) {
-                if (!activated) accountRepository.suppress(toAccount())
+                if (!activated) accountRepository.delete(toAccount())
                 else throw EmailAlreadyUsedException()
             }
         }
     }
 
     suspend fun activate(key: String): Boolean {
-        accountRepository.run {
-            with(findOneByActivationKey(key)) {
+            with(accountRepository.findOneByActivationKey(key)) {
                 return if (this == null) false
                 else {
-                    save(copy(
+                    accountRepository.save(copy(
                         activated = true,
                         activationKey = null
                     )).run { if (id != null) log.info("activation: $login") }
@@ -141,5 +134,5 @@ class SignupService(
             }
         }
     }
-}
+
 /*=================================================================================*/
