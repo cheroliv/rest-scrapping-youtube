@@ -14,12 +14,10 @@
 .features:
 * Signup account
 * Password reset and update
+* Account management
 
 ==== **to test the app**
 Open terminal and run : ```./gradlew check```
-
-==== **to BDD test the app**
-Open terminal and run : ```./gradlew cucumber```
 
 ==== **to run the app**
 Open terminal and run : ```./gradlew bootRun``` +
