@@ -1,7 +1,6 @@
 package webapp.accounts.models
 
 import jakarta.validation.constraints.*
-import webapp.Constants
 import webapp.Constants.IMAGE_URL_DEFAULT
 import webapp.Constants.LOGIN_REGEX
 import webapp.Constants.PASSWORD_MAX_LENGTH

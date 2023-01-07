@@ -17,9 +17,9 @@ import webapp.Constants.ROLE_USER
 import webapp.Constants.SIGNUP_API
 import webapp.Constants.SYSTEM_USER
 import webapp.accounts.*
-import webapp.accounts.models.AccountUtils.generateActivationKey
 import webapp.accounts.mail.MailService
 import webapp.accounts.models.AccountCredentials
+import webapp.accounts.models.AccountUtils.generateActivationKey
 import webapp.accounts.models.exceptions.EmailAlreadyUsedException
 import webapp.accounts.models.exceptions.InvalidPasswordException
 import webapp.accounts.models.exceptions.UsernameAlreadyUsedException
@@ -111,7 +111,7 @@ class SignupService(
 
     @Throws(UsernameAlreadyUsedException::class)
     private suspend fun loginValidation(model: AccountCredentials) {
-        accountRepository.findOneByLogin(model.login!!).run {
+        accountRepository.findOne(model.login!!).run {
             if (this != null) if (!activated) accountRepository.delete(this.toAccount())
             else throw UsernameAlreadyUsedException()
         }
@@ -119,7 +119,7 @@ class SignupService(
 
     @Throws(UsernameAlreadyUsedException::class)
     private suspend fun emailValidation(model: AccountCredentials) {
-        accountRepository.findOneByEmail(model.email!!).run {
+        accountRepository.findOne(model.email!!).run {
             if (this != null) {
                 if (!activated) accountRepository.delete(toAccount())
                 else throw EmailAlreadyUsedException()

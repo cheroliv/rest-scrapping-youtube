@@ -17,10 +17,10 @@ import webapp.Constants.SYSTEM_USER
 import webapp.DataTests.accounts
 import webapp.DataTests.defaultAccount
 import webapp.accounts.*
-import webapp.accounts.models.AccountUtils.generateActivationKey
 import webapp.accounts.models.*
-import webapp.accounts.repository.AccountRepositoryR2dbc
+import webapp.accounts.models.AccountUtils.generateActivationKey
 import webapp.accounts.repository.AccountRepository
+import webapp.accounts.repository.AccountRepositoryR2dbc
 import java.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -65,43 +65,32 @@ internal class AccountRepositoryR2dbcTest {
         assertEquals(0, countAccount(dao))
         createDataAccounts(accounts, dao)
         assertEquals(accounts.size, countAccount(dao))
+        assertEquals(accounts.size + 1, countAccountAuthority(dao))
         accountRepository.delete(defaultAccount.toAccount())
         assertEquals(accounts.size - 1, countAccount(dao))
+        assertEquals(accounts.size, countAccountAuthority(dao))
     }
 
     @Test
-    fun test_findOneByEmail() = runBlocking {
+    fun test_findOne_with_Email() = runBlocking {
         assertEquals(0, countAccount(dao))
         createDataAccounts(accounts, dao)
         assertEquals(accounts.size, countAccount(dao))
         assertEquals(
             defaultAccount.login,
-            accountRepository.findOneByEmail(defaultAccount.email!!)!!.login
+            accountRepository.findOne(defaultAccount.email!!)!!.login
         )
     }
 
     @Test
-    fun test_findOneByLogin() = runBlocking {
+    fun test_findOne_with_Login() = runBlocking {
         assertEquals(0, countAccount(dao))
         createDataAccounts(accounts, dao)
         assertEquals(accounts.size, countAccount(dao))
         assertEquals(
             defaultAccount.email,
-            accountRepository.findOneByLogin(defaultAccount.login!!)!!.email
+            accountRepository.findOne(defaultAccount.login!!)!!.email
         )
-    }
-
-    @Test
-    fun test_suppress() {
-        assertEquals(0, countAccount(dao))
-        createDataAccounts(accounts, dao)
-        assertEquals(accounts.size, countAccount(dao))
-        assertEquals(accounts.size + 1, countAccountAuthority(dao))
-        runBlocking {
-            accountRepository.delete(findOneByLogin(defaultAccount.login!!, dao)!!.toAccount())
-        }
-        assertEquals(accounts.size - 1, countAccount(dao))
-        assertEquals(accounts.size, countAccountAuthority(dao))
     }
 
     @Test
