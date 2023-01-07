@@ -11,10 +11,11 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Mono
 import webapp.Bootstrap
-import webapp.accounts.AccountRepository
-import webapp.accounts.UserNotActivatedException
+import webapp.accounts.repository.AccountRepository
+import webapp.accounts.models.exceptions.UserNotActivatedException
 import webapp.accounts.models.AccountCredentials
 
+@Suppress("unused")
 @Component("userDetailsService")
 class DomainUserDetailsService(
     private val accountRepository: AccountRepository

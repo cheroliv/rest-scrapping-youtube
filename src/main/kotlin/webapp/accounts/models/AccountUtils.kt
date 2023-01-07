@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package webapp.accounts
+package webapp.accounts.models
 
 import org.apache.commons.lang3.RandomStringUtils
 import java.security.SecureRandom

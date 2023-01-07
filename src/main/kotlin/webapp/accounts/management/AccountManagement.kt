@@ -3,25 +3,12 @@
 package webapp.accounts.management
 
 
-import webapp.Constants.AUTHORITY_API
-import webapp.accounts.AuthorityRepository
 import org.springframework.context.ApplicationContext
-import org.springframework.http.HttpStatus.OK
 import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
 
-/*=================================================================================*/
-@RestController
-@RequestMapping(AUTHORITY_API)
-class AuthorityController(
-    private val authorityRepository: AuthorityRepository
-) {
-    @GetMapping
-    @ResponseStatus(OK)
-    suspend fun getAuthorities() = authorityRepository.findAll()
-}
 /*=================================================================================*/
 
 

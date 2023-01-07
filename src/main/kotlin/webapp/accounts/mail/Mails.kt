@@ -1,4 +1,4 @@
-package webapp.accounts
+package webapp.accounts.mail
 
 import webapp.ApplicationProperties
 import webapp.Constants.BASE_URL

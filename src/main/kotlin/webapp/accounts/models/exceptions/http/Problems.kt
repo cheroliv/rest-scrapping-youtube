@@ -1,11 +1,12 @@
 @file:Suppress("unused")
 
-package webapp.accounts
+package webapp.accounts.models.exceptions.http
 
 import webapp.Constants.INVALID_PASSWORD_TYPE
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.ProblemDetail.forStatusAndDetail
 import org.springframework.web.ErrorResponseException
+import webapp.accounts.models.exceptions.InvalidPasswordException
 
 //import org.zalando.problem.Problem.DEFAULT_TYPE as PROBLEM_DEFAULT_TYPE
 /*

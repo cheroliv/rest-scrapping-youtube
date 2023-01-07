@@ -14,7 +14,7 @@ import webapp.accounts.models.Account
 import webapp.accounts.models.entities.AccountAuthorityEntity
 import webapp.accounts.models.AccountCredentials
 import webapp.accounts.models.entities.AccountEntity
-import webapp.accounts.AccountUtils.generateActivationKey
+import webapp.accounts.models.AccountUtils.generateActivationKey
 import com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS

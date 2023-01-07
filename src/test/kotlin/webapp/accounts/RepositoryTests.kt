@@ -2,15 +2,6 @@
 
 package webapp.accounts
 
-import webapp.accounts.*
-import webapp.*
-import webapp.Constants.DEFAULT_LANGUAGE
-import webapp.Constants.ROLE_ADMIN
-import webapp.Constants.ROLE_ANONYMOUS
-import webapp.Constants.ROLE_USER
-import webapp.Constants.SYSTEM_USER
-import webapp.Constants.USER
-import webapp.accounts.AccountUtils.generateActivationKey
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterAll
@@ -19,39 +10,21 @@ import org.junit.jupiter.api.BeforeAll
 import org.springframework.beans.factory.getBean
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
+import webapp.*
+import webapp.Constants.DEFAULT_LANGUAGE
+import webapp.Constants.ROLE_USER
+import webapp.Constants.SYSTEM_USER
 import webapp.DataTests.accounts
 import webapp.DataTests.defaultAccount
+import webapp.accounts.*
+import webapp.accounts.models.AccountUtils.generateActivationKey
 import webapp.accounts.models.*
+import webapp.accounts.repository.AccountRepositoryR2dbc
+import webapp.accounts.repository.AccountRepository
 import java.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-
-internal class AuthorityRepositoryR2dbcTest {
-    private lateinit var context: ConfigurableApplicationContext
-
-    private val authorityRepository: AuthorityRepository by lazy { context.getBean<AuthorityRepositoryR2dbc>() }
-
-
-    @BeforeAll
-    fun `lance le server en profile test`() {
-        context = launcher()
-    }
-
-    @AfterAll
-    fun `arrête le serveur`() = context.close()
-
-    @Test
-    fun test_findOne(): Unit = runBlocking {
-        mapOf(
-            ROLE_ADMIN to ROLE_ADMIN,
-            ROLE_USER to ROLE_USER,
-            ROLE_ANONYMOUS to ROLE_ANONYMOUS,
-            "" to null,
-            "foo" to null
-        ).map { assertEquals(it.value, authorityRepository.findOne(it.key)) }
-    }
-}
 
 internal class AccountRepositoryR2dbcTest {
     private lateinit var context: ConfigurableApplicationContext
@@ -188,79 +161,4 @@ internal class AccountRepositoryR2dbcTest {
             }
         }
     }
-}
-
-internal class AccountAuthorityRepositoryR2dbcTest {
-
-    private lateinit var context: ConfigurableApplicationContext
-
-    private val dao: R2dbcEntityTemplate by lazy { context.getBean() }
-    private val accountAuthorityRepository: AccountAuthorityRepository by lazy { context.getBean<AccountAuthorityRepositoryR2dbc>() }
-
-    //    @BeforeAll
-//    fun `lance le server en profile test`() = runApplication<WebApplication> {
-//        testLoader(this)
-//    }.run { context = this }
-    @BeforeAll
-    fun `lance le server en profile test`() {
-        context = launcher()
-    }
-
-    @AfterAll
-    fun `arrête le serveur`() = context.close()
-
-
-    @AfterEach
-    fun tearDown() = deleteAllAccounts(dao)
-
-    @Test
-    fun test_save() {
-        assertEquals(0, countAccount(dao))
-        createDataAccounts(accounts, dao)
-        assertEquals(accounts.size, countAccount(dao))
-        assertEquals(accounts.size + 1, countAccountAuthority(dao))
-        runBlocking {
-            accountAuthorityRepository.save(findOneByLogin(USER, dao)!!.id!!, ROLE_ADMIN)
-        }
-        assertEquals(accounts.size + 2, countAccountAuthority(dao))
-    }
-
-
-    @Test
-    fun test_delete() {
-        assertEquals(0, countAccount(dao))
-        createDataAccounts(accounts, dao)
-        assertEquals(accounts.size, countAccount(dao))
-        assertEquals(accounts.size + 1, countAccountAuthority(dao))
-        runBlocking {
-            accountAuthorityRepository.delete(findOneByLogin(USER, dao)!!.id!!, ROLE_USER)
-        }
-        assertEquals(accounts.size, countAccountAuthority(dao))
-    }
-
-    @Test
-    fun test_deleteAllByAccountId() {
-        assertEquals(0, countAccount(dao))
-        createDataAccounts(accounts, dao)
-        assertEquals(accounts.size, countAccount(dao))
-        assertEquals(accounts.size + 1, countAccountAuthority(dao))
-        runBlocking {
-            accountAuthorityRepository.deleteAllByAccountId(findOneByLogin(USER, dao)!!.id!!)
-        }
-        assertEquals(accounts.size, countAccount(dao))
-        assertEquals(accounts.size, countAccountAuthority(dao))
-    }
-
-//    @Test
-//    fun test_deleteAll() {
-//        assertEquals(0, countAccount(dao))
-//        createDataAccounts(DataTests.accounts, dao)
-//        assertEquals(DataTests.accounts.size, countAccount(dao))
-//        assertEquals(DataTests.accounts.size + 1, countAccountAuthority(dao))
-//        runBlocking {
-//            accountAuthorityRepository.deleteAll()
-//        }
-//        assertEquals(DataTests.accounts.size, countAccount(dao))
-//        assertEquals(0, countAccountAuthority(dao))
-//    }
 }

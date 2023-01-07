@@ -17,8 +17,14 @@ import webapp.Constants.ROLE_USER
 import webapp.Constants.SIGNUP_API
 import webapp.Constants.SYSTEM_USER
 import webapp.accounts.*
-import webapp.accounts.AccountUtils.generateActivationKey
+import webapp.accounts.models.AccountUtils.generateActivationKey
+import webapp.accounts.mail.MailService
 import webapp.accounts.models.AccountCredentials
+import webapp.accounts.models.exceptions.EmailAlreadyUsedException
+import webapp.accounts.models.exceptions.InvalidPasswordException
+import webapp.accounts.models.exceptions.UsernameAlreadyUsedException
+import webapp.accounts.models.exceptions.http.InvalidPasswordProblem
+import webapp.accounts.repository.AccountRepository
 import java.time.Instant.now
 
 

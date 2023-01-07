@@ -32,7 +32,9 @@ import webapp.Constants.GMAIL
 import webapp.Constants.MAILSLURP
 import webapp.Constants.TEST
 import webapp.accounts.models.AccountCredentials
-import webapp.accounts.AccountUtils.generateResetKey
+import webapp.accounts.models.AccountUtils.generateResetKey
+import webapp.accounts.mail.MailService
+import webapp.accounts.mail.MailServiceSmtp
 import webapp.launcher
 import java.io.ByteArrayOutputStream
 import java.io.File
