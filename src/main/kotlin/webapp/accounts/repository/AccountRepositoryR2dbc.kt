@@ -14,7 +14,7 @@ import webapp.accounts.models.AccountCredentials.Companion.isValidEmail
 import webapp.accounts.models.entities.AccountAuthorityEntity
 import webapp.accounts.models.entities.AccountEntity
 import webapp.accounts.models.entities.AuthorityEntity
-import webapp.accounts.models.entities.AuthorityRecord
+import webapp.accounts.models.entities.AuthorityRecord.Companion.ROLE_COLUMN
 
 
 @Repository
@@ -69,14 +69,13 @@ class AccountRepositoryR2dbc(
             dao.insert(this).awaitSingleOrNull()?.id.run id@{
                 if (this@id != null) model.authorities!!.map { modelRole ->
                     dao.selectOne(
-                        query(where(AuthorityRecord.ROLE_COLUMN).`is`(modelRole)),
+                        query(where(ROLE_COLUMN).`is`(modelRole)),
                         AuthorityEntity::class.java
-                    )
-                        .awaitSingleOrNull().run auth@{
-                            if (this@auth != null) if (!role.isNullOrBlank())
-                                dao.insert(AccountAuthorityEntity(userId = this@id, role = role))
-                                    .awaitSingleOrNull()
-                        }
+                    ).awaitSingleOrNull().run auth@{
+                        if (this@auth != null && !role.isNullOrBlank())
+                            dao.insert(AccountAuthorityEntity(userId = this@id, role = role))
+                                .awaitSingleOrNull()
+                    }
                 }
             }
         }
