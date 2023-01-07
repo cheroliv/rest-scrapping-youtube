@@ -3,7 +3,6 @@ package webapp.accounts.repository
 import kotlinx.coroutines.reactive.collect
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
-import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator
 import org.springframework.dao.DataAccessException
 import org.springframework.data.r2dbc.core.*
 import org.springframework.data.relational.core.query.Criteria.where
@@ -11,6 +10,7 @@ import org.springframework.data.relational.core.query.Query.query
 import org.springframework.stereotype.Repository
 import webapp.accounts.models.Account
 import webapp.accounts.models.AccountCredentials
+import webapp.accounts.models.AccountCredentials.Companion.isValidEmail
 import webapp.accounts.models.entities.AccountAuthorityEntity
 import webapp.accounts.models.entities.AccountEntity
 import webapp.accounts.models.entities.AuthorityEntity
@@ -45,7 +45,7 @@ class AccountRepositoryR2dbc(
         .select<AccountEntity>()
         .matching(
             query(
-                where(if (EmailValidator().isValid(emailOrLogin, null)) "email" else "login")
+                where(if (isValidEmail(emailOrLogin)) "email" else "login")
                     .`is`(emailOrLogin)
                     .ignoreCase(true)
             )

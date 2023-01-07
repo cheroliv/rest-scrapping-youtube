@@ -1,7 +1,6 @@
 package webapp.accounts.security
 
 import kotlinx.coroutines.reactor.mono
-import org.hibernate.validator.internal.constraintvalidators.hv.EmailValidator
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService
 import org.springframework.security.core.userdetails.User
@@ -12,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Mono
 import webapp.Bootstrap.log
 import webapp.accounts.models.AccountCredentials
+import webapp.accounts.models.AccountCredentials.Companion.isValidEmail
 import webapp.accounts.models.exceptions.UserNotActivatedException
 import webapp.accounts.repository.AccountRepository
 
@@ -22,22 +22,18 @@ class DomainUserDetailsService(
 ) : ReactiveUserDetailsService {
 
     @Transactional
-    override fun findByUsername(login: String): Mono<UserDetails> = log
-        .debug("Authenticating $login").run {
-            return if (EmailValidator().isValid(login, null)) mono {
-                accountRepository.findOneWithAuthorities(login).apply {
-                    if (this == null) throw UsernameNotFoundException(
-                        "User with email $login was not found in the database"
-                    )
+    override fun findByUsername(emailOrLogin: String): Mono<UserDetails> = log
+        .debug("Authenticating $emailOrLogin").run {
+            return if (isValidEmail(emailOrLogin)) mono {
+                accountRepository.findOneWithAuthorities(emailOrLogin).apply {
+                    if (this == null) throw UsernameNotFoundException("User with email $emailOrLogin was not found in the database")
                 }
-            }.map { createSpringSecurityUser(login, it) }
+            }.map { createSpringSecurityUser(emailOrLogin, it) }
             else mono {
-                accountRepository.findOneWithAuthorities(login).apply {
-                    if (this == null) throw UsernameNotFoundException(
-                        "User $login was not found in the database"
-                    )
+                accountRepository.findOneWithAuthorities(emailOrLogin).apply {
+                    if (this == null) throw UsernameNotFoundException("User $emailOrLogin was not found in the database")
                 }
-            }.map { createSpringSecurityUser(login, it) }
+            }.map { createSpringSecurityUser(emailOrLogin, it) }
         }
 
 
