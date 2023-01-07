@@ -50,13 +50,15 @@ import org.springframework.web.reactive.config.WebFluxConfigurer
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.i18n.LocaleContextResolver
 import reactor.core.publisher.Hooks
+import webapp.Bootstrap.log
 import webapp.Constants.FEATURE_POLICY
+import webapp.Constants.GMAIL
+import webapp.Constants.MAILSLURP
 import webapp.Constants.MAIL_DEBUG
 import webapp.Constants.MAIL_SMTP_AUTH
 import webapp.Constants.MAIL_TRANSPORT_PROTOCOL
 import webapp.Constants.MAIL_TRANSPORT_STARTTLS_ENABLE
 import webapp.Constants.REQUEST_PARAM_LANG
-import webapp.Bootstrap.log
 import java.util.Locale.forLanguageTag
 import java.util.Locale.getDefault
 import java.util.concurrent.Callable
@@ -114,6 +116,7 @@ class MonolithConfiguration(
     fun jdk8TimeModule(): Jdk8Module = Jdk8Module()
 
     @Bean
+    @Profile("!$MAILSLURP & !$GMAIL")
     fun javaMailSender(): JavaMailSender = JavaMailSenderImpl().apply {
         host = properties.mail.host
         port = properties.mail.port

@@ -135,7 +135,7 @@ class MailSlurpServiceTests {
 }
 /*=================================================================================*/
 
-class DefaultMailServiceTests {
+class MailServiceSmtpTests {
 
     private lateinit var context: ConfigurableApplicationContext
     private lateinit var mailService: MailService
