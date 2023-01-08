@@ -24,7 +24,7 @@ class DomainUserDetailsService(
     @Transactional
     override fun findByUsername(emailOrLogin: String): Mono<UserDetails> = log
         .debug("Authenticating $emailOrLogin").run {
-            return if (isValidEmail(emailOrLogin)) mono {
+            return if (emailOrLogin.isValidEmail()) mono {
                 accountRepository.findOneWithAuthorities(emailOrLogin).apply {
                     if (this == null) throw UsernameNotFoundException("User with email $emailOrLogin was not found in the database")
                 }

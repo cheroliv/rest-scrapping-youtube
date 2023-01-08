@@ -37,8 +37,4 @@ data class Account(
     val authorities: Set<String>? = null
 ) {
     fun isActivated(): Boolean = activated
-    companion object {
-        @JvmStatic
-        fun isValidEmail(email:String) = AccountCredentials.isValidEmail(email)
-    }
 }

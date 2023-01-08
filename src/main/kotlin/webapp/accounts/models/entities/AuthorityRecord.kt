@@ -9,6 +9,6 @@ interface AuthorityRecord : Persistable<String> {
     override fun isNew() = true
 
     companion object {
-        const val ROLE_COLUMN = "role"
+        const val ROLE_FIELD = "role"
     }
 }

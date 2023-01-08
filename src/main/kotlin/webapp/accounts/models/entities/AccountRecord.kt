@@ -7,6 +7,7 @@ import java.util.*
 
 /*=================================================================================*/
 interface AccountRecord<AUTH : AuthorityRecord> {
+
     var id: UUID?
     var login: String?
     var password: String?
@@ -24,6 +25,15 @@ interface AccountRecord<AUTH : AuthorityRecord> {
     var createdDate: Instant?
     var lastModifiedBy: String?
     var lastModifiedDate: Instant?
+
+    companion object {
+        const val LOGIN_FIELD = "login"
+        const val EMAIL_FIELD = "email"
+        const val ACCOUNT_AUTH_USER_ID_FIELD = "userId"
+        const val ACTIVATION_KEY_FIELD = "activationKey"
+        const val RESET_KEY_FIELD = "resetKey"
+    }
+
     val toModel: Account
         get() = Account(
             id = id,
@@ -59,4 +69,5 @@ interface AccountRecord<AUTH : AuthorityRecord> {
             lastModifiedDate = lastModifiedDate,
             authorities = authorities?.map { it.role }?.toSet()
         )
+
 }

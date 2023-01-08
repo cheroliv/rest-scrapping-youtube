@@ -2,17 +2,17 @@
 
 package webapp.accounts.models.entities
 
-import webapp.Constants
 import com.fasterxml.jackson.annotation.JsonIgnore
-import org.springframework.data.annotation.*
-import org.springframework.data.relational.core.mapping.Column
-import org.springframework.data.relational.core.mapping.Table
-import java.time.Instant
-import java.util.*
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
+import org.springframework.data.annotation.*
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
+import webapp.Constants.LOGIN_REGEX
 import webapp.accounts.models.AccountCredentials
+import java.time.Instant
+import java.util.*
 import jakarta.validation.constraints.Email as EmailConstraint
 
 
@@ -22,7 +22,7 @@ data class AccountEntity @JvmOverloads constructor(
     @Id override var id: UUID? = null,
 
     @field:NotNull
-    @field:Pattern(regexp = Constants.LOGIN_REGEX)
+    @field:Pattern(regexp = LOGIN_REGEX)
     @field:Size(min = 1, max = 50)
     override var login: String? = null,
 

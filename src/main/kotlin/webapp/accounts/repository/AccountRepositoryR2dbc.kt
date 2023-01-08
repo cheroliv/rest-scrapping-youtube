@@ -13,8 +13,13 @@ import webapp.accounts.models.AccountCredentials
 import webapp.accounts.models.AccountCredentials.Companion.isValidEmail
 import webapp.accounts.models.entities.AccountAuthorityEntity
 import webapp.accounts.models.entities.AccountEntity
+import webapp.accounts.models.entities.AccountRecord.Companion.ACCOUNT_AUTH_USER_ID_FIELD
+import webapp.accounts.models.entities.AccountRecord.Companion.ACTIVATION_KEY_FIELD
+import webapp.accounts.models.entities.AccountRecord.Companion.EMAIL_FIELD
+import webapp.accounts.models.entities.AccountRecord.Companion.LOGIN_FIELD
+import webapp.accounts.models.entities.AccountRecord.Companion.RESET_KEY_FIELD
 import webapp.accounts.models.entities.AuthorityEntity
-import webapp.accounts.models.entities.AuthorityRecord.Companion.ROLE_COLUMN
+import webapp.accounts.models.entities.AuthorityRecord.Companion.ROLE_FIELD
 
 
 @Repository
@@ -27,8 +32,8 @@ class AccountRepositoryR2dbc(
                 AccountEntity(model).copy(
                     version = dao.selectOne(
                         query(
-                            where("login").`is`(model.login!!).ignoreCase(true)
-                                .or(where("email").`is`(model.email!!).ignoreCase(true))
+                            where(LOGIN_FIELD).`is`(model.login!!).ignoreCase(true)
+                                .or(where(EMAIL_FIELD).`is`(model.email!!).ignoreCase(true))
                         ), AccountEntity::class.java
                     ).awaitSingle()!!.version
                 )
@@ -45,7 +50,7 @@ class AccountRepositoryR2dbc(
         .select<AccountEntity>()
         .matching(
             query(
-                where(if (isValidEmail(emailOrLogin)) "email" else "login")
+                where(if (emailOrLogin.isValidEmail()) EMAIL_FIELD else LOGIN_FIELD)
                     .`is`(emailOrLogin)
                     .ignoreCase(true)
             )
@@ -56,7 +61,7 @@ class AccountRepositoryR2dbc(
     else if (ac.id == null) null
     else ac.copy(authorities = mutableSetOf<String>().apply {
         dao.select<AccountAuthorityEntity>()
-            .matching(query(where("userId").`is`(ac.id)))
+            .matching(query(where(ACCOUNT_AUTH_USER_ID_FIELD).`is`(ac.id)))
             .all()
             .collect { add(it.role) }
     })
@@ -64,12 +69,12 @@ class AccountRepositoryR2dbc(
     override suspend fun findOneWithAuthorities(emailOrLogin: String): AccountCredentials? =
         findOne(emailOrLogin).run { return@run withAuthorities(this) }
 
-    override suspend fun signup(model: AccountCredentials) {
-        AccountEntity(model).run {
+    override suspend fun signup(accountCredentials: AccountCredentials) {
+        AccountEntity(accountCredentials).run {
             dao.insert(this).awaitSingleOrNull()?.id.run id@{
-                if (this@id != null) model.authorities!!.map { modelRole ->
+                if (this@id != null) accountCredentials.authorities!!.map { authority ->
                     dao.selectOne(
-                        query(where(ROLE_COLUMN).`is`(modelRole)),
+                        query(where(ROLE_FIELD).`is`(authority)),
                         AuthorityEntity::class.java
                     ).awaitSingleOrNull().run auth@{
                         if (this@auth != null && !role.isNullOrBlank())
@@ -82,20 +87,20 @@ class AccountRepositoryR2dbc(
     }
 
     override suspend fun findActivationKeyByLogin(login: String): String? =
-        dao.select<AccountEntity>().matching(query(where("login").`is`(login).ignoreCase(true)))
+        dao.select<AccountEntity>().matching(query(where(LOGIN_FIELD).`is`(login).ignoreCase(true)))
             .awaitOneOrNull()
             ?.activationKey
 
 
     override suspend fun findOneByActivationKey(key: String): AccountCredentials? =
         dao.selectOne(
-            query(where("activationKey").`is`(key)),
+            query(where(ACTIVATION_KEY_FIELD).`is`(key)),
             AccountEntity::class.java
         ).awaitSingleOrNull()
             ?.toCredentialsModel
 
     override suspend fun findOneByResetKey(key: String) = dao.selectOne(
-        query(where("resetKey").`is`(key)),
+        query(where(RESET_KEY_FIELD).`is`(key)),
         AccountEntity::class.java
     ).awaitSingleOrNull() //as  AccountRecord<*>?
 
@@ -106,7 +111,7 @@ class AccountRepositoryR2dbc(
             else null).run {
                 if (this != null) {
                     dao.delete<AccountAuthorityEntity>()
-                        .matching(query(where("userId").`is`(id!!)))
+                        .matching(query(where(ACCOUNT_AUTH_USER_ID_FIELD).`is`(id!!)))
                         .allAndAwait()
                     dao.delete(AccountEntity(this)).awaitSingle()
                 }

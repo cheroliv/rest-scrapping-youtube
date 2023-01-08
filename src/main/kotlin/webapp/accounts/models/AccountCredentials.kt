@@ -80,6 +80,6 @@ data class AccountCredentials(
 
     companion object {
         @JvmStatic
-        fun isValidEmail(email:String) = EmailValidator().isValid(email, null)
+        fun String.isValidEmail() = EmailValidator().isValid(this, null)
     }
 }
