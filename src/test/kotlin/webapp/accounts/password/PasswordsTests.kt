@@ -5,20 +5,10 @@ package webapp.accounts.password
 //import org.assertj.core.api.Assertions.assertThat
 //import org.springframework.test.web.reactive.server.returnResult
 //import java.net.URI
-import webapp.Constants.BASE_URL_DEV
-import webapp.deleteAllAccounts
-import webapp.launcher
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeAll
-import org.springframework.beans.factory.getBean
-import org.springframework.context.ConfigurableApplicationContext
-import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
-import org.springframework.test.web.reactive.server.WebTestClient
 import kotlin.test.*
 
 @Suppress("unused")
-internal class ChangePasswordControllerTests {
+internal class PasswordControllerTests {
 
     /*
         @Test
@@ -141,32 +131,6 @@ internal class ChangePasswordControllerTests {
             assertThat(updatedUser.password).isEqualTo(user.password)
         }
      */
-
-}
-
-internal class ResetPasswordControllerTest {
-
-
-    private val client: WebTestClient by lazy {
-        WebTestClient
-            .bindToServer()
-            .baseUrl(BASE_URL_DEV)
-            .build()
-    }
-    private lateinit var context: ConfigurableApplicationContext
-    private val dao: R2dbcEntityTemplate by lazy { context.getBean() }
-
-    @BeforeAll
-    fun `lance le server en profile test`() {
-        context = launcher()
-    }
-
-    @AfterAll
-    fun `arrête le serveur`() = context.close()
-
-    @AfterEach
-    fun tearDown() = deleteAllAccounts(dao)
-
     @Test
     fun `test Request Password Reset`() {
     }
