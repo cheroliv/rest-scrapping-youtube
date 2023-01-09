@@ -4,6 +4,7 @@ package webapp
 
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import jakarta.validation.Validation.buildDefaultValidatorFactory
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler
 import org.springframework.beans.factory.DisposableBean
@@ -109,6 +110,12 @@ class MonolithConfiguration(
 
     @Bean
     fun validator(): Validator = LocalValidatorFactoryBean()
+
+
+//    @Bean
+//    fun beanValidator(): JakartaValidationValidator = buildDefaultValidatorFactory().validator
+
+
 
     @Bean
     fun javaTimeModule(): JavaTimeModule = JavaTimeModule()

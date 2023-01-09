@@ -8,6 +8,7 @@ import org.springframework.data.r2dbc.core.*
 import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.data.relational.core.query.Query.query
 import org.springframework.stereotype.Repository
+import webapp.Constants.ROLE_USER
 import webapp.accounts.models.Account
 import webapp.accounts.models.AccountCredentials
 import webapp.accounts.models.AccountCredentials.Companion.isValidEmail
@@ -18,13 +19,11 @@ import webapp.accounts.models.entities.AccountRecord.Companion.ACTIVATION_KEY_FI
 import webapp.accounts.models.entities.AccountRecord.Companion.EMAIL_FIELD
 import webapp.accounts.models.entities.AccountRecord.Companion.LOGIN_FIELD
 import webapp.accounts.models.entities.AccountRecord.Companion.RESET_KEY_FIELD
-import webapp.accounts.models.entities.AuthorityEntity
-import webapp.accounts.models.entities.AuthorityRecord.Companion.ROLE_FIELD
 
 
 @Repository
 class AccountRepositoryR2dbc(
-    private val dao: R2dbcEntityTemplate
+    private val dao: R2dbcEntityTemplate,
 ) : AccountRepository {
     override suspend fun save(model: AccountCredentials): Account? =
         try {
@@ -71,21 +70,19 @@ class AccountRepositoryR2dbc(
         findOne(emailOrLogin).run { return@run withAuthorities(this) }
 
     override suspend fun signup(accountCredentials: AccountCredentials) {
-        AccountEntity(accountCredentials).run {
-            dao.insert(this).awaitSingleOrNull()?.id.run id@{
-                if (this@id != null) accountCredentials.authorities!!.map { authority ->
-                    dao.selectOne(
-                        query(where(ROLE_FIELD).`is`(authority)),
-                        AuthorityEntity::class.java
-                    ).awaitSingleOrNull().run auth@{
-                        if (this@auth != null && !role.isNullOrBlank())
-                            dao.insert(AccountAuthorityEntity(userId = this@id, role = role))
-                                .awaitSingleOrNull()
-                    }
-                }
+        dao.insert(AccountEntity(accountCredentials))
+            .awaitSingleOrNull()
+            ?.id
+            .run {
+                if (this != null) dao.insert(
+                    AccountAuthorityEntity(
+                        userId = this,
+                        role = ROLE_USER
+                    )
+                ).awaitSingleOrNull()
             }
-        }
     }
+
 
     override suspend fun findActivationKeyByLogin(login: String): String? =
         dao.select<AccountEntity>().matching(query(where(LOGIN_FIELD).`is`(login).ignoreCase(true)))

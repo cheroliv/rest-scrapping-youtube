@@ -2,6 +2,7 @@
 
 package webapp.accounts.signup
 
+import jakarta.validation.Validator
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -14,6 +15,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.WebTestClient.bindToServer
 import org.springframework.test.web.reactive.server.returnResult
 import webapp.*
+import webapp.Bootstrap.log
 import webapp.Constants.ACTIVATE_API_PARAM
 import webapp.Constants.ACTIVATE_API_PATH
 import webapp.Constants.BASE_URL_DEV
@@ -38,7 +40,7 @@ internal class SignupTests {
     }
 
     private val dao: R2dbcEntityTemplate by lazy { context.getBean() }
-
+    private val validator: Validator by lazy { context.getBean() }
     @BeforeAll
     fun `lance le server en profile test`() {
         context = launcher()
@@ -143,6 +145,9 @@ internal class SignupTests {
 
     @Test
     fun `test signup account avec un password invalid`() {
+        validator.validateProperty(AccountCredentials("123"),"password").map {
+            log.info(it.message)
+        }
         assertEquals(0, countAccount(dao))
         client.post()
             .uri(SIGNUP_API_PATH)
