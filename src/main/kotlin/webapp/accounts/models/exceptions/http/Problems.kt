@@ -2,10 +2,10 @@
 
 package webapp.accounts.models.exceptions.http
 
-import webapp.Constants.INVALID_PASSWORD_TYPE
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.ProblemDetail.forStatusAndDetail
 import org.springframework.web.ErrorResponseException
+import webapp.Constants.INVALID_PASSWORD_TYPE
 import webapp.accounts.models.exceptions.InvalidPasswordException
 
 //import org.zalando.problem.Problem.DEFAULT_TYPE as PROBLEM_DEFAULT_TYPE
@@ -63,55 +63,76 @@ public class BookmarkNotFoundException extends ErrorResponseException {
     }
   ]
 }*/
-/*
-{
-  "type": "https://www.cheroliv.com/problem/constraint-violation",
-  "title": "Data binding and validation failure",
-  "status": 400,
-  "path": "/api/register",
-  "message": "error.validation",
-  "fieldErrors": [
-    {
-      "objectName": "managedUserVM",
-      "field": "email",
-      "message": "doit être une adresse électronique syntaxiquement correcte"
-    },
-    {
-      "objectName": "managedUserVM",
-      "field": "password",
-      "message": "la taille doit être comprise entre 4 et 100"
-    },
-    {
-      "objectName": "managedUserVM",
-      "field": "login",
-      "message": "doit correspondre à \"^(?>[a-zA-Z0-9!$&*+=?^_`{|}~.-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)|(?>[_.@A-Za-z0-9-]+)$\""
-    },
-    {
-      "objectName": "managedUserVM",
-      "field": "login",
-      "message": "la taille doit être comprise entre 1 et 50"
-    },
-    {
-      "objectName": "managedUserVM",
-      "field": "login",
-      "message": "ne doit pas être vide"
+
+data class ProblemsModel(
+    val type: String,
+    val title: String,
+    val status: Int,
+    val path: String,
+    val message: String,
+    val fieldErrors: Map<String, String>
+) {
+    @Suppress("MemberVisibilityCanBePrivate")
+    companion object {
+        const val PROBLEM_OBJECT_NAME = "objectName"
+        const val PROBLEM_FIELD = "field"
+        const val PROBLEM_MESSAGE = "message"
+        val detailsKeys = setOf(
+            PROBLEM_OBJECT_NAME,
+            PROBLEM_FIELD,
+            PROBLEM_MESSAGE
+        )
     }
-  ]
 }
-*/
-class InvalidPasswordProblem(
-    exception: InvalidPasswordException
-) : ErrorResponseException(
-    BAD_REQUEST,
-    forStatusAndDetail(
+    /*
+    {
+      "type": "https://www.cheroliv.com/problem/constraint-violation",
+      "title": "Data binding and validation failure",
+      "status": 400,
+      "path": "/api/register",
+      "message": "error.validation",
+      "fieldErrors": [
+        {
+          "objectName": "managedUserVM",
+          "field": "email",
+          "message": "doit être une adresse électronique syntaxiquement correcte"
+        },
+        {
+          "objectName": "managedUserVM",
+          "field": "password",
+          "message": "la taille doit être comprise entre 4 et 100"
+        },
+        {
+          "objectName": "managedUserVM",
+          "field": "login",
+          "message": "doit correspondre à \"^(?>[a-zA-Z0-9!$&*+=?^_`{|}~.-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)|(?>[_.@A-Za-z0-9-]+)$\""
+        },
+        {
+          "objectName": "managedUserVM",
+          "field": "login",
+          "message": "la taille doit être comprise entre 1 et 50"
+        },
+        {
+          "objectName": "managedUserVM",
+          "field": "login",
+          "message": "ne doit pas être vide"
+        }
+      ]
+    }
+    */
+    class InvalidPasswordProblem(
+        exception: InvalidPasswordException
+    ) : ErrorResponseException(
         BAD_REQUEST,
-        exception.message!!
-    ).apply {
-        type = INVALID_PASSWORD_TYPE
-        title = "Incorrect password"
-    },
-    exception
-)
+        forStatusAndDetail(
+            BAD_REQUEST,
+            exception.message!!
+        ).apply {
+            type = INVALID_PASSWORD_TYPE
+            title = "Incorrect password"
+        },
+        exception
+    )
 
 /*=================================================================================*/
 //class Foo(
