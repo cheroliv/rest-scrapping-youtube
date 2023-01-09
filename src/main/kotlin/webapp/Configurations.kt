@@ -66,26 +66,7 @@ import java.util.concurrent.Executor
 import java.util.concurrent.Future
 
 
-/*=================================================================================*/
-@Configuration
-class LocaleSupportConfiguration : DelegatingWebFluxConfiguration() {
 
-    override fun createLocaleContextResolver(): LocaleContextResolver = RequestParamLocaleContextResolver()
-
-    class RequestParamLocaleContextResolver : LocaleContextResolver {
-        override fun resolveLocaleContext(exchange: ServerWebExchange): LocaleContext {
-            var targetLocale = getDefault()
-            val referLang = exchange.request.queryParams[REQUEST_PARAM_LANG]
-            if (!referLang.isNullOrEmpty()) targetLocale = forLanguageTag(referLang[0])
-            return SimpleLocaleContext(targetLocale)
-        }
-
-        @Throws(UnsupportedOperationException::class)
-        override fun setLocaleContext(
-            exchange: ServerWebExchange, localeContext: LocaleContext?
-        ): Unit = throw UnsupportedOperationException("Not Supported")
-    }
-}
 
 
 /*=================================================================================*/
