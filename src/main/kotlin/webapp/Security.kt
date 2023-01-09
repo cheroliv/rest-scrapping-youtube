@@ -3,12 +3,6 @@
 package webapp
 
 
-import webapp.Constants.AUTHORITIES_KEY
-import webapp.Constants.AUTHORIZATION_HEADER
-import webapp.Constants.BEARER_START_WITH
-import webapp.Constants.INVALID_TOKEN
-import webapp.Constants.VALID_TOKEN
-import webapp.Bootstrap.log
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.Jwts.parserBuilder
@@ -33,6 +27,12 @@ import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
+import webapp.Bootstrap.log
+import webapp.Constants.AUTHORITIES_KEY
+import webapp.Constants.AUTHORIZATION_HEADER
+import webapp.Constants.BEARER_START_WITH
+import webapp.Constants.INVALID_TOKEN
+import webapp.Constants.VALID_TOKEN
 import java.security.Key
 import java.util.*
 import kotlin.text.Charsets.UTF_8
@@ -43,7 +43,7 @@ import org.springframework.security.core.userdetails.User as UserSecurity
 
 @Component
 class TokenProvider(
-    private val properties: ApplicationProperties
+    private val properties: Properties
 ) : InitializingBean {
 
     private var key: Key? = null

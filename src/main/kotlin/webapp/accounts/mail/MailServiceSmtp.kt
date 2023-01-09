@@ -9,7 +9,7 @@ import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.thymeleaf.spring6.SpringTemplateEngine
-import webapp.ApplicationProperties
+import webapp.Properties
 import webapp.Bootstrap
 import webapp.Constants.GMAIL
 import webapp.Constants.MAILSLURP
@@ -19,7 +19,7 @@ import webapp.Constants.MAILSLURP
 @Service
 @Profile("!$MAILSLURP & !$GMAIL")
 class MailServiceSmtp(
-    private val properties: ApplicationProperties,
+    private val properties: Properties,
     private val mailSender: JavaMailSender,
     private val messageSource: MessageSource,
     private val templateEngine: SpringTemplateEngine

@@ -3,7 +3,6 @@ package webapp
 import org.apache.logging.log4j.LogManager.getLogger
 import org.apache.logging.log4j.Logger
 import org.springframework.beans.factory.getBean
-import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.ApplicationContext
 import org.springframework.context.MessageSource
@@ -28,13 +27,12 @@ import java.net.UnknownHostException
 import java.util.Locale.getDefault
 
 /*=================================================================================*/
-@SpringBootApplication
-class WebApplication
+
 /*=================================================================================*/
 
 object Bootstrap {
     @JvmStatic
-    fun main(args: Array<String>) = runApplication<WebApplication>(*args)
+    fun main(args: Array<String>) = runApplication<Application>(*args)
         .checkProfileLog()
         .bootstrapLog()
         .`continue`()
@@ -106,7 +104,7 @@ internal fun ApplicationContext.checkProfileLog(): ApplicationContext = apply {
 internal fun ApplicationContext.bootstrapLog(): ApplicationContext = apply {
     startupLogMessage(
         appName = environment.getProperty(SPRING_APPLICATION_NAME),
-        goVisitMessage = getBean<ApplicationProperties>().goVisitMessage,
+        goVisitMessage = getBean<Properties>().goVisitMessage,
         protocol = if (environment.getProperty(SERVER_SSL_KEY_STORE) != null) HTTPS
         else HTTP,
         serverPort = environment.getProperty(SERVER_PORT),
@@ -127,4 +125,26 @@ internal fun ApplicationContext.bootstrapLog(): ApplicationContext = apply {
         else EMPTY_STRING,
     ).run { log.info(this) }
 }
+/*=================================================================================*/
+/*=================================================================================*/
+
+//object CliBootstrap {
+//    @JvmStatic
+//    fun main(args: Array<String>) {
+//        runApplication<Application>(*args) {
+//            setAdditionalProfiles(Constants.PROFILE_CLI)
+//            setDefaultProperties(Constants.PROFILE_CLI_PROPS)
+//        }
+//        kotlin.system.exitProcess(Constants.NORMAL_TERMINATION)
+//    }
+//}
+
+/*=================================================================================*/
+//@org.springframework.stereotype.Component
+//@org.springframework.context.annotation.Profile(Constants.PROFILE_CLI)
+//class CliRunner : CommandLineRunner {
+//    override fun run(vararg args: String?) = runBlocking {
+//        log.info("command line interface: $args")
+//    }
+//}
 /*=================================================================================*/

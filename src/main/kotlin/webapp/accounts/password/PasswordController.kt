@@ -60,7 +60,7 @@ class PasswordController(
      *
      * @param keyAndPassword the generated key and the new password.
      * @throws InvalidPasswordProblem {@code 400 (Bad Request)} if the password is incorrect.
-     * @throws RuntimeException         {@code 500 (Internal WebApplication Error)} if the password could not be reset.
+     * @throws RuntimeException         {@code 500 (Internal Application Error)} if the password could not be reset.
      */
     @PostMapping(RESET_PASSWORD_API_FINISH)
     suspend fun finishPasswordReset(@RequestBody keyAndPassword: KeyAndPassword): Unit =

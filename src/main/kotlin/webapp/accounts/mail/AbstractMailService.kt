@@ -3,14 +3,14 @@ package webapp.accounts.mail
 import org.springframework.context.MessageSource
 import org.thymeleaf.context.Context
 import org.thymeleaf.spring6.SpringTemplateEngine
-import webapp.ApplicationProperties
+import webapp.Properties
 import webapp.Bootstrap
 import webapp.Constants
 import webapp.accounts.models.AccountCredentials
 import java.util.*
 
 abstract class AbstractMailService(
-    private val properties: ApplicationProperties,
+    private val properties: Properties,
     private val messageSource: MessageSource,
     private val templateEngine: SpringTemplateEngine
 ) : MailService {

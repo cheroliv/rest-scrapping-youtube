@@ -21,7 +21,7 @@ import java.util.concurrent.Future
 @Configuration
 @EnableScheduling
 @Suppress("unused")
-class AsyncTasksConfiguration(
+class Asyncs(
     private val taskExecutionProperties: TaskExecutionProperties
 ) : AsyncConfigurer {
 

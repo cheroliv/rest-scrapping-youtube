@@ -34,7 +34,7 @@ internal class AccountRepositoryR2dbcTest {
 
 
     //    @BeforeAll
-//    fun `lance le server en profile test`() = runApplication<WebApplication> {
+//    fun `lance le server en profile test`() = runApplication<Application> {
 //        testLoader(this)
 //    }.run { context = this }
     @BeforeAll

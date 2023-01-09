@@ -4,6 +4,7 @@ package webapp
 
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.*
 import org.springframework.data.web.ReactivePageableHandlerMethodArgumentResolver
@@ -46,13 +47,13 @@ import webapp.Constants.MAIL_TRANSPORT_STARTTLS_ENABLE
 
 
 /*=================================================================================*/
-@Configuration
 @EnableWebFlux
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
-@EnableConfigurationProperties(ApplicationProperties::class)
-class MonolithConfiguration(
-    private val properties: ApplicationProperties,
+@EnableConfigurationProperties(Properties::class)
+@SpringBootApplication
+class Application(
+    private val properties: Properties,
     private val userDetailsService: ReactiveUserDetailsService,
     private val tokenProvider: TokenProvider,
 ) : WebFluxConfigurer {
@@ -149,7 +150,7 @@ class MonolithConfiguration(
             // Use a cache filter that only match selected paths
             return CachingHttpHeadersFilter(
                 TimeUnit.DAYS.toMillis(
-                    ApplicationProperties.getHttp().getCache().getTimeToLiveInDays()
+                    Properties.getHttp().getCache().getTimeToLiveInDays()
                 )
             )
         }

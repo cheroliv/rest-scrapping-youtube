@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.thymeleaf.spring6.SpringTemplateEngine
-import webapp.ApplicationProperties
+import webapp.Properties
 import webapp.Bootstrap.log
 import webapp.Constants.GMAIL
 
@@ -15,7 +15,7 @@ import webapp.Constants.GMAIL
 @Service
 @Profile(GMAIL)
 class MailServiceGmail(
-    private val properties: ApplicationProperties,
+    private val properties: Properties,
     private val messageSource: MessageSource,
     private val templateEngine: SpringTemplateEngine
 ) : AbstractMailService(

@@ -230,7 +230,7 @@ data class ProblemsModel(
 //@ControllerAdvice
 //class ProblemTranslator(
 //    private val env: Environment,
-//    private val properties: ApplicationProperties
+//    private val properties: Properties
 //) : ProblemHandling, SecurityAdviceTrait {
 //
 //    companion object {

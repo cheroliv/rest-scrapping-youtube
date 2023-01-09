@@ -23,7 +23,7 @@ import org.springframework.context.MessageSource
 import org.springframework.mail.MailSendException
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.thymeleaf.spring6.SpringWebFluxTemplateEngine
-import webapp.ApplicationProperties
+import webapp.Properties
 import webapp.Constants.DEFAULT
 import webapp.Constants.DEFAULT_LANGUAGE
 import webapp.Constants.DEVELOPMENT
@@ -50,7 +50,7 @@ import kotlin.test.*
 class MailSlurpServiceTests {
 
     private lateinit var context: ConfigurableApplicationContext
-    private val token: String by lazy { context.getBean<ApplicationProperties>().mailbox.test.token }
+    private val token: String by lazy { context.getBean<Properties>().mailbox.test.token }
     private val api by lazy { InboxControllerApi(token) }
 
     @BeforeAll
@@ -139,7 +139,7 @@ class MailServiceSmtpTests {
     private lateinit var context: ConfigurableApplicationContext
     private lateinit var mailService: MailService
 
-    private val properties: ApplicationProperties by lazy { context.getBean() }
+    private val properties: Properties by lazy { context.getBean() }
 
     private val messageSource: MessageSource by lazy { context.getBean() }
 

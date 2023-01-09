@@ -49,7 +49,7 @@ class SignupController(private val signupService: SignupService) {
      * `GET  /activate` : activate the signed-up user.
      *
      * @param key the activation key.
-     * @throws RuntimeException `500 (Internal WebApplication Error)` if the user couldn't be activated.
+     * @throws RuntimeException `500 (Internal Application Error)` if the user couldn't be activated.
      */
     @GetMapping(ACTIVATE_API)
     suspend fun activateAccount(@RequestParam(ACTIVATE_API_KEY) key: String) {

@@ -37,7 +37,7 @@ import java.util.*
 ////     * {@code GET  /account} : get the current user.
 ////     *
 ////     * @return the current user.
-////     * @throws RuntimeException {@code 500 (Internal WebApplication Error)} if the user couldn't be returned.
+////     * @throws RuntimeException {@code 500 (Internal Application Error)} if the user couldn't be returned.
 ////     */
 ////    @GetMapping("account")
 ////    suspend fun getAccount(): Account = log.info("controller getAccount").run {
@@ -52,7 +52,7 @@ import java.util.*
 ////     *
 ////     * @param account the current user information.
 ////     * @throws EmailAlreadyUsedProblem {@code 400 (Bad Request)} if the email is already used.
-////     * @throws RuntimeException          {@code 500 (Internal WebApplication Error)} if the user login wasn't found.
+////     * @throws RuntimeException          {@code 500 (Internal Application Error)} if the user login wasn't found.
 ////     */
 ////    @PostMapping("account")
 ////    suspend fun saveAccount(@Valid @RequestBody account: Account): Unit {
@@ -109,7 +109,7 @@ import java.util.*
 ////     *
 ////     * @param keyAndPassword the generated key and the new password.
 ////     * @throws InvalidPasswordProblem {@code 400 (Bad Request)} if the password is incorrect.
-////     * @throws RuntimeException         {@code 500 (Internal WebApplication Error)} if the password could not be reset.
+////     * @throws RuntimeException         {@code 500 (Internal Application Error)} if the password could not be reset.
 ////     */
 ////    @PostMapping("account/reset-password/finish")
 ////    suspend fun finishPasswordReset(@RequestBody keyAndPassword: KeyAndPassword): Unit {
@@ -154,7 +154,7 @@ import java.util.*
 //class AccountController(
 //    private val userService: UserService,
 //    private val mailService: MailService,
-//    private val properties: ApplicationProperties
+//    private val properties: Properties
 //) {
 //    companion object {
 //        private val ALLOWED_ORDERED_PROPERTIES =
@@ -376,7 +376,7 @@ import java.util.*
 /*=================================================================================*/
 
 
-//import webapp.WebApplication.Log.log
+//import webapp.Application.Log.log
 //import common.domain.Avatar
 //import webapp.http.util.PaginationUtil.generatePaginationHttpHeaders
 ////import webapp.accounts.management.UserService
