@@ -47,12 +47,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 
-//@TestConfiguration
-//class TestConfiguration{
-//    @Bean
-//    @Profile(TEST)
-//    fun javaMailSender(): JavaMailSender = JavaMailSenderImpl()
-//}
 
 val ByteArray.logBody: ByteArray
     get() = apply {

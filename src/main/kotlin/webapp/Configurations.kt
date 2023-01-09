@@ -110,12 +110,6 @@ class MonolithConfiguration(
     @Bean
     fun validator(): Validator = LocalValidatorFactoryBean()
 
-
-//    @Bean
-//    fun beanValidator(): JakartaValidationValidator = buildDefaultValidatorFactory().validator
-
-
-
     @Bean
     fun javaTimeModule(): JavaTimeModule = JavaTimeModule()
 

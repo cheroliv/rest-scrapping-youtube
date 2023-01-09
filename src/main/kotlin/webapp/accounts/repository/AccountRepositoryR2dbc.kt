@@ -44,6 +44,19 @@ class AccountRepositoryR2dbc(
             null
         }
 
+    override suspend fun signup(accountCredentials: AccountCredentials) {
+        dao.insert(AccountEntity(accountCredentials))
+            .awaitSingleOrNull()
+            ?.id
+            .run {
+                if (this != null) dao.insert(
+                    AccountAuthorityEntity(
+                        userId = this,
+                        role = ROLE_USER
+                    )
+                ).awaitSingleOrNull()
+            }
+    }
 
     override suspend fun findOne(emailOrLogin: String): AccountCredentials? = dao
         .select<AccountEntity>()
@@ -71,19 +84,7 @@ class AccountRepositoryR2dbc(
     override suspend fun findOneWithAuthorities(emailOrLogin: String): AccountCredentials? =
         findOne(emailOrLogin).run { return@run withAuthorities(this) }
 
-    override suspend fun signup(accountCredentials: AccountCredentials) {
-        dao.insert(AccountEntity(accountCredentials))
-            .awaitSingleOrNull()
-            ?.id
-            .run {
-                if (this != null) dao.insert(
-                    AccountAuthorityEntity(
-                        userId = this,
-                        role = ROLE_USER
-                    )
-                ).awaitSingleOrNull()
-            }
-    }
+
 
 
     override suspend fun findActivationKeyByLogin(login: String): String? =
