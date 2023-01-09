@@ -12,6 +12,7 @@ import org.springframework.data.web.ReactiveSortHandlerMethodArgumentResolver
 import org.springframework.format.FormatterRegistry
 import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar
 import org.springframework.http.HttpMethod.OPTIONS
+import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.security.authentication.ReactiveAuthenticationManager
@@ -21,6 +22,7 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder.AUTHENTICATION
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder.HTTP_BASIC
 import org.springframework.security.config.web.server.ServerHttpSecurity
+import org.springframework.security.core.context.ReactiveSecurityContextHolder.withAuthentication
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -29,13 +31,20 @@ import org.springframework.security.web.server.header.ReferrerPolicyServerHttpHe
 import org.springframework.security.web.server.util.matcher.NegatedServerWebExchangeMatcher
 import org.springframework.security.web.server.util.matcher.OrServerWebExchangeMatcher
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers.pathMatchers
+import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean
 import org.springframework.web.cors.reactive.CorsWebFilter
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 import org.springframework.web.reactive.config.EnableWebFlux
 import org.springframework.web.reactive.config.WebFluxConfigurer
+import org.springframework.web.server.ServerWebExchange
+import org.springframework.web.server.WebFilter
+import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Hooks
+import reactor.core.publisher.Mono
+import webapp.Constants.AUTHORIZATION_HEADER
+import webapp.Constants.BEARER_START_WITH
 import webapp.Constants.FEATURE_POLICY
 import webapp.Constants.GMAIL
 import webapp.Constants.MAILSLURP
@@ -55,7 +64,7 @@ import webapp.Logging.d
 class Application(
     private val properties: Properties,
     private val userDetailsService: ReactiveUserDetailsService,
-    private val tokenProvider: TokenProvider,
+    private val security: Security,
 ) : WebFluxConfigurer {
 
     override fun addFormatters(registry: FormatterRegistry) {
@@ -163,6 +172,36 @@ class Application(
         UserDetailsRepositoryReactiveAuthenticationManager(userDetailsService).apply {
             setPasswordEncoder(passwordEncoder())
         }
+    @Component("jwtFilter")
+    class JwtFilter(private val security: Security) : WebFilter {
+
+        override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
+            resolveToken(exchange.request).apply token@{
+                chain.apply {
+                    return if (!isNullOrBlank() &&
+                        security.validateToken(this@token)
+                    ) filter(exchange)
+                        .contextWrite(
+                            withAuthentication(
+                                security.getAuthentication(this@token)
+                            )
+                        )
+                    else filter(exchange)
+                }
+            }
+        }
+
+        private fun resolveToken(request: ServerHttpRequest): String? = request
+            .headers
+            .getFirst(AUTHORIZATION_HEADER)
+            .apply {
+                return if (
+                    !isNullOrBlank() &&
+                    startsWith(BEARER_START_WITH)
+                ) substring(startIndex = 7)
+                else null
+            }
+    }
 
     @Bean
     fun springSecurityFilterChain(
@@ -175,7 +214,7 @@ class Application(
                 ), pathMatchers(OPTIONS, "/**")
             )
         )
-    ).csrf().disable().addFilterAt(SpaWebFilter(), AUTHENTICATION).addFilterAt(JwtFilter(tokenProvider), HTTP_BASIC)
+    ).csrf().disable().addFilterAt(SpaWebFilter(), AUTHENTICATION).addFilterAt(JwtFilter(security), HTTP_BASIC)
         .authenticationManager(reactiveAuthenticationManager())
         .exceptionHandling()
 //        .accessDeniedHandler(problemSupport)
@@ -193,6 +232,29 @@ class Application(
         .pathMatchers("/services/**").authenticated().pathMatchers("/swagger-resources/**").authenticated()
         .pathMatchers("/v2/api-docs").authenticated().pathMatchers("/management/**").hasAuthority(Constants.ROLE_ADMIN)
         .pathMatchers("/api/admin/**").hasAuthority(Constants.ROLE_ADMIN).and().build()
+
+    @Component
+    class SpaWebFilter : WebFilter {
+        override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
+            exchange.request.uri.path.apply {
+                return if (
+                    !this.startsWith("/api") &&
+                    !this.startsWith("/management") &&
+                    !this.startsWith("/services") &&
+                    !this.startsWith("/swagger") &&
+                    !this.startsWith("/v2/api-docs") &&
+                    this.matches(Regex("[^\\\\.]*"))
+                ) chain.filter(
+                    exchange.mutate().request(
+                        exchange.request
+                            .mutate()
+                            .path("/index.html")
+                            .build()
+                    ).build()
+                ) else chain.filter(exchange)
+            }
+        }
+    }
 }
 
 /*=================================================================================*/
