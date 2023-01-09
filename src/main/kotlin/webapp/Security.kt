@@ -27,12 +27,12 @@ import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
-import webapp.Bootstrap.log
 import webapp.Constants.AUTHORITIES_KEY
 import webapp.Constants.AUTHORIZATION_HEADER
 import webapp.Constants.BEARER_START_WITH
 import webapp.Constants.INVALID_TOKEN
 import webapp.Constants.VALID_TOKEN
+import webapp.Logging.log
 import java.security.Key
 import java.util.*
 import kotlin.text.Charsets.UTF_8

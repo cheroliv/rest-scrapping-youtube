@@ -15,7 +15,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.WebTestClient.bindToServer
 import org.springframework.test.web.reactive.server.returnResult
 import webapp.*
-import webapp.Bootstrap.log
+import webapp.Logging.log
 import webapp.Constants.ACTIVATE_API_PARAM
 import webapp.Constants.ACTIVATE_API_PATH
 import webapp.Constants.BASE_URL_DEV

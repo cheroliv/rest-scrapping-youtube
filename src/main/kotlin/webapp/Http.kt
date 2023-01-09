@@ -9,7 +9,7 @@ import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import org.springframework.web.util.UriComponentsBuilder
 import reactor.core.publisher.Mono
-import webapp.Bootstrap.log
+import webapp.Logging.log
 import java.io.UnsupportedEncodingException
 import java.net.URLEncoder.encode
 import java.text.MessageFormat

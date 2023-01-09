@@ -3,7 +3,7 @@ package webapp
 import webapp.Constants.DEVELOPMENT
 import webapp.Constants.PRODUCTION
 import webapp.Constants.STARTUP_LOG_MSG_KEY
-import webapp.Bootstrap.log
+import webapp.Logging.log
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.springframework.beans.factory.getBean

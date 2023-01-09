@@ -2,7 +2,7 @@ package webapp.accounts.password
 
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import webapp.Bootstrap.log
+import webapp.Logging.log
 import webapp.accounts.models.AccountCredentials
 import webapp.accounts.repository.AccountRepository
 import java.time.Instant.now

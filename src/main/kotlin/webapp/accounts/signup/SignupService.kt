@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import webapp.*
-import webapp.Bootstrap.log
+import webapp.Logging.log
 import webapp.Constants.DEFAULT_LANGUAGE
 import webapp.Constants.ROLE_USER
 import webapp.Constants.SYSTEM_USER

@@ -5,9 +5,9 @@ import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.thymeleaf.spring6.SpringTemplateEngine
-import webapp.Properties
-import webapp.Bootstrap
 import webapp.Constants
+import webapp.Logging.log
+import webapp.Properties
 
 /*=================================================================================*/
 @Suppress("unused")
@@ -29,5 +29,5 @@ class MailServiceSlurp(
         content: String,
         isMultipart: Boolean,
         isHtml: Boolean
-    ) = Bootstrap.log.info(MailServiceSlurp::class.java.name)
+    ) = log.info(MailServiceSlurp::class.java.name)
 }

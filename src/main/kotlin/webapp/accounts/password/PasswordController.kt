@@ -51,7 +51,7 @@ class PasswordController(
     @PostMapping(RESET_PASSWORD_API_INIT)
     suspend fun requestPasswordReset(@RequestBody @Email mail: String) =
         with(passwordService.requestPasswordReset(mail)) {
-            if (this == null) webapp.Bootstrap.log.warn("Password reset requested for non existing mail")
+            if (this == null) webapp.Logging.log.warn("Password reset requested for non existing mail")
             else mailService.sendPasswordResetMail(this)
         }
 

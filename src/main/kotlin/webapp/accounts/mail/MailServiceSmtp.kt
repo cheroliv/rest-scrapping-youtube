@@ -9,10 +9,10 @@ import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.thymeleaf.spring6.SpringTemplateEngine
-import webapp.Properties
-import webapp.Bootstrap
 import webapp.Constants.GMAIL
 import webapp.Constants.MAILSLURP
+import webapp.Logging
+import webapp.Properties
 
 /*=================================================================================*/
 @Async
@@ -47,11 +47,11 @@ class MailServiceSmtp(
                 setText(content, isHtml)
             }
             mailSender.send(this)
-            Bootstrap.log.debug("Sent email to User '$to'")
+            Logging.log.debug("Sent email to User '$to'")
         } catch (e: MailException) {
-            Bootstrap.log.warn("Email could not be sent to user '$to'", e)
+            Logging.log.warn("Email could not be sent to user '$to'", e)
         } catch (e: MessagingException) {
-            Bootstrap.log.warn("Email could not be sent to user '$to'", e)
+            Logging.log.warn("Email could not be sent to user '$to'", e)
         }
     }
 }

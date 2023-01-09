@@ -31,7 +31,7 @@ import java.time.ZoneOffset.UTC
 @Configuration
 @EnableTransactionManagement
 @EnableR2dbcRepositories("webapp")
-class DatabaseConfiguration(
+class Database(
     private val properties: Properties
 ) {
     @Bean

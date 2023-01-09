@@ -13,7 +13,7 @@ import webapp.Constants.USER
 import webapp.DataTests.accounts
 import webapp.DataTests.defaultAccount
 import webapp.DataTests.defaultAccountJson
-import webapp.Bootstrap.log
+import webapp.Logging.log
 import webapp.accounts.models.AccountCredentials
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.lang3.StringUtils.stripAccents

@@ -36,7 +36,6 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 import org.springframework.web.reactive.config.EnableWebFlux
 import org.springframework.web.reactive.config.WebFluxConfigurer
 import reactor.core.publisher.Hooks
-import webapp.Bootstrap.log
 import webapp.Constants.FEATURE_POLICY
 import webapp.Constants.GMAIL
 import webapp.Constants.MAILSLURP
@@ -44,6 +43,7 @@ import webapp.Constants.MAIL_DEBUG
 import webapp.Constants.MAIL_SMTP_AUTH
 import webapp.Constants.MAIL_TRANSPORT_PROTOCOL
 import webapp.Constants.MAIL_TRANSPORT_STARTTLS_ENABLE
+import webapp.Logging.log
 
 
 /*=================================================================================*/

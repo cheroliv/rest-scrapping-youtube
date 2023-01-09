@@ -11,6 +11,7 @@ import org.springframework.core.task.AsyncTaskExecutor
 import org.springframework.scheduling.annotation.AsyncConfigurer
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
+import webapp.Logging.log
 import java.util.concurrent.Callable
 import java.util.concurrent.Executor
 import java.util.concurrent.Future
@@ -32,7 +33,7 @@ class Asyncs(
         @Suppress("UsePropertyAccessSyntax") setThreadNamePrefix(taskExecutionProperties.threadNamePrefix)
         corePoolSize = taskExecutionProperties.pool.coreSize
         maxPoolSize = taskExecutionProperties.pool.maxSize
-    }).also { Bootstrap.log.debug("Creating Async Task Executor") }
+    }).also { log.debug("Creating Async Task Executor") }
 
     override fun getAsyncUncaughtExceptionHandler(): AsyncUncaughtExceptionHandler =
         SimpleAsyncUncaughtExceptionHandler()
@@ -68,7 +69,7 @@ class Asyncs(
             }
         }
 
-        private fun handle(e: Exception?): Unit = Bootstrap.log.error(EXCEPTION_MESSAGE, e)
+        private fun handle(e: Exception?): Unit = log.error(EXCEPTION_MESSAGE, e)
 
         override fun submit(task: Runnable): Future<*> = executor.submit(createWrappedRunnable(task))
 
