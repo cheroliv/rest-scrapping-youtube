@@ -4,16 +4,8 @@ package webapp
 
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler
-import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler
-import org.springframework.beans.factory.DisposableBean
-import org.springframework.beans.factory.InitializingBean
-import org.springframework.boot.autoconfigure.task.TaskExecutionProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.*
-import org.springframework.context.i18n.LocaleContext
-import org.springframework.context.i18n.SimpleLocaleContext
-import org.springframework.core.task.AsyncTaskExecutor
 import org.springframework.data.web.ReactivePageableHandlerMethodArgumentResolver
 import org.springframework.data.web.ReactiveSortHandlerMethodArgumentResolver
 import org.springframework.format.FormatterRegistry
@@ -21,10 +13,6 @@ import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar
 import org.springframework.http.HttpMethod.OPTIONS
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
-import org.springframework.scheduling.annotation.AsyncConfigurer
-import org.springframework.scheduling.annotation.EnableAsync
-import org.springframework.scheduling.annotation.EnableScheduling
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
@@ -44,11 +32,8 @@ import org.springframework.validation.Validator
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean
 import org.springframework.web.cors.reactive.CorsWebFilter
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
-import org.springframework.web.reactive.config.DelegatingWebFluxConfiguration
 import org.springframework.web.reactive.config.EnableWebFlux
 import org.springframework.web.reactive.config.WebFluxConfigurer
-import org.springframework.web.server.ServerWebExchange
-import org.springframework.web.server.i18n.LocaleContextResolver
 import reactor.core.publisher.Hooks
 import webapp.Bootstrap.log
 import webapp.Constants.FEATURE_POLICY
@@ -58,15 +43,6 @@ import webapp.Constants.MAIL_DEBUG
 import webapp.Constants.MAIL_SMTP_AUTH
 import webapp.Constants.MAIL_TRANSPORT_PROTOCOL
 import webapp.Constants.MAIL_TRANSPORT_STARTTLS_ENABLE
-import webapp.Constants.REQUEST_PARAM_LANG
-import java.util.Locale.forLanguageTag
-import java.util.Locale.getDefault
-import java.util.concurrent.Callable
-import java.util.concurrent.Executor
-import java.util.concurrent.Future
-
-
-
 
 
 /*=================================================================================*/
@@ -221,73 +197,3 @@ class MonolithConfiguration(
 /*=================================================================================*/
 
 
-@EnableAsync
-@Configuration
-@EnableScheduling
-@Suppress("unused")
-class AsyncTasksConfiguration(
-    private val taskExecutionProperties: TaskExecutionProperties
-) : AsyncConfigurer {
-
-
-    @Bean(name = ["taskExecutor"])
-    override fun getAsyncExecutor(): Executor = ExceptionHandlingAsyncTaskExecutor(ThreadPoolTaskExecutor().apply {
-        queueCapacity = taskExecutionProperties.pool.queueCapacity
-        @Suppress("UsePropertyAccessSyntax") setThreadNamePrefix(taskExecutionProperties.threadNamePrefix)
-        corePoolSize = taskExecutionProperties.pool.coreSize
-        maxPoolSize = taskExecutionProperties.pool.maxSize
-    }).also { log.debug("Creating Async Task Executor") }
-
-    override fun getAsyncUncaughtExceptionHandler(): AsyncUncaughtExceptionHandler =
-        SimpleAsyncUncaughtExceptionHandler()
-
-
-    class ExceptionHandlingAsyncTaskExecutor(
-        private val executor: AsyncTaskExecutor
-    ) : AsyncTaskExecutor, InitializingBean, DisposableBean {
-        companion object {
-            const val EXCEPTION_MESSAGE = "Caught async exceptions"
-        }
-
-        override fun execute(task: Runnable): Unit = executor.execute(createWrappedRunnable(task))
-
-        @Suppress("OVERRIDE_DEPRECATION")
-        override fun execute(task: Runnable, startTimeout: Long): Unit =
-            executor.execute(createWrappedRunnable(task))
-
-        private fun <T> createCallable(task: Callable<T>): Callable<T> = Callable {
-            try {
-                return@Callable task.call()
-            } catch (e: Exception) {
-                handle(e)
-                throw e
-            }
-        }
-
-        private fun createWrappedRunnable(task: Runnable): Runnable = Runnable {
-            try {
-                task.run()
-            } catch (e: Exception) {
-                handle(e)
-            }
-        }
-
-        private fun handle(e: Exception?): Unit = log.error(EXCEPTION_MESSAGE, e)
-
-        override fun submit(task: Runnable): Future<*> = executor.submit(createWrappedRunnable(task))
-
-        override fun <T> submit(task: Callable<T>): Future<T> = executor.submit(createCallable(task))
-
-        @Throws(Exception::class)
-        override fun destroy() {
-            if (executor is DisposableBean) (executor as DisposableBean).apply(DisposableBean::destroy)
-        }
-
-        @Throws(Exception::class)
-        override fun afterPropertiesSet() {
-            if (executor is InitializingBean) (executor as InitializingBean).apply { afterPropertiesSet() }
-        }
-    }
-}
-
-/*=================================================================================*/
