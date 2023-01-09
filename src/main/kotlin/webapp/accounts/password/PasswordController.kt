@@ -9,6 +9,7 @@ import webapp.Constants
 import webapp.Constants.CHANGE_PASSWORD_API
 import webapp.Constants.RESET_PASSWORD_API_FINISH
 import webapp.Constants.RESET_PASSWORD_API_INIT
+import webapp.Logging.w
 import webapp.accounts.mail.MailService
 import webapp.accounts.models.KeyAndPassword
 import webapp.accounts.models.PasswordChange
@@ -51,7 +52,7 @@ class PasswordController(
     @PostMapping(RESET_PASSWORD_API_INIT)
     suspend fun requestPasswordReset(@RequestBody @Email mail: String) =
         with(passwordService.requestPasswordReset(mail)) {
-            if (this == null) webapp.Logging.log.warn("Password reset requested for non existing mail")
+            if (this == null) w("Password reset requested for non existing mail")
             else mailService.sendPasswordResetMail(this)
         }
 

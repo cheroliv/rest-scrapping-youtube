@@ -7,20 +7,20 @@
 
 package webapp
 
-import webapp.Constants.ADMIN
-import webapp.Constants.DOMAIN_DEV_URL
-import webapp.Constants.USER
-import webapp.DataTests.accounts
-import webapp.DataTests.defaultAccount
-import webapp.DataTests.defaultAccountJson
-import webapp.Logging.log
-import webapp.accounts.models.AccountCredentials
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.commons.lang3.StringUtils.stripAccents
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.springframework.beans.factory.getBean
 import org.springframework.context.ConfigurableApplicationContext
+import webapp.Constants.ADMIN
+import webapp.Constants.DOMAIN_DEV_URL
+import webapp.Constants.USER
+import webapp.DataTests.accounts
+import webapp.DataTests.defaultAccount
+import webapp.DataTests.defaultAccountJson
+import webapp.Logging.i
+import webapp.accounts.models.AccountCredentials
 import kotlin.test.Test
 
 
@@ -97,14 +97,15 @@ internal class DataTestsChecks {
     fun `lance le server en profile test`() {
         context = launcher()
     }
+
     @AfterAll
     fun `arrête le serveur`() = context.close()
 
 
     @Test
     fun `affiche moi du json`() {
-        log.info(context.getBean<ObjectMapper>().writeValueAsString(accounts))
-        log.info(context.getBean<ObjectMapper>().writeValueAsString(defaultAccount))
-        log.info(defaultAccountJson)
+        i(context.getBean<ObjectMapper>().writeValueAsString(accounts))
+        i(context.getBean<ObjectMapper>().writeValueAsString(defaultAccount))
+        i(defaultAccountJson)
     }
 }

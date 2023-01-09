@@ -9,20 +9,20 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.task.AsyncTaskExecutor
 import org.springframework.scheduling.annotation.AsyncConfigurer
+import org.springframework.scheduling.annotation.EnableAsync
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
-import webapp.Logging.log
+import webapp.Logging.d
+import webapp.Logging.e
 import java.util.concurrent.Callable
 import java.util.concurrent.Executor
 import java.util.concurrent.Future
 
-//class Asyncs {
-//}
-//@EnableAsync
+@EnableAsync
 @Configuration
 @EnableScheduling
 @Suppress("unused")
-class Asyncs(
+class Scheduling(
     private val taskExecutionProperties: TaskExecutionProperties
 ) : AsyncConfigurer {
 
@@ -33,7 +33,7 @@ class Asyncs(
         @Suppress("UsePropertyAccessSyntax") setThreadNamePrefix(taskExecutionProperties.threadNamePrefix)
         corePoolSize = taskExecutionProperties.pool.coreSize
         maxPoolSize = taskExecutionProperties.pool.maxSize
-    }).also { log.debug("Creating Async Task Executor") }
+    }).also { d("Creating Async Task Executor") }
 
     override fun getAsyncUncaughtExceptionHandler(): AsyncUncaughtExceptionHandler =
         SimpleAsyncUncaughtExceptionHandler()
@@ -69,7 +69,7 @@ class Asyncs(
             }
         }
 
-        private fun handle(e: Exception?): Unit = log.error(EXCEPTION_MESSAGE, e)
+        private fun handle(e: Exception?): Unit = e(EXCEPTION_MESSAGE, e)
 
         override fun submit(task: Runnable): Future<*> = executor.submit(createWrappedRunnable(task))
 

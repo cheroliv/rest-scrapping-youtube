@@ -43,7 +43,7 @@ import webapp.Constants.MAIL_DEBUG
 import webapp.Constants.MAIL_SMTP_AUTH
 import webapp.Constants.MAIL_TRANSPORT_PROTOCOL
 import webapp.Constants.MAIL_TRANSPORT_STARTTLS_ENABLE
-import webapp.Logging.log
+import webapp.Logging.d
 
 
 /*=================================================================================*/
@@ -118,7 +118,7 @@ class Application(
     fun corsFilter(): CorsWebFilter = CorsWebFilter(UrlBasedCorsConfigurationSource().apply source@{
         properties.cors.apply config@{
             if (allowedOrigins != null && allowedOrigins!!.isNotEmpty()) {
-                log.debug("Registering CORS filter").run {
+                d("Registering CORS filter").run {
                     this@source.apply {
                         registerCorsConfiguration("/api/**", this@config)
                         registerCorsConfiguration("/management/**", this@config)

@@ -32,7 +32,10 @@ import webapp.Constants.AUTHORIZATION_HEADER
 import webapp.Constants.BEARER_START_WITH
 import webapp.Constants.INVALID_TOKEN
 import webapp.Constants.VALID_TOKEN
-import webapp.Logging.log
+import webapp.Logging.d
+import webapp.Logging.i
+import webapp.Logging.t
+import webapp.Logging.w
 import java.security.Key
 import java.util.*
 import kotlin.text.Charsets.UTF_8
@@ -60,13 +63,13 @@ class TokenProvider(
             .run {
                 key = hmacShaKeyFor(
                     when {
-                        !hasLength(this) -> log.warn(
+                        !hasLength(this) -> w(
                             "Warning: the Jwt key used is not Base64-encoded. " +
                                     "We recommend using the `webapp.security.authentication.jwt.base64-secret`" +
                                     " key for optimum security."
                         ).run { toByteArray(UTF_8) }
 
-                        else -> log.debug("Using a Base64-encoded Jwt secret key").run {
+                        else -> d("Using a Base64-encoded Jwt secret key").run {
                             BASE64.decode(
                                 properties
                                     .security
@@ -142,14 +145,16 @@ class TokenProvider(
                 .parseClaimsJws(token)
             return VALID_TOKEN
         } catch (e: JwtException) {
-            log.info("Invalid Jwt token.")
-            log.trace("Invalid Jwt token trace. $e")
+            i("Invalid Jwt token.")
+            t("Invalid Jwt token trace. $e")
         } catch (e: IllegalArgumentException) {
-            log.info("Invalid Jwt token.")
-            log.trace("Invalid Jwt token trace. $e")
+            i("Invalid Jwt token.")
+            t("Invalid Jwt token trace. $e")
         }
         return INVALID_TOKEN
     }
+
+
 }
 /*=================================================================================*/
 

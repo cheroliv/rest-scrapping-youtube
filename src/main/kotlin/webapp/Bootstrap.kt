@@ -38,7 +38,7 @@ object Bootstrap {
 //@org.springframework.context.annotation.Profile(Constants.PROFILE_CLI)
 //class CliRunner : CommandLineRunner {
 //    override fun run(vararg args: String?) = runBlocking {
-//        log.info("command line interface: $args")
+//        i("command line interface: $args")
 //    }
 //}
 /*=================================================================================*/

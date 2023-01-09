@@ -6,7 +6,7 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.thymeleaf.spring6.SpringTemplateEngine
 import webapp.Constants
-import webapp.Logging.log
+import webapp.Logging.i
 import webapp.Properties
 
 /*=================================================================================*/
@@ -29,5 +29,5 @@ class MailServiceSlurp(
         content: String,
         isMultipart: Boolean,
         isHtml: Boolean
-    ) = log.info(MailServiceSlurp::class.java.name)
+    ) = i(MailServiceSlurp::class.java.name)
 }

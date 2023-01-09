@@ -5,10 +5,10 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import webapp.*
-import webapp.Logging.log
 import webapp.Constants.DEFAULT_LANGUAGE
 import webapp.Constants.ROLE_USER
 import webapp.Constants.SYSTEM_USER
+import webapp.Logging.i
 import webapp.accounts.*
 import webapp.accounts.mail.MailService
 import webapp.accounts.models.AccountCredentials
@@ -18,7 +18,6 @@ import webapp.accounts.models.exceptions.InvalidPasswordException
 import webapp.accounts.models.exceptions.UsernameAlreadyUsedException
 import webapp.accounts.repository.AccountRepository
 import java.time.Instant.now
-
 
 
 @Service
@@ -77,15 +76,17 @@ class SignupService(
     }
 
     suspend fun activate(key: String): Boolean {
-            with(accountRepository.findOneByActivationKey(key)) {
-                return if (this == null) false
-                else {
-                    accountRepository.save(copy(
+        with(accountRepository.findOneByActivationKey(key)) {
+            return if (this == null) false
+            else {
+                accountRepository.save(
+                    copy(
                         activated = true,
                         activationKey = null
-                    )).run { if (id != null) log.info("activation: $login") }
-                    true
-                }
+                    )
+                ).run { if (id != null) i("activation: $login") }
+                true
             }
         }
     }
+}

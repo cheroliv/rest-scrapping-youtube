@@ -177,7 +177,7 @@ internal abstract class AbstractIntegrationTest {
                 .allAndAwait()
         }
 
-    suspend fun logCountUser() = log.info("countUser: ${countUser()}")
+    suspend fun logCountUser() = i("countUser: ${countUser()}")
 
     suspend fun logCountUserAuthority() = log
         .info("countUserAuthority: ${countUserAuthority()}")
@@ -266,8 +266,8 @@ internal abstract class AbstractIntegrationTest {
     suspend fun logUsers() {
         findAllUsers().apply {
             if (count() == 1 || count() == 0)
-                log.info(single()::toString)
-            else map { log.info(it::toString) }
+                i(single()::toString)
+            else map { i(it::toString) }
         }
     }
 }

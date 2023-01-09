@@ -10,12 +10,13 @@ import webapp.Constants.REQUEST_PARAM_LANG
 import java.util.*
 import java.util.Locale.forLanguageTag
 
-object I18n {
-}
+//object I18n {
+//}
 
 /*=================================================================================*/
+@Suppress("unused")
 @Configuration
-class LocaleSupportConfiguration : DelegatingWebFluxConfiguration() {
+class I18n : DelegatingWebFluxConfiguration() {
 
     override fun createLocaleContextResolver(): LocaleContextResolver = RequestParamLocaleContextResolver()
 

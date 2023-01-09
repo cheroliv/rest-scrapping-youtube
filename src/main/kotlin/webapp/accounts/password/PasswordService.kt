@@ -2,7 +2,7 @@ package webapp.accounts.password
 
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import webapp.Logging.log
+import webapp.Logging.d
 import webapp.accounts.models.AccountCredentials
 import webapp.accounts.repository.AccountRepository
 import java.time.Instant.now
@@ -28,7 +28,7 @@ class PasswordService(private val accountRepository: AccountRepository) {
 //                        else saveUser(this.apply {
 //                            password = passwordEncoder.encode(newPassword)
 //                        }).run {
-//                            log.debug("Changed password for User: {}", this)
+//                            d("Changed password for User: {}", this)
 //                        }
 //                    }
 //                }
@@ -38,7 +38,7 @@ class PasswordService(private val accountRepository: AccountRepository) {
     suspend fun completePasswordReset(newPassword: String, key: String): AccountCredentials? =
         accountRepository.findOneByResetKey(key).run {
             if (this != null && resetDate?.isAfter(now().minusSeconds(86400)) == true) {
-                log.debug("Reset account password for reset key $key")
+                d("Reset account password for reset key $key")
                 return@completePasswordReset toCredentialsModel
                 //                return saveUser(
                 //                apply {
@@ -47,7 +47,7 @@ class PasswordService(private val accountRepository: AccountRepository) {
                 //                    resetDate = null
                 //                })
             } else {
-                log.debug("$key is not a valid reset account password key")
+                d("$key is not a valid reset account password key")
                 return@completePasswordReset null
             }
         }

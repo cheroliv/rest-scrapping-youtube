@@ -5,9 +5,9 @@ import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.thymeleaf.spring6.SpringTemplateEngine
-import webapp.Properties
-import webapp.Logging.log
 import webapp.Constants.GMAIL
+import webapp.Logging.i
+import webapp.Properties
 
 
 @Suppress("unused")
@@ -29,5 +29,5 @@ class MailServiceGmail(
         content: String,
         isMultipart: Boolean,
         isHtml: Boolean
-    ) = log.info(MailServiceGmail::class.java.name)
+    ) = i(MailServiceGmail::class.java.name)
 }

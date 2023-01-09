@@ -16,7 +16,6 @@ import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.data.r2dbc.core.select
 import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.data.relational.core.query.Query.query
-import webapp.Logging.log
 import webapp.Constants.ADMIN
 import webapp.Constants.DEFAULT_LANGUAGE
 import webapp.Constants.ROLE_ADMIN
@@ -24,6 +23,7 @@ import webapp.Constants.ROLE_USER
 import webapp.Constants.SYSTEM_USER
 import webapp.Constants.TEST
 import webapp.Constants.VIRGULE
+import webapp.Logging.i
 import webapp.accounts.models.Account
 import webapp.accounts.models.AccountCredentials
 import webapp.accounts.models.AccountUtils.generateActivationKey
@@ -42,7 +42,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 
-
 val ByteArray.logBody: ByteArray
     get() = apply {
         map { it.toInt().toChar().toString() }
@@ -56,14 +55,14 @@ val ByteArray.logBody: ByteArray
             .replace("{\"", "\n{\n\t\"")
             .replace("\"}", "\"\n}")
             .replace("\",\"", "\",\n\t\"")
-            .run { log.info(this) }
+            .run { i(this) }
 
     }
 val ByteArray.logBodyRaw: ByteArray
     get() = apply {
         map { it.toInt().toChar().toString() }
             .reduce { request, s -> request + s }
-            .run { log.info(this) }
+            .run { i(this) }
     }
 
 
@@ -84,12 +83,12 @@ fun launcher(vararg profiles: String): ConfigurableApplicationContext =
         (if (!environment.defaultProfiles.isNullOrEmpty()) environment
             .defaultProfiles
             .reduce { acc, s -> "$acc, $s" }
-        else "").run { log.info("defaultProfiles: $this") }
+        else "").run { i("defaultProfiles: $this") }
 
         (if (!environment.activeProfiles.isNullOrEmpty()) environment
             .activeProfiles
             .reduce { acc, s -> "$acc, $s" }
-        else "").run { log.info("activeProfiles: $this") }
+        else "").run { i("activeProfiles: $this") }
     }
 
 

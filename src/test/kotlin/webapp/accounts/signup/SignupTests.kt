@@ -15,7 +15,6 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.WebTestClient.bindToServer
 import org.springframework.test.web.reactive.server.returnResult
 import webapp.*
-import webapp.Logging.log
 import webapp.Constants.ACTIVATE_API_PARAM
 import webapp.Constants.ACTIVATE_API_PATH
 import webapp.Constants.BASE_URL_DEV
@@ -23,6 +22,7 @@ import webapp.Constants.DEFAULT_LANGUAGE
 import webapp.Constants.ROLE_ADMIN
 import webapp.Constants.SIGNUP_API_PATH
 import webapp.DataTests.defaultAccount
+import webapp.Logging.i
 import webapp.accounts.*
 import webapp.accounts.models.AccountCredentials
 import webapp.accounts.models.AccountUtils.generateActivationKey
@@ -175,7 +175,7 @@ internal class SignupTests {
     @Test
     fun `test signup account avec un password invalid`() {
         validator.validateProperty(AccountCredentials("123"),"password").map {
-            log.info(it.message)
+            i(it.message)
         }
         assertEquals(0, countAccount(dao))
         client.post()

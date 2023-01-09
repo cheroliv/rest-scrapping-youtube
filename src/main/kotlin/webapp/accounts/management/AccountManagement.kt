@@ -29,7 +29,7 @@ import java.util.*
 ////    @GetMapping("/authenticate")
 ////    suspend fun isAuthenticated(request: ServerWebExchange): String? =
 ////        request.getPrincipal<Principal>().map(Principal::getName).awaitFirstOrNull().also {
-////            log.debug("REST request to check if the current user is authenticated")
+////            d("REST request to check if the current user is authenticated")
 ////        }
 ////
 ////
@@ -40,7 +40,7 @@ import java.util.*
 ////     * @throws RuntimeException {@code 500 (Internal Application Error)} if the user couldn't be returned.
 ////     */
 ////    @GetMapping("account")
-////    suspend fun getAccount(): Account = log.info("controller getAccount").run {
+////    suspend fun getAccount(): Account = i("controller getAccount").run {
 ////        userService.getUserWithAuthorities().run<User?, Nothing> {
 ////            if (this == null) throw AccountException("User could not be found")
 ////            else return Account(user = this)
@@ -185,7 +185,7 @@ import java.util.*
 //    @org.springframework.security.access.prepost.PreAuthorize("hasAuthority(\"$ROLE_ADMIN\")")
 //    suspend fun createUser(@Valid @RequestBody account: Account): ResponseEntity<User> {
 //        account.apply requestAccount@{
-//            log.debug("REST request to save User : {}", account)
+//            d("REST request to save User : {}", account)
 //            if (id != null) throw AlertProblem(
 //                defaultMessage = "A new user cannot already have an ID",
 //                entityName = "userManagement",
@@ -234,7 +234,7 @@ import java.util.*
 //    @PutMapping("/users")
 //    @org.springframework.security.access.prepost.PreAuthorize("hasAuthority(\"$ROLE_ADMIN\")")
 //    suspend fun updateUser(@Valid @RequestBody account: Account): ResponseEntity<Account> {
-//        log.debug("REST request to update User : {}", account)
+//        d("REST request to update User : {}", account)
 //        userService.findAccountByEmail(account.email!!).apply {
 //            if (this == null) throw ResponseStatusException(NOT_FOUND)
 //            if (id != account.id) throw EmailAlreadyUsedProblem()
@@ -264,7 +264,7 @@ import java.util.*
 //    @GetMapping("/users")
 //    @org.springframework.security.access.prepost.PreAuthorize("hasAuthority(\"$ROLE_ADMIN\")")
 //    suspend fun getAllUsers(request: ServerHttpRequest, pageable: Pageable): ResponseEntity<Flow<Account>> =
-//        log.debug("REST request to get all User for an admin").run {
+//        d("REST request to get all User for an admin").run {
 //            return if (!onlyContainsAllowedProperties(pageable)) {
 //                badRequest().build()
 //            } else ok()
@@ -298,7 +298,7 @@ import java.util.*
 //    @GetMapping("/users/{login}")
 //    @org.springframework.security.access.prepost.PreAuthorize("hasAuthority(\"$ROLE_ADMIN\")")
 //    suspend fun getUser(@PathVariable login: String): Account =
-//        log.debug("REST request to get User : {}", login).run {
+//        d("REST request to get User : {}", login).run {
 //            return Account(userService.getUserWithAuthoritiesByLogin(login).apply {
 //                if (this == null) throw ResponseStatusException(NOT_FOUND)
 //            }!!)
@@ -316,7 +316,7 @@ import java.util.*
 //    suspend fun deleteUser(
 //        @PathVariable @Pattern(regexp = LOGIN_REGEX) login: String
 //    ): ResponseEntity<Unit> {
-//        log.debug("REST request to delete User: {}", login).run {
+//        d("REST request to delete User: {}", login).run {
 //            userService.deleteUser(login).run {
 //                return noContent().headers(
 //                    createAlert(
@@ -481,21 +481,21 @@ class UserService
 //
 //    @Transactional
 //    suspend fun activateRegistration(key: String): User? =
-//        log.debug("Activating user for activation key {}", key).run {
+//        d("Activating user for activation key {}", key).run {
 //            return@run iUserRepository.findOneByActivationKey(key).apply {
 //                if (this != null) {
 //                    activated = true
 //                    activationKey = null
 //                    saveUser(user = this).run {
-//                        log.debug("Activated user: {}", this)
+//                        d("Activated user: {}", this)
 //                    }
-//                } else log.debug("No user found with activation key {}", key)
+//                } else d("No user found with activation key {}", key)
 //            }
 //        }
 //
 //
 //    suspend fun completePasswordReset(newPassword: String, key: String): User? =
-//        log.debug("Reset user password for reset key {}", key).run {
+//        d("Reset user password for reset key {}", key).run {
 //            userRepository.findOneByResetKey(key).apply {
 //                return if (this != null &&
 //                    resetDate?.isAfter(now().minusSeconds(86400)) == true
@@ -569,7 +569,7 @@ class UserService
 //                }
 //            }
 //        }).also {
-//            log.debug("Created Information for User: {}", it)
+//            d("Created Information for User: {}", it)
 //        }
 //
 //
@@ -604,7 +604,7 @@ class UserService
 //                    userAuthRepository.deleteAllUserAuthoritiesByUser(account.id!!)
 //                }
 //            }).also {
-//                log.debug("Changed Information for User: {}", it)
+//                d("Changed Information for User: {}", it)
 //            })
 //        }
 //
@@ -613,7 +613,7 @@ class UserService
 //    suspend fun deleteUser(login: String): Unit =
 //        userRepository.findOneByLogin(login).apply {
 //            userRepository.delete(this!!)
-//        }.run { log.debug("Changed Information for User: $this") }
+//        }.run { d("Changed Information for User: $this") }
 //
 //    /**
 //     * Update basic information (first name, last name, email, language) for the current user.
@@ -639,7 +639,7 @@ class UserService
 //            this.langKey = langKey
 //            this.imageUrl = imageUrl
 //            saveUser(user = this).also {
-//                log.debug("Changed Information for User: {}", it)
+//                d("Changed Information for User: {}", it)
 //            }
 //        }
 //    }
@@ -673,7 +673,7 @@ class UserService
 //                        else saveUser(this.apply {
 //                            password = passwordEncoder.encode(newPassword)
 //                        }).run {
-//                            log.debug("Changed password for User: {}", this)
+//                            d("Changed password for User: {}", this)
 //                        }
 //                    }
 //                }
@@ -761,7 +761,7 @@ class UserService
 //        ).map {
 //            it.apply {
 //                userRepository.delete(this).also {
-//                    log.debug("Deleted User: {}", this)
+//                    d("Deleted User: {}", this)
 //                }
 //            }
 //        }

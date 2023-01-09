@@ -6,13 +6,38 @@ import org.slf4j.LoggerFactory.getLogger
 import org.springframework.beans.factory.getBean
 import org.springframework.context.ApplicationContext
 import org.springframework.context.MessageSource
+import webapp.Constants.EMPTY_STRING
+import webapp.Constants.JUMPLINE
 import java.net.InetAddress
 import java.net.UnknownHostException
 import java.util.*
 
 object Logging {
     @JvmStatic
-    val log: Logger by lazy { getLogger(Application::class.java) }
+    private val log: Logger by lazy { getLogger(Application::class.java) }
+
+    @JvmStatic
+    fun i(message: String) = log.info(message)
+
+    @JvmStatic
+    fun d(message: String) = log.debug(message)
+
+    @JvmStatic
+    fun w(message: String) = log.warn(message)
+
+    @JvmStatic
+    fun t(message: String) = log.trace(message)
+    @JvmStatic
+    fun e(message: String) = log.error(message)
+    @JvmStatic
+    fun e(message: String,defaultMessage: String?) = log.error(message,defaultMessage)
+
+    @JvmStatic
+    fun e(message: String,e: Exception?) = log.error(message,e)
+    @JvmStatic
+    fun w(message: String,e: Exception?) = log.warn(message,e)
+
+
 
     /*=================================================================================*/
     @Suppress("UnusedReceiverParameter")
@@ -20,7 +45,7 @@ object Logging {
 
     /*=================================================================================*/
 
-    fun startupLogMessage(
+    private fun startupLogMessage(
         appName: String?,
         goVisitMessage: String,
         protocol: String,
@@ -29,7 +54,7 @@ object Logging {
         hostAddress: String,
         profiles: String,
         activeProfiles: String
-    ): String = """${Constants.JUMPLINE}${Constants.JUMPLINE}${Constants.JUMPLINE}
+    ): String = """$JUMPLINE$JUMPLINE$JUMPLINE
 ----------------------------------------------------------
 go visit $goVisitMessage    
 ----------------------------------------------------------
@@ -37,18 +62,18 @@ Application '$appName' is running!
 Access URLs
     Local:      $protocol://localhost:$serverPort$contextPath
     External:   $protocol://$hostAddress:$serverPort$contextPath${
-        if (profiles.isNotBlank()) Constants.JUMPLINE + buildString {
+        if (profiles.isNotBlank()) JUMPLINE + buildString {
             append("Profile(s): ")
             append(profiles)
-        } else Constants.EMPTY_STRING
+        } else EMPTY_STRING
     }${
-        if (activeProfiles.isNotBlank()) Constants.JUMPLINE + buildString {
+        if (activeProfiles.isNotBlank()) JUMPLINE + buildString {
             append("Active(s) profile(s): ")
             append(activeProfiles)
-        } else Constants.EMPTY_STRING
+        } else EMPTY_STRING
     }
 ----------------------------------------------------------
-${Constants.JUMPLINE}${Constants.JUMPLINE}""".trimIndent()
+$JUMPLINE$JUMPLINE""".trimIndent()
 
 
     /*=================================================================================*/
@@ -92,12 +117,12 @@ ${Constants.JUMPLINE}${Constants.JUMPLINE}""".trimIndent()
             profiles = if (environment.defaultProfiles.isNotEmpty())
                 environment.defaultProfiles
                     .reduce { accumulator, profile -> "$accumulator, $profile" }
-            else Constants.EMPTY_STRING,
+            else EMPTY_STRING,
             activeProfiles = if (environment.activeProfiles.isNotEmpty())
                 environment.activeProfiles
                     .reduce { accumulator, profile -> "$accumulator, $profile" }
-            else Constants.EMPTY_STRING,
-        ).run { log.info(this) }
+            else EMPTY_STRING,
+        ).run { i(this) }
     }
 }
 /*=================================================================================*/

@@ -12,6 +12,7 @@ import org.thymeleaf.spring6.SpringTemplateEngine
 import webapp.Constants.GMAIL
 import webapp.Constants.MAILSLURP
 import webapp.Logging
+import webapp.Logging.w
 import webapp.Properties
 
 /*=================================================================================*/
@@ -47,11 +48,11 @@ class MailServiceSmtp(
                 setText(content, isHtml)
             }
             mailSender.send(this)
-            Logging.log.debug("Sent email to User '$to'")
+            Logging.d("Sent email to User '$to'")
         } catch (e: MailException) {
-            Logging.log.warn("Email could not be sent to user '$to'", e)
+            w("Email could not be sent to user '$to'", e)
         } catch (e: MessagingException) {
-            Logging.log.warn("Email could not be sent to user '$to'", e)
+            w("Email could not be sent to user '$to'", e)
         }
     }
 }

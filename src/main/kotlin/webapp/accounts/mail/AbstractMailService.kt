@@ -4,7 +4,7 @@ import org.springframework.context.MessageSource
 import org.thymeleaf.context.Context
 import org.thymeleaf.spring6.SpringTemplateEngine
 import webapp.Constants
-import webapp.Logging.log
+import webapp.Logging.d
 import webapp.Properties
 import webapp.accounts.models.AccountCredentials
 import java.util.*
@@ -30,7 +30,7 @@ abstract class AbstractMailService(
     ) {
         when (account.email) {
             null -> {
-                log.debug("Email doesn't exist for user '${account.login}'")
+                d("Email doesn't exist for user '${account.login}'")
                 return
             }
 
@@ -51,13 +51,13 @@ abstract class AbstractMailService(
 
     override fun sendActivationEmail(account: AccountCredentials) = sendEmailFromTemplate(
         account, Constants.TEMPLATE_NAME_SIGNUP, Constants.TITLE_KEY_SIGNUP
-    ).run { log.debug("Sending activation email to '${account.email}'") }
+    ).run { d("Sending activation email to '${account.email}'") }
 
     override fun sendCreationEmail(account: AccountCredentials) = sendEmailFromTemplate(
         account, Constants.TEMPLATE_NAME_CREATION, Constants.TITLE_KEY_SIGNUP
-    ).run { log.debug("Sending creation email to '${account.email}'") }
+    ).run { d("Sending creation email to '${account.email}'") }
 
     override fun sendPasswordResetMail(account: AccountCredentials) = sendEmailFromTemplate(
         account, Constants.TEMPLATE_NAME_PASSWORD, Constants.TITLE_KEY_PASSWORD
-    ).run { log.debug("Sending password reset email to '${account.email}'") }
+    ).run { d("Sending password reset email to '${account.email}'") }
 }

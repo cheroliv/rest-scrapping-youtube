@@ -1,14 +1,14 @@
 package webapp
 
-import webapp.Constants.DEVELOPMENT
-import webapp.Constants.PRODUCTION
-import webapp.Constants.STARTUP_LOG_MSG_KEY
-import webapp.Logging.log
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.springframework.beans.factory.getBean
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.context.MessageSource
+import webapp.Constants.DEVELOPMENT
+import webapp.Constants.PRODUCTION
+import webapp.Constants.STARTUP_LOG_MSG_KEY
+import webapp.Logging.i
 import java.util.*
 import java.util.Locale.FRENCH
 import kotlin.test.Test
@@ -18,7 +18,8 @@ class ConfigurationsTests {
 
     private lateinit var context: ConfigurableApplicationContext
     private val messageSource: MessageSource by lazy { context.getBean() }
-private val properties: Properties by lazy { context.getBean() }
+    private val properties: Properties by lazy { context.getBean() }
+
     @BeforeAll
     fun `lance le server en profile test`() {
         context = launcher()
@@ -56,11 +57,11 @@ private val properties: Properties by lazy { context.getBean() }
             Locale.getDefault()
         )
         assertEquals(msg, i18nMsg)
-        log.info(i18nMsg)
+        i(i18nMsg)
     }
 
     @Test
-    fun `test go visit message`(){
+    fun `test go visit message`() {
         assertEquals(
             "https://github.com/cheroliv/kotlin-springboot",
             properties.goVisitMessage
