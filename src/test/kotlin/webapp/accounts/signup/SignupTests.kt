@@ -54,6 +54,35 @@ internal class SignupTests {
 
 
     @Test
+    fun `vérification des exceptions problems en response`() {
+        client
+            .post()
+            .uri("")
+            .contentType(APPLICATION_JSON)
+            .bodyValue(defaultAccount)
+            .exchange()
+            .returnResult<Unit>()
+            .requestBodyContent!!
+            .map { it.toInt().toChar().toString() }
+            .reduce { acc: String, s: String -> acc + s }
+            .run {
+                defaultAccount.run {
+                    setOf(
+                        "\"login\":\"${login}\"",
+                        "\"password\":\"${password}\"",
+                        "\"firstName\":\"${firstName}\"",
+                        "\"lastName\":\"${lastName}\"",
+                        "\"email\":\"${email}\"",
+                    ).map {
+                        //test request contient les paramètres passés
+                        assertTrue(contains(it))
+                    }
+                }
+            }
+    }
+
+
+    @Test
     fun `vérifie que la requête contient bien des données cohérentes`() {
         client
             .post()

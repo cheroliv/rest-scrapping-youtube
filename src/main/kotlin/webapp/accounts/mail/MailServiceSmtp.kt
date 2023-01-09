@@ -11,12 +11,13 @@ import org.springframework.stereotype.Service
 import org.thymeleaf.spring6.SpringTemplateEngine
 import webapp.ApplicationProperties
 import webapp.Bootstrap
-import webapp.Constants
+import webapp.Constants.GMAIL
+import webapp.Constants.MAILSLURP
 
 /*=================================================================================*/
 @Async
 @Service
-@Profile("!${Constants.MAILSLURP} & !${Constants.GMAIL}")
+@Profile("!$MAILSLURP & !$GMAIL")
 class MailServiceSmtp(
     private val properties: ApplicationProperties,
     private val mailSender: JavaMailSender,

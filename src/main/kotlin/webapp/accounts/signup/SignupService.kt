@@ -34,10 +34,10 @@ class SignupService(
         UsernameAlreadyUsedException::class,
         UsernameAlreadyUsedException::class
     )
+
     suspend fun signup(account: AccountCredentials) {
-        InvalidPasswordException().run {
-            if (isPasswordLengthInvalid(account.password)) throw this
-        }
+        //TODO: account.run
+        InvalidPasswordException().run { if (isPasswordLengthInvalid(account.password)) throw this }
         loginValidation(account)
         emailValidation(account)
         val createdDate = now()

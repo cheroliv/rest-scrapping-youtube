@@ -57,14 +57,16 @@ class AccountRepositoryR2dbc(
         ?.toCredentialsModel
 
     private suspend fun withAuthorities(ac: AccountCredentials?): AccountCredentials? =
-        if (ac == null) null
-        else if (ac.id == null) null
-        else ac.copy(authorities = mutableSetOf<String>().apply {
-            dao.select<AccountAuthorityEntity>()
-                .matching(query(where(ACCOUNT_AUTH_USER_ID_FIELD).`is`(ac.id)))
-                .all()
-                .collect { add(it.role) }
-        })
+        when {
+            ac == null -> null
+            ac.id == null -> null
+            else -> ac.copy(authorities = mutableSetOf<String>().apply {
+                dao.select<AccountAuthorityEntity>()
+                    .matching(query(where(ACCOUNT_AUTH_USER_ID_FIELD).`is`(ac.id)))
+                    .all()
+                    .collect { add(it.role) }
+            })
+        }
 
     override suspend fun findOneWithAuthorities(emailOrLogin: String): AccountCredentials? =
         findOne(emailOrLogin).run { return@run withAuthorities(this) }

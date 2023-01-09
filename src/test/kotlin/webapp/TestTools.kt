@@ -2,19 +2,6 @@
 
 package webapp
 
-import webapp.Constants.ADMIN
-import webapp.Constants.DEFAULT_LANGUAGE
-import webapp.Constants.ROLE_ADMIN
-import webapp.Constants.ROLE_USER
-import webapp.Constants.SYSTEM_USER
-import webapp.Constants.TEST
-import webapp.Constants.VIRGULE
-import webapp.Bootstrap.log
-import webapp.accounts.models.Account
-import webapp.accounts.models.entities.AccountAuthorityEntity
-import webapp.accounts.models.AccountCredentials
-import webapp.accounts.models.entities.AccountEntity
-import webapp.accounts.models.AccountUtils.generateActivationKey
 import com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS
@@ -23,12 +10,30 @@ import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Description
 import org.hamcrest.TypeSafeDiagnosingMatcher
 import org.springframework.boot.runApplication
+import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.web.reactive.context.StandardReactiveWebEnvironment
 import org.springframework.context.ConfigurableApplicationContext
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Profile
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.data.r2dbc.core.select
 import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.data.relational.core.query.Query.query
+import org.springframework.mail.javamail.JavaMailSender
+import org.springframework.mail.javamail.JavaMailSenderImpl
+import webapp.Bootstrap.log
+import webapp.Constants.ADMIN
+import webapp.Constants.DEFAULT_LANGUAGE
+import webapp.Constants.ROLE_ADMIN
+import webapp.Constants.ROLE_USER
+import webapp.Constants.SYSTEM_USER
+import webapp.Constants.TEST
+import webapp.Constants.VIRGULE
+import webapp.accounts.models.Account
+import webapp.accounts.models.AccountCredentials
+import webapp.accounts.models.AccountUtils.generateActivationKey
+import webapp.accounts.models.entities.AccountAuthorityEntity
+import webapp.accounts.models.entities.AccountEntity
 import java.io.IOException
 import java.lang.Byte.parseByte
 import java.time.Instant
@@ -41,6 +46,13 @@ import kotlin.reflect.full.createInstance
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+
+//@TestConfiguration
+//class TestConfiguration{
+//    @Bean
+//    @Profile(TEST)
+//    fun javaMailSender(): JavaMailSender = JavaMailSenderImpl()
+//}
 
 val ByteArray.logBody: ByteArray
     get() = apply {

@@ -15,8 +15,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.mockito.*
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.doNothing
-import org.mockito.Mockito.verify
+import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations.openMocks
 import org.springframework.beans.factory.getBean
 import org.springframework.context.ConfigurableApplicationContext
@@ -31,10 +30,10 @@ import webapp.Constants.DEVELOPMENT
 import webapp.Constants.GMAIL
 import webapp.Constants.MAILSLURP
 import webapp.Constants.TEST
-import webapp.accounts.models.AccountCredentials
-import webapp.accounts.models.AccountUtils.generateResetKey
 import webapp.accounts.mail.MailService
 import webapp.accounts.mail.MailServiceSmtp
+import webapp.accounts.models.AccountCredentials
+import webapp.accounts.models.AccountUtils.generateResetKey
 import webapp.launcher
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -413,8 +412,6 @@ class MailServiceSmtpTests {
 class GmailServiceTests {
 
     private lateinit var context: ConfigurableApplicationContext
-    private lateinit var mailService: MailService
-    lateinit var javaMailSender: JavaMailSenderImpl
 
     @BeforeAll
     fun `lance le server en profile test`() {
