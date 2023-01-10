@@ -24,11 +24,11 @@ import webapp.Constants.SYSTEM_USER
 import webapp.Constants.TEST
 import webapp.Constants.VIRGULE
 import webapp.Logging.i
-import webapp.accounts.models.Account
-import webapp.accounts.models.AccountCredentials
-import webapp.accounts.models.AccountUtils.generateActivationKey
-import webapp.accounts.models.entities.AccountAuthorityEntity
-import webapp.accounts.models.entities.AccountEntity
+import webapp.models.Account
+import webapp.models.AccountCredentials
+import webapp.models.AccountUtils.generateActivationKey
+import webapp.models.entities.AccountAuthorityEntity
+import webapp.models.entities.AccountEntity
 import java.io.IOException
 import java.lang.Byte.parseByte
 import java.time.Instant
