@@ -31,4 +31,3 @@ pluginManagement {
 }
 
 rootProject.name = "kotlin-springboot"
-include(":desktop")
