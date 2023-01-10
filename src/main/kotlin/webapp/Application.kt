@@ -26,7 +26,28 @@ import reactor.core.publisher.Mono
 @SpringBootApplication
 @EnableConfigurationProperties(Properties::class)
 class Application(private val properties: Properties) : WebFluxConfigurer {
-
+    @Component
+    class SpaWebFilter : WebFilter {
+        override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
+            exchange.request.uri.path.apply {
+                return if (
+                    !startsWith("/api") &&
+                    !startsWith("/management") &&
+                    !startsWith("/services") &&
+                    !startsWith("/swagger") &&
+                    !startsWith("/v2/api-docs") &&
+                    matches(Regex("[^\\\\.]*"))
+                ) chain.filter(
+                    exchange.mutate().request(
+                        exchange.request
+                            .mutate()
+                            .path("/index.html")
+                            .build()
+                    ).build()
+                ) else chain.filter(exchange)
+            }
+        }
+    }
     @Bean
     fun validator(): Validator = LocalValidatorFactoryBean()
 
@@ -67,28 +88,7 @@ class Application(private val properties: Properties) : WebFluxConfigurer {
         }
     */
 
-    @Component
-    class SpaWebFilter : WebFilter {
-        override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
-            exchange.request.uri.path.apply {
-                return if (
-                    !startsWith("/api") &&
-                    !startsWith("/management") &&
-                    !startsWith("/services") &&
-                    !startsWith("/swagger") &&
-                    !startsWith("/v2/api-docs") &&
-                    matches(Regex("[^\\\\.]*"))
-                ) chain.filter(
-                    exchange.mutate().request(
-                        exchange.request
-                            .mutate()
-                            .path("/index.html")
-                            .build()
-                    ).build()
-                ) else chain.filter(exchange)
-            }
-        }
-    }
+
 }
 
 /*=================================================================================*/
