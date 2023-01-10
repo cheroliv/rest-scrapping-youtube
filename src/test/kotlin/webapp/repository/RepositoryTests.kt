@@ -16,7 +16,6 @@ import webapp.Constants.ROLE_USER
 import webapp.Constants.SYSTEM_USER
 import webapp.DataTests.accounts
 import webapp.DataTests.defaultAccount
-import webapp.accounts.*
 import webapp.models.AccountUtils.generateActivationKey
 import java.time.Instant
 import kotlin.test.Test

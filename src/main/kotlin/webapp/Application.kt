@@ -37,29 +37,8 @@ class Application(private val properties: Properties) : WebFluxConfigurer {
     fun jdk8TimeModule(): Jdk8Module = Jdk8Module()
 
 
-
-
-//    /**
-//     * The handler must have precedence over
-//     * WebFluxResponseStatusExceptionHandler
-//     * and Spring Boot's ErrorWebExceptionHandler
-//     */
-//    @Bean
-//    @Order(-2)
-//    fun problemHandler(
-//        mapper: ObjectMapper, problemHandling: ProblemHandling
-//    ): WebExceptionHandler = ProblemExceptionHandler(mapper, problemHandling)
-//
-//    @Bean
-//    fun problemModule(): ProblemModule = ProblemModule()
-//
-//    @Bean
-//    fun constraintViolationProblemModule() = ConstraintViolationProblemModule()
-
     @Profile("!${Constants.PRODUCTION}")
     fun reactorConfiguration() = Hooks.onOperatorDebug()
-
-
 
     // TODO: remove when this is supported in spring-data / spring-boot
     @Bean
@@ -93,12 +72,12 @@ class Application(private val properties: Properties) : WebFluxConfigurer {
         override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
             exchange.request.uri.path.apply {
                 return if (
-                    !this.startsWith("/api") &&
-                    !this.startsWith("/management") &&
-                    !this.startsWith("/services") &&
-                    !this.startsWith("/swagger") &&
-                    !this.startsWith("/v2/api-docs") &&
-                    this.matches(Regex("[^\\\\.]*"))
+                    !startsWith("/api") &&
+                    !startsWith("/management") &&
+                    !startsWith("/services") &&
+                    !startsWith("/swagger") &&
+                    !startsWith("/v2/api-docs") &&
+                    matches(Regex("[^\\\\.]*"))
                 ) chain.filter(
                     exchange.mutate().request(
                         exchange.request
