@@ -11,31 +11,13 @@ import org.springframework.data.web.ReactivePageableHandlerMethodArgumentResolve
 import org.springframework.data.web.ReactiveSortHandlerMethodArgumentResolver
 import org.springframework.format.FormatterRegistry
 import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar
-import org.springframework.http.HttpMethod.OPTIONS
-import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
-import org.springframework.security.authentication.ReactiveAuthenticationManager
-import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
-import org.springframework.security.config.web.server.SecurityWebFiltersOrder.AUTHENTICATION
-import org.springframework.security.config.web.server.SecurityWebFiltersOrder.HTTP_BASIC
-import org.springframework.security.config.web.server.ServerHttpSecurity
-import org.springframework.security.core.context.ReactiveSecurityContextHolder.withAuthentication
-import org.springframework.security.core.userdetails.ReactiveUserDetailsService
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.security.web.server.SecurityWebFilterChain
-import org.springframework.security.web.server.header.ReferrerPolicyServerHttpHeadersWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN
-import org.springframework.security.web.server.util.matcher.NegatedServerWebExchangeMatcher
-import org.springframework.security.web.server.util.matcher.OrServerWebExchangeMatcher
-import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers.pathMatchers
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean
-import org.springframework.web.cors.reactive.CorsWebFilter
-import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 import org.springframework.web.reactive.config.EnableWebFlux
 import org.springframework.web.reactive.config.WebFluxConfigurer
 import org.springframework.web.server.ServerWebExchange
@@ -43,16 +25,12 @@ import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Hooks
 import reactor.core.publisher.Mono
-import webapp.Constants.AUTHORIZATION_HEADER
-import webapp.Constants.BEARER_START_WITH
-import webapp.Constants.FEATURE_POLICY
 import webapp.Constants.GMAIL
 import webapp.Constants.MAILSLURP
 import webapp.Constants.MAIL_DEBUG
 import webapp.Constants.MAIL_SMTP_AUTH
 import webapp.Constants.MAIL_TRANSPORT_PROTOCOL
 import webapp.Constants.MAIL_TRANSPORT_STARTTLS_ENABLE
-import webapp.Logging.d
 
 
 /*=================================================================================*/
@@ -63,8 +41,6 @@ import webapp.Logging.d
 @SpringBootApplication
 class Application(
     private val properties: Properties,
-    private val userDetailsService: ReactiveUserDetailsService,
-    private val security: Security,
 ) : WebFluxConfigurer {
 
     override fun addFormatters(registry: FormatterRegistry) {
@@ -123,20 +99,7 @@ class Application(
     @Profile("!${Constants.PRODUCTION}")
     fun reactorConfiguration() = Hooks.onOperatorDebug()
 
-    @Bean
-    fun corsFilter(): CorsWebFilter = CorsWebFilter(UrlBasedCorsConfigurationSource().apply source@{
-        properties.cors.apply config@{
-            if (allowedOrigins != null && allowedOrigins!!.isNotEmpty()) {
-                d("Registering CORS filter").run {
-                    this@source.apply {
-                        registerCorsConfiguration("/api/**", this@config)
-                        registerCorsConfiguration("/management/**", this@config)
-                        registerCorsConfiguration("/v2/api-docs", this@config)
-                    }
-                }
-            }
-        }
-    })
+
 
     // TODO: remove when this is supported in spring-data / spring-boot
     @Bean
@@ -164,74 +127,6 @@ class Application(
             )
         }
     */
-    @Bean("passwordEncoder")
-    fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
-
-    @Bean
-    fun reactiveAuthenticationManager(): ReactiveAuthenticationManager =
-        UserDetailsRepositoryReactiveAuthenticationManager(userDetailsService).apply {
-            setPasswordEncoder(passwordEncoder())
-        }
-    @Component("jwtFilter")
-    class JwtFilter(private val security: Security) : WebFilter {
-
-        override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
-            resolveToken(exchange.request).apply token@{
-                chain.apply {
-                    return if (!isNullOrBlank() &&
-                        security.validateToken(this@token)
-                    ) filter(exchange)
-                        .contextWrite(
-                            withAuthentication(
-                                security.getAuthentication(this@token)
-                            )
-                        )
-                    else filter(exchange)
-                }
-            }
-        }
-
-        private fun resolveToken(request: ServerHttpRequest): String? = request
-            .headers
-            .getFirst(AUTHORIZATION_HEADER)
-            .apply {
-                return if (
-                    !isNullOrBlank() &&
-                    startsWith(BEARER_START_WITH)
-                ) substring(startIndex = 7)
-                else null
-            }
-    }
-
-    @Bean
-    fun springSecurityFilterChain(
-        http: ServerHttpSecurity
-    ): SecurityWebFilterChain = @Suppress("DEPRECATION") http.securityMatcher(
-        NegatedServerWebExchangeMatcher(
-            OrServerWebExchangeMatcher(
-                pathMatchers(
-                    "/app/**", "/i18n/**", "/content/**", "/swagger-ui/**", "/test/**", "/webjars/**"
-                ), pathMatchers(OPTIONS, "/**")
-            )
-        )
-    ).csrf().disable().addFilterAt(SpaWebFilter(), AUTHENTICATION).addFilterAt(JwtFilter(security), HTTP_BASIC)
-        .authenticationManager(reactiveAuthenticationManager())
-        .exceptionHandling()
-//        .accessDeniedHandler(problemSupport)
-//        .authenticationEntryPoint(problemSupport)
-        .and().headers()
-        .contentSecurityPolicy(Constants.CONTENT_SECURITY_POLICY).and().referrerPolicy(STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
-        .and().featurePolicy(FEATURE_POLICY).and().frameOptions().disable().and().authorizeExchange().pathMatchers("/")
-        .permitAll().pathMatchers("/**").permitAll().pathMatchers("/*.*").permitAll()
-        .pathMatchers("/api/account/signup").permitAll().pathMatchers("/api/activate").permitAll()
-        .pathMatchers("/api/authenticate").permitAll().pathMatchers("/api/account/reset-password/init").permitAll()
-        .pathMatchers("/api/account/reset-password/finish").permitAll().pathMatchers("/api/auth-info").permitAll()
-        .pathMatchers("/api/user/**").permitAll().pathMatchers("/management/health").permitAll()
-        .pathMatchers("/management/health/**").permitAll().pathMatchers("/management/info").permitAll()
-        .pathMatchers("/management/prometheus").permitAll().pathMatchers("/api/**").permitAll()
-        .pathMatchers("/services/**").authenticated().pathMatchers("/swagger-resources/**").authenticated()
-        .pathMatchers("/v2/api-docs").authenticated().pathMatchers("/management/**").hasAuthority(Constants.ROLE_ADMIN)
-        .pathMatchers("/api/admin/**").hasAuthority(Constants.ROLE_ADMIN).and().build()
 
     @Component
     class SpaWebFilter : WebFilter {
