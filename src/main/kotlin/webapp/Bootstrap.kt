@@ -7,17 +7,12 @@ import webapp.Logging.`continue`
 
 /*=================================================================================*/
 
-/*=================================================================================*/
-
 object Bootstrap {
     @JvmStatic
     fun main(args: Array<String>) = runApplication<Application>(*args)
         .checkProfileLog()
         .bootstrapLog()
         .`continue`()
-
-//    @JvmStatic
-//    val log: Logger by lazy { getLogger(Application::class.java) }
 }
 
 /*=================================================================================*/

@@ -9,20 +9,14 @@ import org.springframework.web.cors.CorsConfiguration
 
 /*=================================================================================*/
 
-@ConfigurationProperties(
-    prefix = "webapp",
-    ignoreUnknownFields = false
-)
-@PropertySources(
-    PropertySource(
+@PropertySources(PropertySource(
         "classpath:git.properties",
         ignoreResourceNotFound = true
-    ),
-    PropertySource(
+    ), PropertySource(
         "classpath:META-INF/build-info.properties",
         ignoreResourceNotFound = true
-    )
-)
+    ))
+@ConfigurationProperties(prefix = "webapp", ignoreUnknownFields = false)
 class Properties @ConstructorBinding constructor(
     val message: String = "",
     val item: String,

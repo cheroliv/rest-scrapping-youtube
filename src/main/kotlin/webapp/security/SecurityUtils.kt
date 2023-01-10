@@ -1,4 +1,4 @@
-package webapp
+package webapp.security
 
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.security.core.Authentication
@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.userdetails.UserDetails
+import webapp.Constants
 
 object SecurityUtils {
 

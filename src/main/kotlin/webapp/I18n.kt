@@ -3,6 +3,8 @@ package webapp
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.i18n.LocaleContext
 import org.springframework.context.i18n.SimpleLocaleContext
+import org.springframework.format.FormatterRegistry
+import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar
 import org.springframework.web.reactive.config.DelegatingWebFluxConfiguration
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.i18n.LocaleContextResolver
@@ -17,6 +19,13 @@ import java.util.Locale.forLanguageTag
 @Suppress("unused")
 @Configuration
 class I18n : DelegatingWebFluxConfiguration() {
+
+    override fun addFormatters(registry: FormatterRegistry) {
+        DateTimeFormatterRegistrar().apply {
+            setUseIsoFormat(true)
+            registerFormatters(registry)
+        }
+    }
 
     override fun createLocaleContextResolver(): LocaleContextResolver = RequestParamLocaleContextResolver()
 

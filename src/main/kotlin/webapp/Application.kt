@@ -9,12 +9,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.*
 import org.springframework.data.web.ReactivePageableHandlerMethodArgumentResolver
 import org.springframework.data.web.ReactiveSortHandlerMethodArgumentResolver
-import org.springframework.format.FormatterRegistry
-import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
-import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
-import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean
@@ -35,20 +31,9 @@ import webapp.Constants.MAIL_TRANSPORT_STARTTLS_ENABLE
 
 /*=================================================================================*/
 @EnableWebFlux
-@EnableWebFluxSecurity
-@EnableReactiveMethodSecurity
-@EnableConfigurationProperties(Properties::class)
 @SpringBootApplication
-class Application(
-    private val properties: Properties,
-) : WebFluxConfigurer {
-
-    override fun addFormatters(registry: FormatterRegistry) {
-        DateTimeFormatterRegistrar().apply {
-            setUseIsoFormat(true)
-            registerFormatters(registry)
-        }
-    }
+@EnableConfigurationProperties(Properties::class)
+class Application(private val properties: Properties) : WebFluxConfigurer {
 
     @Bean
     fun validator(): Validator = LocalValidatorFactoryBean()
