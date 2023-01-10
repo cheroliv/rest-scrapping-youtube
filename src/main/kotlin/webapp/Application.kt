@@ -9,8 +9,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.*
 import org.springframework.data.web.ReactivePageableHandlerMethodArgumentResolver
 import org.springframework.data.web.ReactiveSortHandlerMethodArgumentResolver
-import org.springframework.mail.javamail.JavaMailSender
-import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.stereotype.Component
 import org.springframework.validation.Validator
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean
@@ -21,12 +19,6 @@ import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Hooks
 import reactor.core.publisher.Mono
-import webapp.Constants.GMAIL
-import webapp.Constants.MAILSLURP
-import webapp.Constants.MAIL_DEBUG
-import webapp.Constants.MAIL_SMTP_AUTH
-import webapp.Constants.MAIL_TRANSPORT_PROTOCOL
-import webapp.Constants.MAIL_TRANSPORT_STARTTLS_ENABLE
 
 
 /*=================================================================================*/
@@ -44,24 +36,7 @@ class Application(private val properties: Properties) : WebFluxConfigurer {
     @Bean
     fun jdk8TimeModule(): Jdk8Module = Jdk8Module()
 
-    @Bean
-    @Profile("!$MAILSLURP & !$GMAIL")
-    fun javaMailSender(): JavaMailSender = JavaMailSenderImpl().apply {
-        host = properties.mail.host
-        port = properties.mail.port
-        username = properties.mail.from
-        password = properties.mail.password
-        mapOf(
-            MAIL_TRANSPORT_PROTOCOL to properties.mail.property.transport.protocol,
-            MAIL_SMTP_AUTH to properties.mail.property.smtp.auth,
-            MAIL_TRANSPORT_STARTTLS_ENABLE to properties.mail.property.smtp.starttls.enable,
-            MAIL_DEBUG to properties.mail.property.debug,
-            "spring.mail.test-connection" to true,
-            "mail.smtp.ssl.trust" to true,
-            "mail.connect_timeout" to 60000,
-            "mail.auth_api_key" to "",
-        ).forEach { javaMailProperties[it.key] = it.value }
-    }
+
 
 
 //    /**
