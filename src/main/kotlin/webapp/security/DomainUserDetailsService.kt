@@ -42,13 +42,11 @@ class DomainUserDetailsService(
     private fun createSpringSecurityUser(
         lowercaseLogin: String,
         account: AccountCredentials
-    ): User = if (!account.activated)
+    ) = if (!account.activated)
         throw UserNotActivatedException("User $lowercaseLogin was not activated")
     else User(
         account.login!!,
         account.password!!,
-        account.authorities!!.map {
-            SimpleGrantedAuthority(it)
-        }
+        account.authorities!!.map { SimpleGrantedAuthority(it) }
     )
 }
