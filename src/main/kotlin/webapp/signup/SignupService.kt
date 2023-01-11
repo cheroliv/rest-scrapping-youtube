@@ -12,7 +12,6 @@ import webapp.mail.MailService
 import webapp.models.AccountCredentials
 import webapp.models.AccountUtils.generateActivationKey
 import webapp.models.exceptions.EmailAlreadyUsedException
-import webapp.models.exceptions.InvalidPasswordException
 import webapp.models.exceptions.UsernameAlreadyUsedException
 import webapp.repository.AccountRepository
 import java.time.Instant.now
@@ -26,7 +25,6 @@ class SignupService(
 ) {
 
     @Throws(
-        InvalidPasswordException::class,
         UsernameAlreadyUsedException::class,
         UsernameAlreadyUsedException::class
     )
@@ -60,7 +58,7 @@ class SignupService(
         }
     }
 
-    @Throws(UsernameAlreadyUsedException::class)
+    @Throws(EmailAlreadyUsedException::class)
     private suspend fun emailValidation(model: AccountCredentials) {
         accountRepository.findOne(model.email!!).run {
             if (this != null) {

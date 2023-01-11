@@ -36,7 +36,6 @@ class SignupController(private val signupService: SignupService) {
         produces = [APPLICATION_PROBLEM_JSON_VALUE]
     )
     @ResponseStatus(CREATED)
-    @Throws(InvalidPasswordProblem::class)
     suspend fun signup(
         @Valid
         @RequestBody
