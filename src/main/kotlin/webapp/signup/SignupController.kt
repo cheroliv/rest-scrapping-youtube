@@ -37,16 +37,14 @@ class SignupController(private val signupService: SignupService) {
     suspend fun signup(
         @Valid
         @RequestBody
-        accountCredentials: AccountCredentials
+        accountCredentials: AccountCredentials,
+//         result: BindingResult
     ) = try {
         i("on entre dans le controller")
         signupService.signup(accountCredentials)
     } catch (ipe: InvalidPasswordException) {
         throw InvalidPasswordProblem(ipe)
     }
-    //        catch (eap:EmailAlreadyUsedProblem){
-//
-//        }
 
 
     /**

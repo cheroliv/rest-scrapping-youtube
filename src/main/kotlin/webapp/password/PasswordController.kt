@@ -31,7 +31,7 @@ class PasswordController(
     @PostMapping(Constants.CHANGE_PASSWORD_API)
     suspend fun changePassword(@RequestBody passwordChange: PasswordChange): Unit =
         InvalidPasswordException().run {
-            if (isPasswordLengthInvalid(passwordChange.newPassword)) throw this
+            if (InvalidPasswordException.isPasswordLengthInvalid(passwordChange.newPassword)) throw this
             else if (passwordChange.currentPassword != null
                 && passwordChange.newPassword != null
             ) passwordService.changePassword(
@@ -63,7 +63,7 @@ class PasswordController(
     @PostMapping(Constants.RESET_PASSWORD_API_FINISH)
     suspend fun finishPasswordReset(@RequestBody keyAndPassword: KeyAndPassword): Unit =
         with(InvalidPasswordException()) {
-            if (isPasswordLengthInvalid(keyAndPassword.newPassword)) throw this
+            if (InvalidPasswordException.isPasswordLengthInvalid(keyAndPassword.newPassword)) throw this
             else if (keyAndPassword.newPassword != null
                 && keyAndPassword.key != null
                 && passwordService.completePasswordReset(

@@ -3,13 +3,16 @@ package webapp.signup
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import webapp.Constants
+import webapp.Constants.DEFAULT_LANGUAGE
+import webapp.Constants.ROLE_USER
+import webapp.Constants.SYSTEM_USER
 import webapp.Logging.i
 import webapp.mail.MailService
 import webapp.models.AccountCredentials
-import webapp.models.AccountUtils
+import webapp.models.AccountUtils.generateActivationKey
 import webapp.models.exceptions.EmailAlreadyUsedException
 import webapp.models.exceptions.InvalidPasswordException
+import webapp.models.exceptions.InvalidPasswordException.Companion.isPasswordLengthInvalid
 import webapp.models.exceptions.UsernameAlreadyUsedException
 import webapp.repository.AccountRepository
 import java.time.Instant
@@ -32,19 +35,19 @@ class SignupService(
         //TODO: account.run
         i("on entre dans le service")
 
-        InvalidPasswordException().run { if (isPasswordLengthInvalid(account.password)) throw this }
+        if (isPasswordLengthInvalid(account.password)) throw InvalidPasswordException()
         loginValidation(account)
         emailValidation(account)
         val createdDate = Instant.now()
         account.copy(
             password = passwordEncoder.encode(account.password),
-            activationKey = AccountUtils.generateActivationKey,
-            authorities = setOf(Constants.ROLE_USER),
-            langKey = if (account.langKey.isNullOrBlank()) Constants.DEFAULT_LANGUAGE
+            activationKey = generateActivationKey,
+            authorities = setOf(ROLE_USER),
+            langKey = if (account.langKey.isNullOrBlank()) DEFAULT_LANGUAGE
             else account.langKey,
-            createdBy = Constants.SYSTEM_USER,
+            createdBy = SYSTEM_USER,
             createdDate = createdDate,
-            lastModifiedBy = Constants.SYSTEM_USER,
+            lastModifiedBy = SYSTEM_USER,
             lastModifiedDate = createdDate,
             activated = false
         ).run {
