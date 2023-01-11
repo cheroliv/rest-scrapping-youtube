@@ -164,8 +164,8 @@ configurations {
     }
 }
 
-java.sourceCompatibility=VERSION_1_8
-java.targetCompatibility=VERSION_17
+java.sourceCompatibility = VERSION_1_8
+java.targetCompatibility = VERSION_19
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
@@ -199,4 +199,23 @@ tasks.register<TestReport>("testReport") {
     group = "report"
     destinationDir = file("$buildDir/reports/tests")
     reportOn("test")
+}
+
+jib {
+    from{
+        image="eclipse-temurin:19.0.1_10-jre-alpine"
+        platforms {
+            platform {
+                architecture = "${findProperty("jibArchitecture") ?: "amd64"}"
+                os = "linux"
+            }
+        }
+    }
+
+    to { image = "cheroliv/kotlin-springboot"
+//        auth{
+//            username=properties["docker_hub_login"].toString()
+//            password=properties["docker_hub_login_token"].toString()
+//        }
+    }
 }

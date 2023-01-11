@@ -25,3 +25,7 @@ and launch http://localhost:8080/
 
 ==== **to run desktop app**
 Open terminal and run : ```./gradlew :desktop:run``` +
+
+==== docker registry
+
+cheroliv/kotlin-springboot:tagname
