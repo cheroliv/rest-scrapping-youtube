@@ -43,11 +43,7 @@ class SignupController(private val signupService: SignupService) {
         accountCredentials: AccountCredentials
     ) {
         i("on entre dans le controller")
-//        try {
-         signupService.signup(accountCredentials)
-//        } catch (iep: InvalidPasswordException) {
-//            throw InvalidPasswordProblem(iep)
-//        }
+        signupService.signup(accountCredentials)
     }
 
     class InvalidPasswordProblem(
