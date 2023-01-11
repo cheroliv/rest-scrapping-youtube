@@ -1,16 +1,16 @@
 package webapp.signup
 
 import jakarta.validation.Valid
-import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE
-import org.springframework.http.ProblemDetail
+import org.springframework.http.ProblemDetail.forStatusAndDetail
 import org.springframework.web.ErrorResponseException
 import org.springframework.web.bind.annotation.*
-import webapp.Constants
 import webapp.Constants.ACCOUNT_API
 import webapp.Constants.ACTIVATE_API
 import webapp.Constants.ACTIVATE_API_KEY
+import webapp.Constants.INVALID_PASSWORD_TYPE
 import webapp.Constants.MSG_WRONG_ACTIVATION_KEY
 import webapp.Constants.SIGNUP_API
 import webapp.Logging.i
@@ -44,7 +44,7 @@ class SignupController(private val signupService: SignupService) {
     ) {
         i("on entre dans le controller")
         try {
-            signupService.signup(accountCredentials)
+         signupService.signup(accountCredentials)
         } catch (iep: InvalidPasswordException) {
             throw InvalidPasswordProblem(iep)
         }
@@ -53,12 +53,12 @@ class SignupController(private val signupService: SignupService) {
     class InvalidPasswordProblem(
         exception: InvalidPasswordException
     ) : ErrorResponseException(
-        HttpStatus.BAD_REQUEST,
-        ProblemDetail.forStatusAndDetail(
-            HttpStatus.BAD_REQUEST,
+        BAD_REQUEST,
+        forStatusAndDetail(
+            BAD_REQUEST,
             exception.message!!
         ).apply {
-            type = Constants.INVALID_PASSWORD_TYPE
+            type = INVALID_PASSWORD_TYPE
             title = "Incorrect password"
         },
         exception
