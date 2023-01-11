@@ -4,7 +4,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import webapp.Constants
-import webapp.Logging
+import webapp.Logging.i
 import webapp.mail.MailService
 import webapp.models.AccountCredentials
 import webapp.models.AccountUtils
@@ -30,6 +30,8 @@ class SignupService(
 
     suspend fun signup(account: AccountCredentials) {
         //TODO: account.run
+        i("on entre dans le service")
+
         InvalidPasswordException().run { if (isPasswordLengthInvalid(account.password)) throw this }
         loginValidation(account)
         emailValidation(account)
@@ -78,7 +80,7 @@ class SignupService(
                         activated = true,
                         activationKey = null
                     )
-                ).run { if (id != null) Logging.i("activation: $login") }
+                ).run { if (id != null) i("activation: $login") }
                 true
             }
         }

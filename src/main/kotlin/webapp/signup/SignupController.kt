@@ -1,17 +1,22 @@
 package webapp.signup
 
 import jakarta.validation.Valid
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
+import org.springframework.http.HttpStatus.CREATED
+import org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE
 import org.springframework.web.bind.annotation.*
-import webapp.Constants
-import webapp.models.exceptions.http.InvalidPasswordProblem
+import webapp.Constants.ACCOUNT_API
+import webapp.Constants.ACTIVATE_API
+import webapp.Constants.ACTIVATE_API_KEY
+import webapp.Constants.MSG_WRONG_ACTIVATION_KEY
+import webapp.Constants.SIGNUP_API
+import webapp.Logging.i
 import webapp.models.AccountCredentials
 import webapp.models.exceptions.InvalidPasswordException
+import webapp.models.exceptions.http.InvalidPasswordProblem
 
 @Suppress("unused")
 @RestController
-@RequestMapping(Constants.ACCOUNT_API)
+@RequestMapping(ACCOUNT_API)
 class SignupController(private val signupService: SignupService) {
     internal class SignupException(message: String) : RuntimeException(message)
 
@@ -24,14 +29,17 @@ class SignupController(private val signupService: SignupService) {
      * @throws webapp.LoginAlreadyUsedProblem {@code 400 (Bad Request)} if the login is already used.
      */
     @PostMapping(
-        Constants.SIGNUP_API,
-        produces = [MediaType.APPLICATION_PROBLEM_JSON_VALUE]
+        SIGNUP_API,
+        produces = [APPLICATION_PROBLEM_JSON_VALUE]
     )
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(CREATED)
     @Throws(InvalidPasswordProblem::class)
     suspend fun signup(
-        @RequestBody @Valid accountCredentials: AccountCredentials
+        @Valid
+        @RequestBody
+        accountCredentials: AccountCredentials
     ) = try {
+        i("on entre dans le controller")
         signupService.signup(accountCredentials)
     } catch (ipe: InvalidPasswordException) {
         throw InvalidPasswordProblem(ipe)
@@ -47,8 +55,8 @@ class SignupController(private val signupService: SignupService) {
      * @param key the activation key.
      * @throws RuntimeException `500 (Internal Application Error)` if the user couldn't be activated.
      */
-    @GetMapping(Constants.ACTIVATE_API)
-    suspend fun activateAccount(@RequestParam(Constants.ACTIVATE_API_KEY) key: String) {
-        if (!signupService.activate(key)) throw SignupException(Constants.MSG_WRONG_ACTIVATION_KEY)
+    @GetMapping(ACTIVATE_API)
+    suspend fun activateAccount(@RequestParam(ACTIVATE_API_KEY) key: String) {
+        if (!signupService.activate(key)) throw SignupException(MSG_WRONG_ACTIVATION_KEY)
     }
 }
