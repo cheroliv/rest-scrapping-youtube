@@ -15,7 +15,7 @@ import webapp.models.exceptions.InvalidPasswordException
 import webapp.models.exceptions.InvalidPasswordException.Companion.isPasswordLengthInvalid
 import webapp.models.exceptions.UsernameAlreadyUsedException
 import webapp.repository.AccountRepository
-import java.time.Instant
+import java.time.Instant.now
 
 @Service
 @Transactional
@@ -30,15 +30,13 @@ class SignupService(
         UsernameAlreadyUsedException::class,
         UsernameAlreadyUsedException::class
     )
-
     suspend fun signup(account: AccountCredentials) {
-        //TODO: account.run
         i("on entre dans le service")
 
         if (isPasswordLengthInvalid(account.password)) throw InvalidPasswordException()
         loginValidation(account)
         emailValidation(account)
-        val createdDate = Instant.now()
+        val createdDate = now()
         account.copy(
             password = passwordEncoder.encode(account.password),
             activationKey = generateActivationKey,
@@ -78,12 +76,8 @@ class SignupService(
         with(accountRepository.findOneByActivationKey(key)) {
             return if (this == null) false
             else {
-                accountRepository.save(
-                    copy(
-                        activated = true,
-                        activationKey = null
-                    )
-                ).run { if (id != null) i("activation: $login") }
+                accountRepository.save(copy(activated = true, activationKey = null))
+                    .run { if (id != null) i("activation: $login") }
                 true
             }
         }

@@ -3,17 +3,12 @@
 package webapp.models.exceptions.http
 
 import org.springframework.core.env.Environment
-import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.ProblemDetail
-import org.springframework.http.ProblemDetail.forStatusAndDetail
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
-import org.springframework.web.ErrorResponseException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.server.ServerWebExchange
 import webapp.AppProperties
-import webapp.Constants.INVALID_PASSWORD_TYPE
-import webapp.models.exceptions.InvalidPasswordException
 import java.io.Serializable
 
 //import org.zalando.problem.Problem.DEFAULT_TYPE as PROBLEM_DEFAULT_TYPE
@@ -129,19 +124,7 @@ data class ProblemsModel(
   ]
 }
 */
-class InvalidPasswordProblem(
-    exception: InvalidPasswordException
-) : ErrorResponseException(
-    BAD_REQUEST,
-    forStatusAndDetail(
-        BAD_REQUEST,
-        exception.message!!
-    ).apply {
-        type = INVALID_PASSWORD_TYPE
-        title = "Incorrect password"
-    },
-    exception
-)
+
 
 /*=================================================================================*/
 //class Foo(
