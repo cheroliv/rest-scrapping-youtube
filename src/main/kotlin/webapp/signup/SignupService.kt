@@ -26,12 +26,12 @@ class SignupService(
 
     @Throws(
         UsernameAlreadyUsedException::class,
-        UsernameAlreadyUsedException::class
+        EmailAlreadyUsedException::class
     )
     suspend fun signup(@Valid account: AccountCredentials) {
         i("on entre dans le service")
-        loginValidation(account)
-        emailValidation(account)
+        isLoginAvailable(account)
+        isEmailAvailable(account)
         val createdDate = now()
         account.copy(
             password = passwordEncoder.encode(account.password),
@@ -51,7 +51,7 @@ class SignupService(
     }
 
     @Throws(UsernameAlreadyUsedException::class)
-    private suspend fun loginValidation(model: AccountCredentials) {
+    private suspend fun isLoginAvailable(model: AccountCredentials) {
         accountRepository.findOne(model.login!!).run {
             if (this != null) if (!activated) accountRepository.delete(this.toAccount())
             else throw UsernameAlreadyUsedException()
@@ -59,22 +59,18 @@ class SignupService(
     }
 
     @Throws(EmailAlreadyUsedException::class)
-    private suspend fun emailValidation(model: AccountCredentials) {
+    private suspend fun isEmailAvailable(model: AccountCredentials) {
         accountRepository.findOne(model.email!!).run {
-            if (this != null) {
-                if (!activated) accountRepository.delete(toAccount())
-                else throw EmailAlreadyUsedException()
-            }
+            if (this != null) if (!activated) accountRepository.delete(toAccount())
+            else throw EmailAlreadyUsedException()
         }
     }
 
     suspend fun activate(key: String): Boolean {
         with(accountRepository.findOneByActivationKey(key)) {
-            return if (this == null) false
-            else {
-                accountRepository.save(copy(activated = true, activationKey = null))
-                    .run { if (id != null) i("activation: $login") }
-                true
+            return if (this == null) false.apply { i("no activation for key: $key") }
+            else accountRepository.save(copy(activated = true, activationKey = null)).run {
+                return if (this != null) true.apply { i("activation: $login") } else false
             }
         }
     }

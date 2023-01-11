@@ -1,5 +1,6 @@
 package webapp.repository
 
+import jakarta.validation.Valid
 import jakarta.validation.Validator
 import kotlinx.coroutines.reactive.collect
 import kotlinx.coroutines.reactor.awaitSingle
@@ -25,7 +26,7 @@ class AccountRepositoryR2dbc(
     private val dao: R2dbcEntityTemplate,
     private val validator: Validator,
 ) : AccountRepository {
-    override suspend fun save(model: AccountCredentials): Account? =
+    override suspend fun save(@Valid model: AccountCredentials): Account? =
         try {
             if (model.id != null) dao.update(
                 AccountEntity(model).copy(
@@ -44,7 +45,7 @@ class AccountRepositoryR2dbc(
             null
         }
 
-    override suspend fun signup(accountCredentials: AccountCredentials) {
+    override suspend fun signup(@Valid accountCredentials: AccountCredentials) {
         dao.insert(AccountEntity(accountCredentials))
             .awaitSingleOrNull()
             ?.id

@@ -37,8 +37,7 @@ class SignupController(private val signupService: SignupService) {
     )
     @ResponseStatus(CREATED)
     suspend fun signup(
-        @Valid
-        @RequestBody
+        @RequestBody @Valid
         accountCredentials: AccountCredentials
     ) {
         i("on entre dans le controller")
