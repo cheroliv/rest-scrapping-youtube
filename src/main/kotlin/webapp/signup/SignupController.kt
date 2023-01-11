@@ -39,10 +39,8 @@ class SignupController(private val signupService: SignupService) {
     suspend fun signup(
         @RequestBody @Valid
         accountCredentials: AccountCredentials
-    ) {
-        i("on entre dans le controller")
-        signupService.signup(accountCredentials)
-    }
+    ) = signupService.signup(accountCredentials)
+
 
     class InvalidPasswordProblem(
         exception: InvalidPasswordException
