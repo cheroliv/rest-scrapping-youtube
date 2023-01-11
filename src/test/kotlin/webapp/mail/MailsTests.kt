@@ -47,7 +47,7 @@ import kotlin.test.*
 class MailSlurpServiceTests {
 
     private lateinit var context: ConfigurableApplicationContext
-    private val token: String by lazy { context.getBean<webapp.Properties>().mailbox.test.token }
+    private val token: String by lazy { context.getBean<webapp.AppProperties>().mailbox.test.token }
     private val api by lazy { InboxControllerApi(token) }
 
     @BeforeAll
@@ -136,7 +136,7 @@ class MailServiceSmtpTests {
     private lateinit var context: ConfigurableApplicationContext
     private lateinit var mailService: MailService
 
-    private val properties: webapp.Properties by lazy { context.getBean() }
+    private val properties: webapp.AppProperties by lazy { context.getBean() }
 
     private val messageSource: MessageSource by lazy { context.getBean() }
 

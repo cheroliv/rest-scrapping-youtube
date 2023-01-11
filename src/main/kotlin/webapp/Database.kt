@@ -31,7 +31,7 @@ import java.time.ZoneOffset.UTC
 @Configuration
 @EnableTransactionManagement
 @EnableR2dbcRepositories("webapp")
-class Database(private val properties: Properties) {
+class Database(private val properties: AppProperties) {
     @Bean
     fun inMemoryConnectionFactory(
         @Qualifier("connectionFactory")
@@ -40,9 +40,7 @@ class Database(private val properties: Properties) {
         ConnectionFactoryInitializer().apply {
             setConnectionFactory(connectionFactory)
             setDatabasePopulator(
-                ResourceDatabasePopulator(
-                    ClassPathResource(properties.database.populatorPath)
-                )
+                ResourceDatabasePopulator(ClassPathResource(properties.database.populatorPath))
             )
         }
 

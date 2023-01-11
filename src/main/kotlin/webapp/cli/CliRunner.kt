@@ -7,10 +7,9 @@ import org.springframework.stereotype.Component
 import webapp.Constants.CLI
 import webapp.Logging.i
 
+@Suppress("unused")
 @Component
 @Profile(CLI)
 class CliRunner : CommandLineRunner {
-    override fun run(vararg args: String?) = runBlocking {
-        i("command line interface: $args")
-    }
+    override fun run(vararg args: String?) = runBlocking { i("command line interface: $args") }
 }

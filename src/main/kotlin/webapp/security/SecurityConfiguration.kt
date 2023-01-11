@@ -2,33 +2,36 @@ package webapp.security
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.HttpMethod
+import org.springframework.http.HttpMethod.*
 import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
-import org.springframework.security.config.web.server.SecurityWebFiltersOrder
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder.AUTHENTICATION
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder.HTTP_BASIC
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.server.SecurityWebFilterChain
-import org.springframework.security.web.server.header.ReferrerPolicyServerHttpHeadersWriter
+import org.springframework.security.web.server.header.ReferrerPolicyServerHttpHeadersWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN
 import org.springframework.security.web.server.util.matcher.NegatedServerWebExchangeMatcher
 import org.springframework.security.web.server.util.matcher.OrServerWebExchangeMatcher
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers
 import org.springframework.web.cors.reactive.CorsWebFilter
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
-import webapp.Application
-import webapp.Constants
-import webapp.Logging
-import webapp.Properties
+import webapp.Application.SpaWebFilter
+import webapp.AppProperties
+import webapp.Constants.CONTENT_SECURITY_POLICY
+import webapp.Constants.FEATURE_POLICY
+import webapp.Constants.ROLE_ADMIN
+import webapp.Logging.d
 
 @Configuration
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
 class SecurityConfiguration(
-    private val properties: Properties,
+    private val properties: AppProperties,
     private val security: Security,
     private val userDetailsService: ReactiveUserDetailsService,
 ) {
@@ -46,25 +49,25 @@ class SecurityConfiguration(
                         "/swagger-ui/**",
                         "/test/**",
                         "/webjars/**"
-                    ), ServerWebExchangeMatchers.pathMatchers(HttpMethod.OPTIONS, "/**")
+                    ), ServerWebExchangeMatchers.pathMatchers(OPTIONS, "/**")
                 )
             )
         ).csrf()
             .disable()
-            .addFilterAt(Application.SpaWebFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
-            .addFilterAt(JwtFilter(security), SecurityWebFiltersOrder.HTTP_BASIC)
+            .addFilterAt(SpaWebFilter(), AUTHENTICATION)
+            .addFilterAt(JwtFilter(security), HTTP_BASIC)
             .authenticationManager(reactiveAuthenticationManager())
             .exceptionHandling()
 //        .accessDeniedHandler(problemSupport)
 //        .authenticationEntryPoint(problemSupport)
             .and()
             .headers()
-            .contentSecurityPolicy(Constants.CONTENT_SECURITY_POLICY)
+            .contentSecurityPolicy(CONTENT_SECURITY_POLICY)
             .and()
-            .referrerPolicy(ReferrerPolicyServerHttpHeadersWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
+            .referrerPolicy(STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
             .and()
 //                .permissionsPolicy(FEATURE_POLICY)
-            .featurePolicy(Constants.FEATURE_POLICY)
+            .featurePolicy(FEATURE_POLICY)
             .and()
             .frameOptions().disable()
             .and()
@@ -87,8 +90,8 @@ class SecurityConfiguration(
             .pathMatchers("/services/**").authenticated()
             .pathMatchers("/swagger-resources/**").authenticated()
             .pathMatchers("/v2/api-docs").authenticated()
-            .pathMatchers("/management/**").hasAuthority(Constants.ROLE_ADMIN)
-            .pathMatchers("/api/admin/**").hasAuthority(Constants.ROLE_ADMIN)
+            .pathMatchers("/management/**").hasAuthority(ROLE_ADMIN)
+            .pathMatchers("/api/admin/**").hasAuthority(ROLE_ADMIN)
             .and()
             .build()
 
@@ -96,7 +99,7 @@ class SecurityConfiguration(
     fun corsFilter(): CorsWebFilter = CorsWebFilter(UrlBasedCorsConfigurationSource().apply source@{
         properties.cors.apply config@{
             if (allowedOrigins != null && allowedOrigins!!.isNotEmpty()) {
-                Logging.d("Registering CORS filter").run {
+                d("Registering CORS filter").run {
                     this@source.apply {
                         registerCorsConfiguration("/api/**", this@config)
                         registerCorsConfiguration("/management/**", this@config)

@@ -2,11 +2,19 @@
 
 package webapp.models.exceptions.http
 
+import org.springframework.core.env.Environment
 import org.springframework.http.HttpStatus.BAD_REQUEST
+import org.springframework.http.ProblemDetail
 import org.springframework.http.ProblemDetail.forStatusAndDetail
+import org.springframework.http.ResponseEntity
+import org.springframework.stereotype.Component
 import org.springframework.web.ErrorResponseException
+import org.springframework.web.bind.annotation.ControllerAdvice
+import org.springframework.web.server.ServerWebExchange
+import webapp.AppProperties
 import webapp.Constants.INVALID_PASSWORD_TYPE
 import webapp.models.exceptions.InvalidPasswordException
+import java.io.Serializable
 
 //import org.zalando.problem.Problem.DEFAULT_TYPE as PROBLEM_DEFAULT_TYPE
 /*
@@ -84,55 +92,56 @@ data class ProblemsModel(
         )
     }
 }
-    /*
+
+/*
+{
+  "type": "https://www.cheroliv.com/problem/constraint-violation",
+  "title": "Data binding and validation failure",
+  "status": 400,
+  "path": "/api/register",
+  "message": "error.validation",
+  "fieldErrors": [
     {
-      "type": "https://www.cheroliv.com/problem/constraint-violation",
-      "title": "Data binding and validation failure",
-      "status": 400,
-      "path": "/api/register",
-      "message": "error.validation",
-      "fieldErrors": [
-        {
-          "objectName": "managedUserVM",
-          "field": "email",
-          "message": "doit être une adresse électronique syntaxiquement correcte"
-        },
-        {
-          "objectName": "managedUserVM",
-          "field": "password",
-          "message": "la taille doit être comprise entre 4 et 100"
-        },
-        {
-          "objectName": "managedUserVM",
-          "field": "login",
-          "message": "doit correspondre à \"^(?>[a-zA-Z0-9!$&*+=?^_`{|}~.-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)|(?>[_.@A-Za-z0-9-]+)$\""
-        },
-        {
-          "objectName": "managedUserVM",
-          "field": "login",
-          "message": "la taille doit être comprise entre 1 et 50"
-        },
-        {
-          "objectName": "managedUserVM",
-          "field": "login",
-          "message": "ne doit pas être vide"
-        }
-      ]
+      "objectName": "managedUserVM",
+      "field": "email",
+      "message": "doit être une adresse électronique syntaxiquement correcte"
+    },
+    {
+      "objectName": "managedUserVM",
+      "field": "password",
+      "message": "la taille doit être comprise entre 4 et 100"
+    },
+    {
+      "objectName": "managedUserVM",
+      "field": "login",
+      "message": "doit correspondre à \"^(?>[a-zA-Z0-9!$&*+=?^_`{|}~.-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)|(?>[_.@A-Za-z0-9-]+)$\""
+    },
+    {
+      "objectName": "managedUserVM",
+      "field": "login",
+      "message": "la taille doit être comprise entre 1 et 50"
+    },
+    {
+      "objectName": "managedUserVM",
+      "field": "login",
+      "message": "ne doit pas être vide"
     }
-    */
-    class InvalidPasswordProblem(
-        exception: InvalidPasswordException
-    ) : ErrorResponseException(
+  ]
+}
+*/
+class InvalidPasswordProblem(
+    exception: InvalidPasswordException
+) : ErrorResponseException(
+    BAD_REQUEST,
+    forStatusAndDetail(
         BAD_REQUEST,
-        forStatusAndDetail(
-            BAD_REQUEST,
-            exception.message!!
-        ).apply {
-            type = INVALID_PASSWORD_TYPE
-            title = "Incorrect password"
-        },
-        exception
-    )
+        exception.message!!
+    ).apply {
+        type = INVALID_PASSWORD_TYPE
+        title = "Incorrect password"
+    },
+    exception
+)
 
 /*=================================================================================*/
 //class Foo(
@@ -226,38 +235,41 @@ data class ProblemsModel(
  * Controller advice to translate the webapp side problems to client-friendly json structures.
  * The error response follows RFC7807 - Problem Details for HTTP APIs (https://tools.ietf.org/html/rfc7807).
  */
-//@Component
-//@ControllerAdvice
-//class ProblemTranslator(
-//    private val env: Environment,
-//    private val properties: Properties
-//) : ProblemHandling, SecurityAdviceTrait {
-//
-//    companion object {
-//        private const val FIELD_ERRORS_KEY = "fieldErrors"
-//        private const val MESSAGE_KEY = "message"
-//        private const val PATH_KEY = "path"
-//        private const val VIOLATIONS_KEY = "violations"
-//    }
-//
-//    class FieldErrorVM(
-//        @Suppress("unused")
-//        val objectName: String,
-//        val field: String,
-//        val message: String?
-//    ) : Serializable {
-//        companion object {
-//            private const val serialVersionUID = 1L
-//        }
-//    }
-//
-//    /**
-//     * Post-process the Problem payload to add the message key for the front-end if needed.
-//     */
-//    override fun process(
-//        entity: ResponseEntity<Problem>,
-//        request: ServerWebExchange
-//    ): Mono<ResponseEntity<Problem>> {
+@Component
+@ControllerAdvice
+class ProblemTranslator(
+    private val env: Environment,
+    private val properties: AppProperties
+) //: ProblemHandling, SecurityAdviceTrait
+{
+
+    companion object {
+        private const val FIELD_ERRORS_KEY = "fieldErrors"
+        private const val MESSAGE_KEY = "message"
+        private const val PATH_KEY = "path"
+        private const val VIOLATIONS_KEY = "violations"
+    }
+
+    class FieldErrorVM(
+        @Suppress("unused")
+        val objectName: String,
+        val field: String,
+        val message: String?
+    ) : Serializable {
+        companion object {
+            private const val serialVersionUID = 1L
+        }
+    }
+
+    /**
+     * Post-process the Problem payload to add the message key for the front-end if needed.
+     */
+    suspend fun process(
+        entity: ResponseEntity<ProblemDetail>,
+        request: ServerWebExchange
+    )
+//  : ResponseEntity<ProblemDetail>
+    {
 //        @Suppress("SENSELESS_COMPARISON")
 //        if (entity == null) return Mono.empty()
 //        val problem = entity.body
@@ -297,7 +309,8 @@ data class ProblemsModel(
 //                entity.statusCode
 //            )
 //        )
-//    }
+//    return ResponseEntity<ProblemDetail>(ProblemDetail.forStatus(BAD_REQUEST.value()))
+    }
 //
 //    override fun handleBindingResult(
 //        ex: WebExchangeBindException, request: ServerWebExchange
@@ -429,7 +442,7 @@ data class ProblemsModel(
 //        ).any { it == message }
 //
 //
-//}
+}
 
 /*=================================================================================*/
 

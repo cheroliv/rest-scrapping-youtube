@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 import org.thymeleaf.spring6.SpringTemplateEngine
 import webapp.Constants
 import webapp.Logging
-import webapp.Properties
+import webapp.AppProperties
 
 /*=================================================================================*/
 @Suppress("unused")
@@ -15,7 +15,7 @@ import webapp.Properties
 @Service
 @Profile(Constants.MAILSLURP)
 class MailServiceSlurp(
-    private val properties: Properties,
+    private val properties: AppProperties,
     private val messageSource: MessageSource,
     private val templateEngine: SpringTemplateEngine
 ) : AbstractMailService(

@@ -13,7 +13,7 @@ import webapp.Constants.EMPTY_CONTEXT_PATH
 import webapp.Constants.EMPTY_STRING
 import webapp.Constants.HTTP
 import webapp.Constants.HTTPS
-import webapp.Constants.JUMPLINE
+import webapp.Constants.JUMP_LINE
 import webapp.Constants.PRODUCTION
 import webapp.Constants.SERVER_PORT
 import webapp.Constants.SERVER_SERVLET_CONTEXT_PATH
@@ -70,7 +70,7 @@ object Logging {
         hostAddress: String,
         profiles: String,
         activeProfiles: String
-    ): String = """$JUMPLINE$JUMPLINE$JUMPLINE
+    ): String = """$JUMP_LINE$JUMP_LINE$JUMP_LINE
 ----------------------------------------------------------
 go visit $goVisitMessage    
 ----------------------------------------------------------
@@ -78,18 +78,18 @@ Application '$appName' is running!
 Access URLs
     Local:      $protocol://localhost:$serverPort$contextPath
     External:   $protocol://$hostAddress:$serverPort$contextPath${
-        if (profiles.isNotBlank()) JUMPLINE + buildString {
+        if (profiles.isNotBlank()) JUMP_LINE + buildString {
             append("Profile(s): ")
             append(profiles)
         } else EMPTY_STRING
     }${
-        if (activeProfiles.isNotBlank()) JUMPLINE + buildString {
+        if (activeProfiles.isNotBlank()) JUMP_LINE + buildString {
             append("Active(s) profile(s): ")
             append(activeProfiles)
         } else EMPTY_STRING
     }
 ----------------------------------------------------------
-$JUMPLINE$JUMPLINE""".trimIndent()
+$JUMP_LINE$JUMP_LINE""".trimIndent()
 
 
     /*=================================================================================*/
@@ -120,7 +120,7 @@ $JUMPLINE$JUMPLINE""".trimIndent()
     internal fun ApplicationContext.bootstrapLog(): ApplicationContext = apply {
         startupLogMessage(
             appName = environment.getProperty(SPRING_APPLICATION_NAME),
-            goVisitMessage = getBean<Properties>().goVisitMessage,
+            goVisitMessage = getBean<AppProperties>().goVisitMessage,
             protocol = if (environment.getProperty(SERVER_SSL_KEY_STORE) != null) HTTPS
             else HTTP,
             serverPort = environment.getProperty(SERVER_PORT),

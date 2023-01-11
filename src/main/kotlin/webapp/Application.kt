@@ -23,8 +23,8 @@ import reactor.core.publisher.Mono
 
 @EnableWebFlux
 @SpringBootApplication
-@EnableConfigurationProperties(Properties::class)
-class Application(private val properties: Properties) : WebFluxConfigurer {
+@EnableConfigurationProperties(AppProperties::class)
+class Application(private val properties: AppProperties) : WebFluxConfigurer {
     @Component
     class SpaWebFilter : WebFilter {
         override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
@@ -81,7 +81,7 @@ class Application(private val properties: Properties) : WebFluxConfigurer {
             // Use a cache filter that only match selected paths
             return CachingHttpHeadersFilter(
                 TimeUnit.DAYS.toMillis(
-                    Properties.getHttp().getCache().getTimeToLiveInDays()
+                    AppProperties.getHttp().getCache().getTimeToLiveInDays()
                 )
             )
         }
