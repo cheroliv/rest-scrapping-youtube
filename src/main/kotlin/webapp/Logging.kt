@@ -6,11 +6,25 @@ import org.slf4j.LoggerFactory.getLogger
 import org.springframework.beans.factory.getBean
 import org.springframework.context.ApplicationContext
 import org.springframework.context.MessageSource
+import webapp.Constants.CLOUD
+import webapp.Constants.DEVELOPMENT
+import webapp.Constants.DEV_HOST
+import webapp.Constants.EMPTY_CONTEXT_PATH
 import webapp.Constants.EMPTY_STRING
+import webapp.Constants.HTTP
+import webapp.Constants.HTTPS
 import webapp.Constants.JUMPLINE
-import java.net.InetAddress
+import webapp.Constants.PRODUCTION
+import webapp.Constants.SERVER_PORT
+import webapp.Constants.SERVER_SERVLET_CONTEXT_PATH
+import webapp.Constants.SERVER_SSL_KEY_STORE
+import webapp.Constants.SPRING_APPLICATION_NAME
+import webapp.Constants.STARTUP_HOST_WARN_LOG_MSG
+import webapp.Constants.STARTUP_LOG_MSG_KEY
+import java.net.InetAddress.getLocalHost
 import java.net.UnknownHostException
 import java.util.*
+import java.util.Locale.getDefault
 
 object Logging {
     @JvmStatic
@@ -27,16 +41,18 @@ object Logging {
 
     @JvmStatic
     fun t(message: String) = log.trace(message)
+
     @JvmStatic
     fun e(message: String) = log.error(message)
-    @JvmStatic
-    fun e(message: String,defaultMessage: String?) = log.error(message,defaultMessage)
 
     @JvmStatic
-    fun e(message: String,e: Exception?) = log.error(message,e)
-    @JvmStatic
-    fun w(message: String,e: Exception?) = log.warn(message,e)
+    fun e(message: String, defaultMessage: String?) = log.error(message, defaultMessage)
 
+    @JvmStatic
+    fun e(message: String, e: Exception?) = log.error(message, e)
+
+    @JvmStatic
+    fun w(message: String, e: Exception?) = log.warn(message, e)
 
 
     /*=================================================================================*/
@@ -80,20 +96,22 @@ $JUMPLINE$JUMPLINE""".trimIndent()
 
     internal fun ApplicationContext.checkProfileLog(): ApplicationContext = apply {
         environment.activeProfiles.run {
-            if (contains(Constants.DEVELOPMENT) && contains(Constants.PRODUCTION)) log.error(
-                getBean<MessageSource>().getMessage(
-                    Constants.STARTUP_LOG_MSG_KEY,
-                    arrayOf(Constants.DEVELOPMENT, Constants.PRODUCTION),
-                    Locale.getDefault()
+            if (contains(DEVELOPMENT) && contains(PRODUCTION))
+                log.error(
+                    getBean<MessageSource>().getMessage(
+                        STARTUP_LOG_MSG_KEY,
+                        arrayOf(DEVELOPMENT, PRODUCTION),
+                        getDefault()
+                    )
                 )
-            )
-            if (contains(Constants.DEVELOPMENT) && contains(Constants.CLOUD)) log.error(
-                getBean<MessageSource>().getMessage(
-                    Constants.STARTUP_LOG_MSG_KEY,
-                    arrayOf(Constants.DEVELOPMENT, Constants.CLOUD),
-                    Locale.getDefault()
+            if (contains(DEVELOPMENT) && contains(CLOUD))
+                log.error(
+                    getBean<MessageSource>().getMessage(
+                        STARTUP_LOG_MSG_KEY,
+                        arrayOf(DEVELOPMENT, CLOUD),
+                        getDefault()
+                    )
                 )
-            )
         }
     }
 
@@ -101,25 +119,27 @@ $JUMPLINE$JUMPLINE""".trimIndent()
 
     internal fun ApplicationContext.bootstrapLog(): ApplicationContext = apply {
         startupLogMessage(
-            appName = environment.getProperty(Constants.SPRING_APPLICATION_NAME),
+            appName = environment.getProperty(SPRING_APPLICATION_NAME),
             goVisitMessage = getBean<Properties>().goVisitMessage,
-            protocol = if (environment.getProperty(Constants.SERVER_SSL_KEY_STORE) != null) Constants.HTTPS
-            else Constants.HTTP,
-            serverPort = environment.getProperty(Constants.SERVER_PORT),
-            contextPath = environment.getProperty(Constants.SERVER_SERVLET_CONTEXT_PATH)
-                ?: Constants.EMPTY_CONTEXT_PATH,
+            protocol = if (environment.getProperty(SERVER_SSL_KEY_STORE) != null) HTTPS
+            else HTTP,
+            serverPort = environment.getProperty(SERVER_PORT),
+            contextPath = environment.getProperty(SERVER_SERVLET_CONTEXT_PATH)
+                ?: EMPTY_CONTEXT_PATH,
             hostAddress = try {
-                InetAddress.getLocalHost().hostAddress
+                getLocalHost().hostAddress
             } catch (e: UnknownHostException) {
-                log.warn(Constants.STARTUP_HOST_WARN_LOG_MSG)
-                Constants.DEV_HOST
+                w(STARTUP_HOST_WARN_LOG_MSG)
+                DEV_HOST
             },
             profiles = if (environment.defaultProfiles.isNotEmpty())
-                environment.defaultProfiles
+                environment
+                    .defaultProfiles
                     .reduce { accumulator, profile -> "$accumulator, $profile" }
             else EMPTY_STRING,
             activeProfiles = if (environment.activeProfiles.isNotEmpty())
-                environment.activeProfiles
+                environment
+                    .activeProfiles
                     .reduce { accumulator, profile -> "$accumulator, $profile" }
             else EMPTY_STRING,
         ).run { i(this) }

@@ -17,11 +17,10 @@ import org.springframework.web.reactive.config.WebFluxConfigurer
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
-import reactor.core.publisher.Hooks
+import reactor.core.publisher.Hooks.onOperatorDebug
 import reactor.core.publisher.Mono
 
 
-/*=================================================================================*/
 @EnableWebFlux
 @SpringBootApplication
 @EnableConfigurationProperties(Properties::class)
@@ -59,7 +58,7 @@ class Application(private val properties: Properties) : WebFluxConfigurer {
 
 
     @Profile("!${Constants.PRODUCTION}")
-    fun reactorConfiguration() = Hooks.onOperatorDebug()
+    fun reactorConfiguration() = onOperatorDebug()
 
     // TODO: remove when this is supported in spring-data / spring-boot
     @Bean
@@ -90,7 +89,4 @@ class Application(private val properties: Properties) : WebFluxConfigurer {
 
 
 }
-
-/*=================================================================================*/
-
 
