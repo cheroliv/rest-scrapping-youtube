@@ -202,8 +202,8 @@ tasks.register<TestReport>("testReport") {
 }
 
 jib {
-    from{
-        image="eclipse-temurin:19.0.1_10-jre-alpine"
+    from {
+        image = "eclipse-temurin:19.0.1_10-jre-alpine"
         platforms {
             platform {
                 architecture = "${findProperty("jibArchitecture") ?: "amd64"}"
@@ -212,10 +212,11 @@ jib {
         }
     }
 
-    to { image = "cheroliv/kotlin-springboot"
-//        auth{
-//            username=properties["docker_hub_login"].toString()
-//            password=properties["docker_hub_login_token"].toString()
-//        }
+    to {
+        image = "cheroliv/kotlin-springboot"
+        auth {
+            username = properties["docker_hub_login"].toString()
+            password = properties["docker_hub_login_token"].toString()
+        }
     }
 }
