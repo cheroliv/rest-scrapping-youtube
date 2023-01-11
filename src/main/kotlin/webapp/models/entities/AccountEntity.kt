@@ -30,6 +30,7 @@ data class AccountEntity @JvmOverloads constructor(
 
     @field:Size(max = 50)
     override var firstName: String? = null,
+
     @field:Size(max = 50)
     override var lastName: String? = null,
 

@@ -1,5 +1,6 @@
 package webapp.signup
 
+import jakarta.validation.Valid
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -12,7 +13,6 @@ import webapp.models.AccountCredentials
 import webapp.models.AccountUtils.generateActivationKey
 import webapp.models.exceptions.EmailAlreadyUsedException
 import webapp.models.exceptions.InvalidPasswordException
-import webapp.models.exceptions.InvalidPasswordException.Companion.isPasswordLengthInvalid
 import webapp.models.exceptions.UsernameAlreadyUsedException
 import webapp.repository.AccountRepository
 import java.time.Instant.now
@@ -30,10 +30,8 @@ class SignupService(
         UsernameAlreadyUsedException::class,
         UsernameAlreadyUsedException::class
     )
-    suspend fun signup(account: AccountCredentials) {
+    suspend fun signup(@Valid account: AccountCredentials) {
         i("on entre dans le service")
-
-        if (isPasswordLengthInvalid(account.password)) throw InvalidPasswordException()
         loginValidation(account)
         emailValidation(account)
         val createdDate = now()

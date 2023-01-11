@@ -27,7 +27,9 @@ interface AccountRecord<AUTH : AuthorityRecord> {
     var lastModifiedDate: Instant?
 
     companion object {
+
         const val LOGIN_FIELD = "login"
+        const val PASSWORD_FIELD = "password"
         const val EMAIL_FIELD = "email"
         const val ACCOUNT_AUTH_USER_ID_FIELD = "userId"
         const val ACTIVATION_KEY_FIELD = "activationKey"

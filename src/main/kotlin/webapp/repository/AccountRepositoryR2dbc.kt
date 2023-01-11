@@ -1,33 +1,38 @@
 package webapp.repository
 
+import jakarta.validation.Validator
 import kotlinx.coroutines.reactive.collect
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.dao.DataAccessException
 import org.springframework.data.r2dbc.core.*
-import org.springframework.data.relational.core.query.Criteria
-import org.springframework.data.relational.core.query.Query
+import org.springframework.data.relational.core.query.Criteria.where
+import org.springframework.data.relational.core.query.Query.query
 import org.springframework.stereotype.Repository
 import webapp.Constants
 import webapp.models.Account
 import webapp.models.AccountCredentials
-import webapp.models.AccountCredentials.Companion.isValidEmail
 import webapp.models.entities.AccountAuthorityEntity
 import webapp.models.entities.AccountEntity
-import webapp.models.entities.AccountRecord
+import webapp.models.entities.AccountRecord.Companion.ACCOUNT_AUTH_USER_ID_FIELD
+import webapp.models.entities.AccountRecord.Companion.ACTIVATION_KEY_FIELD
+import webapp.models.entities.AccountRecord.Companion.EMAIL_FIELD
+import webapp.models.entities.AccountRecord.Companion.LOGIN_FIELD
+import webapp.models.entities.AccountRecord.Companion.RESET_KEY_FIELD
 
 @Repository
 class AccountRepositoryR2dbc(
     private val dao: R2dbcEntityTemplate,
+    private val validator: Validator,
 ) : AccountRepository {
     override suspend fun save(model: AccountCredentials): Account? =
         try {
             if (model.id != null) dao.update(
                 AccountEntity(model).copy(
                     version = dao.selectOne(
-                        Query.query(
-                            Criteria.where(AccountRecord.LOGIN_FIELD).`is`(model.login!!).ignoreCase(true)
-                                .or(Criteria.where(AccountRecord.EMAIL_FIELD).`is`(model.email!!).ignoreCase(true))
+                        query(
+                            where(LOGIN_FIELD).`is`(model.login!!).ignoreCase(true)
+                                .or(where(EMAIL_FIELD).`is`(model.email!!).ignoreCase(true))
                         ), AccountEntity::class.java
                     ).awaitSingle()!!.version
                 )
@@ -56,9 +61,15 @@ class AccountRepositoryR2dbc(
     override suspend fun findOne(emailOrLogin: String): AccountCredentials? = dao
         .select<AccountEntity>()
         .matching(
-            Query.query(
-                Criteria.where(if (emailOrLogin.isValidEmail()) AccountRecord.EMAIL_FIELD else AccountRecord.LOGIN_FIELD)
-                    .`is`(emailOrLogin)
+            query(
+                where(
+                    if (validator
+                            .validateProperty(
+                                AccountCredentials(email = emailOrLogin),
+                                EMAIL_FIELD
+                            ).isEmpty()
+                    ) EMAIL_FIELD else LOGIN_FIELD
+                ).`is`(emailOrLogin)
                     .ignoreCase(true)
             )
         ).awaitOneOrNull()
@@ -70,7 +81,7 @@ class AccountRepositoryR2dbc(
             ac.id == null -> null
             else -> ac.copy(authorities = mutableSetOf<String>().apply {
                 dao.select<AccountAuthorityEntity>()
-                    .matching(Query.query(Criteria.where(AccountRecord.ACCOUNT_AUTH_USER_ID_FIELD).`is`(ac.id)))
+                    .matching(query(where(ACCOUNT_AUTH_USER_ID_FIELD).`is`(ac.id)))
                     .all()
                     .collect { add(it.role) }
             })
@@ -80,27 +91,22 @@ class AccountRepositoryR2dbc(
         findOne(emailOrLogin).run { return@run withAuthorities(this) }
 
 
-
-
     override suspend fun findActivationKeyByLogin(login: String): String? =
-        dao.select<AccountEntity>().matching(
-            Query.query(
-                Criteria.where(AccountRecord.LOGIN_FIELD).`is`(login).ignoreCase(true)
-            )
-        )
+        dao.select<AccountEntity>()
+            .matching(query(where(LOGIN_FIELD).`is`(login).ignoreCase(true)))
             .awaitOneOrNull()
             ?.activationKey
 
 
     override suspend fun findOneByActivationKey(key: String): AccountCredentials? =
         dao.selectOne(
-            Query.query(Criteria.where(AccountRecord.ACTIVATION_KEY_FIELD).`is`(key)),
+            query(where(ACTIVATION_KEY_FIELD).`is`(key)),
             AccountEntity::class.java
         ).awaitSingleOrNull()
             ?.toCredentialsModel
 
     override suspend fun findOneByResetKey(key: String) = dao.selectOne(
-        Query.query(Criteria.where(AccountRecord.RESET_KEY_FIELD).`is`(key)),
+        query(where(RESET_KEY_FIELD).`is`(key)),
         AccountEntity::class.java
     ).awaitSingleOrNull() //as  AccountRecord<*>?
 
@@ -111,7 +117,7 @@ class AccountRepositoryR2dbc(
             else null).run {
                 if (this != null) {
                     dao.delete<AccountAuthorityEntity>()
-                        .matching(Query.query(Criteria.where(AccountRecord.ACCOUNT_AUTH_USER_ID_FIELD).`is`(id!!)))
+                        .matching(query(where(ACCOUNT_AUTH_USER_ID_FIELD).`is`(id!!)))
                         .allAndAwait()
                     dao.delete(AccountEntity(this)).awaitSingle()
                 }

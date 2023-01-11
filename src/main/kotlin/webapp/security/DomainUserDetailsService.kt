@@ -1,5 +1,6 @@
 package webapp.security
 
+import jakarta.validation.Validator
 import kotlinx.coroutines.reactor.mono
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService
@@ -9,22 +10,23 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Mono
-import webapp.Logging
+import webapp.Logging.d
 import webapp.models.AccountCredentials
-import webapp.models.AccountCredentials.Companion.isValidEmail
+import webapp.models.entities.AccountRecord.Companion.EMAIL_FIELD
 import webapp.models.exceptions.UserNotActivatedException
 import webapp.repository.AccountRepository
 
 @Suppress("unused")
 @Component("userDetailsService")
 class DomainUserDetailsService(
-    private val accountRepository: AccountRepository
+    private val accountRepository: AccountRepository,
+    private val validator: Validator,
 ) : ReactiveUserDetailsService {
 
     @Transactional
     override fun findByUsername(emailOrLogin: String): Mono<UserDetails> =
-        Logging.d("Authenticating $emailOrLogin").run {
-            return if (emailOrLogin.isValidEmail()) mono {
+        d("Authenticating $emailOrLogin").run {
+            return if (validator.validateProperty(AccountCredentials(email = emailOrLogin), EMAIL_FIELD).isEmpty()) mono {
                 accountRepository.findOneWithAuthorities(emailOrLogin).apply {
                     if (this == null) throw UsernameNotFoundException("User with email $emailOrLogin was not found in the database")
                 }
