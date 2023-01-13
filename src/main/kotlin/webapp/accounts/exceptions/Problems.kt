@@ -214,10 +214,6 @@ data class ProblemsModel(
 /*Translators*/
 /*=================================================================================*/
 
-/**
- * Controller advice to translate the webapp side problems to client-friendly json structures.
- * The error response follows RFC7807 - Problem Details for HTTP APIs (https://tools.ietf.org/html/rfc7807).
- */
 @Component
 @ControllerAdvice
 class ProblemTranslator(
