@@ -1,10 +1,7 @@
-package webapp.models
+package webapp.accounts.models
 
 import jakarta.validation.constraints.*
-import webapp.Constants.IMAGE_URL_DEFAULT
-import webapp.Constants.LOGIN_REGEX
-import webapp.Constants.PASSWORD_MAX_LENGTH
-import webapp.Constants.PASSWORD_MIN_LENGTH
+import webapp.Constants
 import java.time.Instant
 import java.util.*
 
@@ -15,15 +12,15 @@ import java.util.*
 data class AccountCredentials(
     @field:NotNull
     @field:Size(
-        min = PASSWORD_MIN_LENGTH,
-        max = PASSWORD_MAX_LENGTH
+        min = Constants.PASSWORD_MIN_LENGTH,
+        max = Constants.PASSWORD_MAX_LENGTH
     )
     val password: String? = null,
     val activationKey: String? = null,
     val resetKey: String? = null,
     val id: UUID? = null,
     @field:NotBlank
-    @field:Pattern(regexp = LOGIN_REGEX)
+    @field:Pattern(regexp = Constants.LOGIN_REGEX)
     @field:Size(min = 1, max = 50)
     val login: String? = null,
     @field:Size(max = 50)
@@ -34,7 +31,7 @@ data class AccountCredentials(
     @field:Size(min = 5, max = 254)
     val email: String? = null,
     @field:Size(max = 256)
-    val imageUrl: String? = IMAGE_URL_DEFAULT,
+    val imageUrl: String? = Constants.IMAGE_URL_DEFAULT,
     val activated: Boolean = false,
     @field:Size(min = 2, max = 10)
     val langKey: String? = null,

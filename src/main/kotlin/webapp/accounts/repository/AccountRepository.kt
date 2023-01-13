@@ -1,8 +1,8 @@
-package webapp.repository
+package webapp.accounts.repository
 
-import webapp.models.Account
-import webapp.models.AccountCredentials
-import webapp.models.entities.AccountRecord
+import webapp.accounts.entities.AccountRecord
+import webapp.accounts.models.Account
+import webapp.accounts.models.AccountCredentials
 
 interface AccountRepository {
     suspend fun save(model: AccountCredentials): Account?

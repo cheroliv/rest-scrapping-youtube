@@ -16,7 +16,9 @@ import webapp.Constants.ROLE_USER
 import webapp.Constants.SYSTEM_USER
 import webapp.DataTests.accounts
 import webapp.DataTests.defaultAccount
-import webapp.models.AccountUtils.generateActivationKey
+import webapp.accounts.models.AccountUtils.generateActivationKey
+import webapp.accounts.repository.AccountRepository
+import webapp.accounts.repository.AccountRepositoryR2dbc
 import java.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertEquals

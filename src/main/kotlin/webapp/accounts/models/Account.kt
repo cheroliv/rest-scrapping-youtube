@@ -1,4 +1,4 @@
-package webapp.models
+package webapp.accounts.models
 
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank

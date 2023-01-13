@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package webapp.models.exceptions.http
+package webapp.accounts.exceptions
 
 import org.springframework.core.env.Environment
 import org.springframework.http.ProblemDetail

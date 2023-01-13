@@ -1,4 +1,4 @@
-package webapp.models
+package webapp.accounts.models
 
 /*=================================================================================*/
 data class PasswordChange(

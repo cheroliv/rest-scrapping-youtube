@@ -1,11 +1,11 @@
-package webapp.models.entities
+package webapp.accounts.entities
 
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
-import webapp.models.entities.AuthorityRecord.Companion.ROLE_FIELD
+import webapp.accounts.entities.AuthorityRecord.Companion.ROLE_FIELD
 
 /*=================================================================================*/
 @Table("`authority`")

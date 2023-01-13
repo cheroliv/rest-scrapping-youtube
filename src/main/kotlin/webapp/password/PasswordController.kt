@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RestController
 import webapp.Constants
 import webapp.Logging
 import webapp.mail.MailService
-import webapp.models.KeyAndPassword
-import webapp.models.PasswordChange
-import webapp.models.exceptions.InvalidPasswordException
+import webapp.accounts.models.KeyAndPassword
+import webapp.accounts.models.PasswordChange
+import webapp.accounts.exceptions.InvalidPasswordException
 
 /*=================================================================================*/
 @Suppress("unused")

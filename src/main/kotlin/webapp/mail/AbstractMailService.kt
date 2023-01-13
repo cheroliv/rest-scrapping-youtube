@@ -12,7 +12,7 @@ import webapp.Constants.TITLE_KEY_PASSWORD
 import webapp.Constants.TITLE_KEY_SIGNUP
 import webapp.Constants.USER
 import webapp.Logging.d
-import webapp.models.AccountCredentials
+import webapp.accounts.models.AccountCredentials
 import java.util.Locale.forLanguageTag
 
 abstract class AbstractMailService(

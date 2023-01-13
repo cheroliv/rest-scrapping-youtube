@@ -1,4 +1,4 @@
-package webapp.models.entities
+package webapp.accounts.entities
 
 import jakarta.validation.constraints.NotNull
 import org.springframework.data.annotation.Id

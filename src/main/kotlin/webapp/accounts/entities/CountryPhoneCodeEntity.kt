@@ -1,4 +1,4 @@
-package webapp.models.entities
+package webapp.accounts.entities
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.domain.Persistable

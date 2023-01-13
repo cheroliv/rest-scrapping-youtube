@@ -3,8 +3,8 @@ package webapp.password
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import webapp.Logging
-import webapp.repository.AccountRepository
-import webapp.models.AccountCredentials
+import webapp.accounts.repository.AccountRepository
+import webapp.accounts.models.AccountCredentials
 import java.time.Instant
 
 @Service

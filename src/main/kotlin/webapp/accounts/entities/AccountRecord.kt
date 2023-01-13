@@ -1,7 +1,7 @@
-package webapp.models.entities
+package webapp.accounts.entities
 
-import webapp.models.Account
-import webapp.models.AccountCredentials
+import webapp.accounts.models.Account
+import webapp.accounts.models.AccountCredentials
 import java.time.Instant
 import java.util.*
 

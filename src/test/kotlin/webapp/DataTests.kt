@@ -20,7 +20,7 @@ import webapp.DataTests.accounts
 import webapp.DataTests.defaultAccount
 import webapp.DataTests.defaultAccountJson
 import webapp.Logging.i
-import webapp.models.AccountCredentials
+import webapp.accounts.models.AccountCredentials
 import kotlin.test.Test
 
 

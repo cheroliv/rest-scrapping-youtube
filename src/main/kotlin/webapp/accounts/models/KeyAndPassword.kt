@@ -1,4 +1,4 @@
-package webapp.models
+package webapp.accounts.models
 
 data class KeyAndPassword(
     val key: String? = null,

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.*
 import org.springframework.data.web.ReactivePageableHandlerMethodArgumentResolver
 import org.springframework.data.web.ReactiveSortHandlerMethodArgumentResolver
@@ -24,7 +25,9 @@ import reactor.core.publisher.Mono
 @EnableWebFlux
 @SpringBootApplication
 @EnableConfigurationProperties(AppProperties::class)
-class Application(private val properties: AppProperties) : WebFluxConfigurer {
+class Application(private val properties: AppProperties,
+                  private val context: ApplicationContext) : WebFluxConfigurer {
+
     @Component
     class SpaWebFilter : WebFilter {
         override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
@@ -47,6 +50,7 @@ class Application(private val properties: AppProperties) : WebFluxConfigurer {
             }
         }
     }
+
     @Bean
     fun validator(): Validator = LocalValidatorFactoryBean()
 
@@ -55,7 +59,6 @@ class Application(private val properties: AppProperties) : WebFluxConfigurer {
 
     @Bean
     fun jdk8TimeModule(): Jdk8Module = Jdk8Module()
-
 
     @Profile("!${Constants.PRODUCTION}")
     fun reactorConfiguration() = onOperatorDebug()
@@ -67,7 +70,12 @@ class Application(private val properties: AppProperties) : WebFluxConfigurer {
     // TODO: remove when this is supported in spring-boot
     @Bean
     fun reactiveSortHandlerMethodArgumentResolver() = ReactiveSortHandlerMethodArgumentResolver()
-
+/*
+<bean class="org.springframework.validation.beanvalidation.MethodValidationPostProcessor">
+    <property name="validatedAnnotationType" value="javax.validation.Valid" />
+    <property name="validator" ref="refToYOurLocalValidatorFactoryBean" />
+</bean>
+ */
     /*
         @Bean
         fun registrationCustomizer(): ResourceHandlerRegistrationCustomizer {

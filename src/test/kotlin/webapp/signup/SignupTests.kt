@@ -14,8 +14,8 @@ import org.springframework.test.web.reactive.server.returnResult
 import webapp.*
 import webapp.Constants.SIGNUP_API_PATH
 import webapp.DataTests.defaultAccount
-import webapp.models.AccountCredentials
-import webapp.models.AccountUtils
+import webapp.accounts.models.AccountCredentials
+import webapp.accounts.models.AccountUtils
 import java.net.URI
 import kotlin.test.*
 
@@ -115,7 +115,9 @@ internal class SignupTests {
             .expectStatus()
             .isCreated
             .returnResult<Unit>()
-            .responseBodyContent!!.isEmpty().run { assertTrue(this) }
+            .responseBodyContent!!
+            .isEmpty()
+            .run { assertTrue(this) }
         assertEquals(countUserBefore + 1, countAccount(dao))
         assertEquals(countUserAuthBefore + 1, countAccountAuthority(dao))
         findOneByEmail(defaultAccount.email!!, dao).run {

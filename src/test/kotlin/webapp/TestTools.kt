@@ -24,11 +24,11 @@ import webapp.Constants.SYSTEM_USER
 import webapp.Constants.TEST
 import webapp.Constants.VIRGULE
 import webapp.Logging.i
-import webapp.models.Account
-import webapp.models.AccountCredentials
-import webapp.models.AccountUtils.generateActivationKey
-import webapp.models.entities.AccountAuthorityEntity
-import webapp.models.entities.AccountEntity
+import webapp.accounts.entities.AccountAuthorityEntity
+import webapp.accounts.entities.AccountEntity
+import webapp.accounts.models.Account
+import webapp.accounts.models.AccountCredentials
+import webapp.accounts.models.AccountUtils.generateActivationKey
 import java.io.IOException
 import java.lang.Byte.parseByte
 import java.time.Instant
@@ -44,15 +44,14 @@ import kotlin.test.assertTrue
 
 val ByteArray.logBody: ByteArray
     get() = apply {
-        map { it.toInt().toChar().toString() }
+        if (isNotEmpty()) map { it.toInt().toChar().toString() }
             .reduce { request, s ->
                 request + buildString {
                     append(s)
                     if (s == VIRGULE && request.last().isDigit())
                         append("\n\t")
                 }
-            }
-            .replace("{\"", "\n{\n\t\"")
+            }.replace("{\"", "\n{\n\t\"")
             .replace("\"}", "\"\n}")
             .replace("\",\"", "\",\n\t\"")
             .run { i(this) }
@@ -60,7 +59,7 @@ val ByteArray.logBody: ByteArray
     }
 val ByteArray.logBodyRaw: ByteArray
     get() = apply {
-        map { it.toInt().toChar().toString() }
+        if (isNotEmpty()) map { it.toInt().toChar().toString() }
             .reduce { request, s -> request + s }
             .run { i(this) }
     }

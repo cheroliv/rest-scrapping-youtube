@@ -1,4 +1,4 @@
-package webapp.models.entities
+package webapp.accounts.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.validation.constraints.Email
@@ -9,7 +9,7 @@ import org.springframework.data.annotation.*
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import webapp.Constants
-import webapp.models.AccountCredentials
+import webapp.accounts.models.AccountCredentials
 import java.time.Instant
 import java.util.*
 
