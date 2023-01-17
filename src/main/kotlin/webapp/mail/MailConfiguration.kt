@@ -6,10 +6,10 @@ import org.springframework.context.annotation.Profile
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import webapp.Constants
-import webapp.AppProperties
+import webapp.ApplicationProperties
 
 @Configuration
-class MailConfiguration(private val properties:AppProperties) {
+class MailConfiguration(private val properties:ApplicationProperties) {
     @Bean
     @Profile("!${Constants.MAILSLURP} & !${Constants.GMAIL}")
     fun javaMailSender(): JavaMailSender = JavaMailSenderImpl().apply {

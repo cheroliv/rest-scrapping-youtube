@@ -120,7 +120,7 @@ $JUMP_LINE$JUMP_LINE""".trimIndent()
     internal fun ApplicationContext.bootstrapLog(): ApplicationContext = apply {
         startupLogMessage(
             appName = environment.getProperty(SPRING_APPLICATION_NAME),
-            goVisitMessage = getBean<AppProperties>().goVisitMessage,
+            goVisitMessage = getBean<ApplicationProperties>().goVisitMessage,
             protocol = if (environment.getProperty(SERVER_SSL_KEY_STORE) != null) HTTPS
             else HTTP,
             serverPort = environment.getProperty(SERVER_PORT),

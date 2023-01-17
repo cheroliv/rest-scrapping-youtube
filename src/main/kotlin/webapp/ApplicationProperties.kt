@@ -17,7 +17,7 @@ import org.springframework.web.cors.CorsConfiguration
         ignoreResourceNotFound = true
     ))
 @ConfigurationProperties(prefix = "webapp", ignoreUnknownFields = false)
-class AppProperties @ConstructorBinding constructor(
+class ApplicationProperties @ConstructorBinding constructor(
     val message: String = "",
     val item: String,
     val goVisitMessage: String,

@@ -7,14 +7,14 @@ import org.springframework.stereotype.Service
 import org.thymeleaf.spring6.SpringTemplateEngine
 import webapp.Constants
 import webapp.Logging
-import webapp.AppProperties
+import webapp.ApplicationProperties
 
 @Suppress("unused")
 @Async
 @Service
 @Profile(Constants.GMAIL)
 class MailServiceGmail(
-    private val properties: AppProperties,
+    private val properties: ApplicationProperties,
     private val messageSource: MessageSource,
     private val templateEngine: SpringTemplateEngine
 ) : AbstractMailService(
