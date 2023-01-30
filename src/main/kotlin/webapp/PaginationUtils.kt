@@ -1,15 +1,11 @@
-
-
 package webapp
+
 import org.springframework.data.domain.Page
 import org.springframework.http.HttpHeaders
 import org.springframework.web.util.UriComponentsBuilder
 import java.text.MessageFormat
 
-/*=================================================================================*/
 
-
-/*=================================================================================*/
 
 /*=================================================================================*/
 /**
@@ -23,6 +19,7 @@ import java.text.MessageFormat
 object PaginationUtils {
     private const val HEADER_X_TOTAL_COUNT = "X-Total-Count"
     private const val HEADER_LINK_FORMAT = "<{0}>; rel=\"{1}\""
+    /*=================================================================================*/
 
     /**
      * Generate pagination headers for a Spring Data [org.springframework.data.domain.Page] object.
@@ -58,6 +55,7 @@ object PaginationUtils {
         headers.add(HttpHeaders.LINK, link.toString())
         return headers
     }
+    /*=================================================================================*/
 
     private fun prepareLink(
         uriBuilder: UriComponentsBuilder,
@@ -73,6 +71,7 @@ object PaginationUtils {
         ),
         relType
     )
+    /*=================================================================================*/
 
     private fun preparePageUri(
         uriBuilder: UriComponentsBuilder,

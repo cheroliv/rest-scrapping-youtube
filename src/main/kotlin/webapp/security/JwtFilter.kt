@@ -1,7 +1,7 @@
 package webapp.security
 
 import org.springframework.http.server.reactive.ServerHttpRequest
-import org.springframework.security.core.context.ReactiveSecurityContextHolder
+import org.springframework.security.core.context.ReactiveSecurityContextHolder.withAuthentication
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
@@ -18,11 +18,7 @@ class JwtFilter(private val security: Security) : WebFilter {
                 return if (!isNullOrBlank() &&
                     security.validateToken(this@token)
                 ) filter(exchange)
-                    .contextWrite(
-                        ReactiveSecurityContextHolder.withAuthentication(
-                            security.getAuthentication(this@token)
-                        )
-                    )
+                    .contextWrite(withAuthentication(security.getAuthentication(this@token)))
                 else filter(exchange)
             }
         }

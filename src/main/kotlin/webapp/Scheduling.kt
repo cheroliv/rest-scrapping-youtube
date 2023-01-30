@@ -16,7 +16,6 @@ import webapp.Logging.d
 import webapp.Logging.e
 import java.util.concurrent.Callable
 import java.util.concurrent.Executor
-import java.util.concurrent.Future
 
 @EnableAsync
 @Configuration
@@ -46,13 +45,13 @@ class Scheduling(
             const val EXCEPTION_MESSAGE = "Caught async exceptions"
         }
 
-        override fun execute(task: Runnable): Unit = executor.execute(createWrappedRunnable(task))
+        override fun execute(task: Runnable) = executor.execute(createWrappedRunnable(task))
 
         @Suppress("OVERRIDE_DEPRECATION")
-        override fun execute(task: Runnable, startTimeout: Long): Unit =
+        override fun execute(task: Runnable, startTimeout: Long) =
             executor.execute(createWrappedRunnable(task))
 
-        private fun <T> createCallable(task: Callable<T>): Callable<T> = Callable {
+        private fun <T> createCallable(task: Callable<T>) = Callable {
             try {
                 return@Callable task.call()
             } catch (e: Exception) {
@@ -61,7 +60,7 @@ class Scheduling(
             }
         }
 
-        private fun createWrappedRunnable(task: Runnable): Runnable = Runnable {
+        private fun createWrappedRunnable(task: Runnable) = Runnable {
             try {
                 task.run()
             } catch (e: Exception) {
@@ -69,11 +68,11 @@ class Scheduling(
             }
         }
 
-        private fun handle(e: Exception?): Unit = e(EXCEPTION_MESSAGE, e)
+        private fun handle(e: Exception?) = e(EXCEPTION_MESSAGE, e)
 
-        override fun submit(task: Runnable): Future<*> = executor.submit(createWrappedRunnable(task))
+        override fun submit(task: Runnable) = executor.submit(createWrappedRunnable(task))
 
-        override fun <T> submit(task: Callable<T>): Future<T> = executor.submit(createCallable(task))
+        override fun <T> submit(task: Callable<T>) = executor.submit(createCallable(task))
 
         @Throws(Exception::class)
         override fun destroy() {

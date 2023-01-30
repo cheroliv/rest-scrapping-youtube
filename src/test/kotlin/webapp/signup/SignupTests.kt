@@ -7,8 +7,8 @@ import org.junit.jupiter.api.BeforeAll
 import org.springframework.beans.factory.getBean
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
-import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.returnResult
 import webapp.*
@@ -172,7 +172,7 @@ internal class SignupTests {
         assertEquals(0, countAccount(dao))
         client.post()
             .uri(SIGNUP_API_PATH)
-            .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+            .contentType(APPLICATION_PROBLEM_JSON)
             .bodyValue(defaultAccount.copy(password = "123"))
             .exchange()
             .expectStatus()

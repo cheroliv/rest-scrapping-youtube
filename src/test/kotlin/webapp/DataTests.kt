@@ -49,16 +49,11 @@ fun accountCredentialsFactory(login: String): AccountCredentials =
         imageUrl = "http://placehold.it/50x50",
     )
 
-fun nameToLogin(userList: List<String>): List<String> = userList.map { s: String ->
-    stripAccents(
-        s.lowercase().replace(
-            ' ',
-            '.'
-        )
-    )
-}
+fun nameToLogin(userList: List<String>) = userList
+    .map { s ->
+        stripAccents(s.lowercase().replace(' ', '.'))
+    }
 
-@Suppress("unused")
 val writers = listOf(
     "Karl Marx",
     "Jean-Jacques Rousseau",

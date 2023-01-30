@@ -6,11 +6,13 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import webapp.Constants
+import webapp.Constants.RESET_PASSWORD_API_FINISH
+import webapp.Constants.RESET_PASSWORD_API_INIT
 import webapp.Logging
-import webapp.mail.MailService
+import webapp.accounts.exceptions.InvalidPasswordException
 import webapp.accounts.models.KeyAndPassword
 import webapp.accounts.models.PasswordChange
-import webapp.accounts.exceptions.InvalidPasswordException
+import webapp.mail.MailService
 
 /*=================================================================================*/
 @Suppress("unused")
@@ -46,7 +48,7 @@ class PasswordController(
      *
      * @param mail the mail of the user.
      */
-    @PostMapping(Constants.RESET_PASSWORD_API_INIT)
+    @PostMapping(RESET_PASSWORD_API_INIT)
     suspend fun requestPasswordReset(@RequestBody @Email mail: String) =
         with(passwordService.requestPasswordReset(mail)) {
             if (this == null) Logging.w("Password reset requested for non existing mail")
@@ -60,7 +62,7 @@ class PasswordController(
      * @throws InvalidPasswordProblem {@code 400 (Bad Request)} if the password is incorrect.
      * @throws RuntimeException         {@code 500 (Internal Application Error)} if the password could not be reset.
      */
-    @PostMapping(Constants.RESET_PASSWORD_API_FINISH)
+    @PostMapping(RESET_PASSWORD_API_FINISH)
     suspend fun finishPasswordReset(@RequestBody keyAndPassword: KeyAndPassword): Unit =
         with(InvalidPasswordException()) {
             if (InvalidPasswordException.isPasswordLengthInvalid(keyAndPassword.newPassword)) throw this

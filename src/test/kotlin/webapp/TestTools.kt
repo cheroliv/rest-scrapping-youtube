@@ -11,7 +11,6 @@ import org.hamcrest.Description
 import org.hamcrest.TypeSafeDiagnosingMatcher
 import org.springframework.boot.runApplication
 import org.springframework.boot.web.reactive.context.StandardReactiveWebEnvironment
-import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.data.r2dbc.core.select
 import org.springframework.data.relational.core.query.Criteria.where
@@ -31,7 +30,7 @@ import webapp.accounts.models.AccountCredentials
 import webapp.accounts.models.AccountUtils.generateActivationKey
 import java.io.IOException
 import java.lang.Byte.parseByte
-import java.time.Instant
+import java.time.Instant.now
 import java.time.ZonedDateTime
 import java.time.ZonedDateTime.parse
 import java.time.format.DateTimeParseException
@@ -59,36 +58,38 @@ val ByteArray.logBody: ByteArray
     }
 val ByteArray.logBodyRaw: ByteArray
     get() = apply {
-        if (isNotEmpty()) map { it.toInt().toChar().toString() }
-            .reduce { request, s -> request + s }
+        if (isNotEmpty()) map {
+            it.toInt()
+                .toChar()
+                .toString()
+        }.reduce { request, s -> request + s }
             .run { i(this) }
     }
 
 
-fun launcher(vararg profiles: String): ConfigurableApplicationContext =
-    runApplication<Application> {
-        /**
-         * before launching: configuration
-         */
-        setEnvironment(StandardReactiveWebEnvironment().apply {
-            setDefaultProfiles(TEST)
-            addActiveProfile(TEST)
-            profiles.toSet().map { addActiveProfile(it) }
-        })
-    }.apply {
-        /**
-         * after launching: verification & post construct
-         */
-        (if (!environment.defaultProfiles.isNullOrEmpty()) environment
-            .defaultProfiles
-            .reduce { acc, s -> "$acc, $s" }
-        else "").run { i("defaultProfiles: $this") }
+fun launcher(vararg profiles: String) = runApplication<Application> {
+    /**
+     * before launching: configuration
+     */
+    setEnvironment(StandardReactiveWebEnvironment().apply {
+        setDefaultProfiles(TEST)
+        addActiveProfile(TEST)
+        profiles.toSet().map { addActiveProfile(it) }
+    })
+}.apply {
+    /**
+     * after launching: verification & post construct
+     */
+    (if (!environment.defaultProfiles.isNullOrEmpty()) environment
+        .defaultProfiles
+        .reduce { acc, s -> "$acc, $s" }
+    else "").run { i("defaultProfiles: $this") }
 
-        (if (!environment.activeProfiles.isNullOrEmpty()) environment
-            .activeProfiles
-            .reduce { acc, s -> "$acc, $s" }
-        else "").run { i("activeProfiles: $this") }
-    }
+    (if (!environment.activeProfiles.isNullOrEmpty()) environment
+        .activeProfiles
+        .reduce { acc, s -> "$acc, $s" }
+    else "").run { i("activeProfiles: $this") }
+}
 
 
 fun createDataAccounts(accounts: Set<AccountCredentials>, dao: R2dbcEntityTemplate) {
@@ -99,9 +100,9 @@ fun createDataAccounts(accounts: Set<AccountCredentials>, dao: R2dbcEntityTempla
             activationKey = generateActivationKey,
             langKey = DEFAULT_LANGUAGE,
             createdBy = SYSTEM_USER,
-            createdDate = Instant.now(),
+            createdDate = now(),
             lastModifiedBy = SYSTEM_USER,
-            lastModifiedDate = Instant.now(),
+            lastModifiedDate = now(),
             authorities = mutableSetOf(ROLE_USER).apply {
                 if (acc.login == ADMIN) add(ROLE_ADMIN)
             }
@@ -132,9 +133,9 @@ fun createActivatedDataAccounts(accounts: Set<AccountCredentials>, dao: R2dbcEnt
                 activated = true,
                 langKey = DEFAULT_LANGUAGE,
                 createdBy = SYSTEM_USER,
-                createdDate = Instant.now(),
+                createdDate = now(),
                 lastModifiedBy = SYSTEM_USER,
-                lastModifiedDate = Instant.now(),
+                lastModifiedDate = now(),
                 authorities = mutableSetOf(ROLE_USER).apply {
                     if (acc.login == ADMIN) add(ROLE_ADMIN)
                 }.toSet()

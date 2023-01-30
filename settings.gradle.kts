@@ -17,7 +17,7 @@ pluginManagement {
         id("org.jetbrains.compose").version(extra["compose.version"].toString())
         id("org.springframework.boot").version(extra["springboot.version"].toString())
         id("io.spring.dependency-management").version(extra["spring_dependency_management.version"].toString())
-        id("com.google.cloud.tools.jib").version(extra["jib.version"].toString())
+        id("com.google.cloud.tools.jib").version(extra["jib_version"].toString())
         id("com.github.andygoossens.gradle-modernizer-plugin").version(extra["modernizer.version"].toString())
         id("com.google.cloud.tools.appengine").version("2.4.4").toString()
     }

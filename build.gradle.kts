@@ -4,7 +4,8 @@
 )
 
 
-import org.gradle.api.JavaVersion.*
+import org.gradle.api.JavaVersion.VERSION_17
+import org.gradle.api.JavaVersion.VERSION_1_8
 import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -203,20 +204,28 @@ tasks.register<TestReport>("testReport") {
 
 jib {
     from {
-        image = "eclipse-temurin:19.0.1_10-jre-alpine"
+        image = "eclipse-temurin@sha256:fabe27bd9db502d484a11d3f571c2f4ef7bba4a172527084d939935358fb06c4"
         platforms {
             platform {
                 architecture = "${findProperty("jibArchitecture") ?: "amd64"}"
                 os = "linux"
             }
         }
+        auth {
+            username = properties["docker_hub_login"].toString()
+            password = properties["docker_hub_password"].toString()
+        }
     }
 
     to {
         image = "cheroliv/kotlin-springboot"
-        auth {
-            username = properties["docker_hub_login"].toString()
-            password = properties["docker_hub_login_token"].toString()
-        }
+//        auth {
+//            username = properties["docker_hub_login_token"].toString()
+//            password = properties["docker_hub_password"].toString()
+//        }
+//        auth {
+//            username = properties["docker_hub_email"].toString()
+//            password = properties["docker_hub_password"].toString()
+//        }
     }
 }
