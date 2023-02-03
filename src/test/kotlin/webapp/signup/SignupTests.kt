@@ -31,6 +31,7 @@ internal class SignupTests {
 
     private val dao: R2dbcEntityTemplate by lazy { context.getBean() }
     private val validator: Validator by lazy { context.getBean() }
+
     @BeforeAll
     fun `lance le server en profile test`() {
         context = launcher()
