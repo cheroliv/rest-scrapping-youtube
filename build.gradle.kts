@@ -165,8 +165,8 @@ configurations {
     }
 }
 
-java.sourceCompatibility = VERSION_1_8
-java.targetCompatibility = VERSION_17
+//java.sourceCompatibility = VERSION_1_8
+//java.targetCompatibility = VERSION_17
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
