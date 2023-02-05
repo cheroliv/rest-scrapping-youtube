@@ -15,12 +15,6 @@ buildscript {
     repositories {
         gradlePluginPortal()
         google()
-        mavenCentral()
-        maven("https://repo.spring.io/milestone")
-        maven("https://repo.spring.io/snapshot")
-        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap/")
-        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-        maven("https://jitpack.io")
     }
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${properties["kotlin.version"]}")
@@ -164,9 +158,6 @@ configurations {
         ).forEach { exclude(it.first, it.second) }
     }
 }
-
-//java.sourceCompatibility = VERSION_1_8
-//java.targetCompatibility = VERSION_17
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
