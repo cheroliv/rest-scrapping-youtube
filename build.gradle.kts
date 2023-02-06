@@ -4,12 +4,12 @@
 )
 
 
+import AppDeps.implementationDeps
+import GradleUtils.appDependencies
 import org.gradle.api.JavaVersion.VERSION_17
 import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import GradleUtils.appDependencies
-import Versions.kotlin_version
 
 buildscript {
     repositories {
@@ -71,17 +71,14 @@ repositories {
 }
 
 dependencies {
+    testImplementation("org.springframework.boot:spring-boot-starter-test") { exclude(module = "mockito-core") }
     appDependencies()
 }
 
 configurations {
     compileOnly { extendsFrom(configurations.annotationProcessor.get()) }
     implementation.configure {
-        setOf(
-            "org.junit.vintage" to "junit-vintage-engine",
-            "org.springframework.boot" to "spring-boot-starter-tomcat",
-            "org.apache.tomcat" to null
-        ).forEach { exclude(it.first, it.second) }
+        implementationDeps.second.forEach { exclude(it.first, it.second) }
     }
 }
 
