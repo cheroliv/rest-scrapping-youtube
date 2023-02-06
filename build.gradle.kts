@@ -3,7 +3,6 @@
     "DEPRECATION",
 )
 
-
 import AppDeps.implementationDeps
 import GradleUtils.appDependencies
 import org.gradle.api.JavaVersion.VERSION_17
@@ -16,9 +15,7 @@ buildscript {
         gradlePluginPortal()
         google()
     }
-    dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin_version}")
-    }
+    dependencies { classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin_version}") }
 }
 
 plugins {
@@ -38,33 +35,6 @@ plugins {
 group = properties["artifact.group"].toString()
 version = properties["artifact.version"].toString()
 
-//TODO: CLI apiclient to setup mailsurp
-//create 2 inboxes: signup,password
-tasks.register<DefaultTask>("addMailSlurpConfiguration") {
-    group = "application"
-    description = "add a yaml spring configuration for mailSlurp properties, and add the file to .gitignore"
-    doFirst { println("addMailSlurpConfiguration") }
-    //TODO: addMailSlurpConfiguration task
-//check if src/main/resources/application-mailslurp.yml exists?
-//when src/main/resources/application-mailslurp.yml dont exists then create file
-//check if .gitignore exists?
-//when .gitignore dont exists then create file
-// and add src/main/resources/application-mailslurp.yml into .gitignore
-//when .gitgnore exists then check if src/main/resources/application-mailslurp.yml is found into .gitignore
-//when src/main/resources/application-mailslurp.yml is not found into .gitignore
-// then add src/main/resources/application-mailslurp.yml to .gitgnore
-}
-
-//springBoot.mainClass.set("webapp.BackendBootstrap")
-///*
-//./gradlew -q cli --args='your args there'
-// */
-//tasks.register("cli") {
-//    group = "application"
-//    description = "Run webapp cli"
-//    doFirst { springBoot.mainClass.set("webapp.CliBootstrap") }
-//    finalizedBy("bootRun")
-//}
 repositories {
     google()
     mavenCentral()
@@ -114,6 +84,34 @@ tasks.register<TestReport>("testReport") {
     group = "report"
     destinationDir = file("$buildDir/reports/tests")
     reportOn("test")
+}
+
+//springBoot.mainClass.set("webapp.BackendBootstrap")
+///*
+//./gradlew -q cli --args='your args there'
+// */
+//tasks.register("cli") {
+//    group = "application"
+//    description = "Run webapp cli"
+//    doFirst { springBoot.mainClass.set("webapp.CliBootstrap") }
+//    finalizedBy("bootRun")
+//}
+
+//TODO: CLI apiclient to setup mailsurp
+//create 2 inboxes: signup,password
+tasks.register<DefaultTask>("addMailSlurpConfiguration") {
+    group = "application"
+    description = "add a yaml spring configuration for mailSlurp properties, and add the file to .gitignore"
+    doFirst { println("addMailSlurpConfiguration") }
+    //TODO: addMailSlurpConfiguration task
+//check if src/main/resources/application-mailslurp.yml exists?
+//when src/main/resources/application-mailslurp.yml dont exists then create file
+//check if .gitignore exists?
+//when .gitignore dont exists then create file
+// and add src/main/resources/application-mailslurp.yml into .gitignore
+//when .gitgnore exists then check if src/main/resources/application-mailslurp.yml is found into .gitignore
+//when src/main/resources/application-mailslurp.yml is not found into .gitignore
+// then add src/main/resources/application-mailslurp.yml to .gitgnore
 }
 
 jib {

@@ -30,8 +30,8 @@ object AppDeps {
     @JvmStatic
     val implementationDeps = Pair(
         mapOf(
-//            Pair("org.jetbrains.kotlin:kotlin-stdlib-jdk8" to BLANK, emptyMap<String, String?>()),
-//            Pair("org.jetbrains.kotlin:kotlin-reflect" to BLANK, emptyMap<String, String?>()),
+//            Pair("org.jetbrains.kotlin:kotlin-stdlib-jdk8" to BLANK, emptySet<Pair<String?, String?>()),
+//            Pair("org.jetbrains.kotlin:kotlin-reflect" to BLANK, emptySet<Pair<String?, String?>()),
             "org.jetbrains.kotlin:kotlin-stdlib-jdk8" to BLANK,
             "org.jetbrains.kotlin:kotlin-reflect" to BLANK,
             "io.projectreactor.kotlin:reactor-kotlin-extensions" to BLANK,
