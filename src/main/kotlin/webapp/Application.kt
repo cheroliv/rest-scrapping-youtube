@@ -54,6 +54,8 @@ class Application(private val properties: Properties,
     @Bean
     fun validator(): Validator = LocalValidatorFactoryBean()
 
+//    @Bean
+//    fun foo()=Validation.byDefaultProvider().
     @Bean
     fun javaTimeModule(): JavaTimeModule = JavaTimeModule()
 

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.springframework.beans.factory.getBean
 import org.springframework.context.ConfigurableApplicationContext
+import org.springframework.context.MessageSource
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON
@@ -18,6 +19,7 @@ import webapp.Logging.i
 import webapp.accounts.models.AccountCredentials
 import webapp.accounts.models.AccountUtils
 import java.net.URI
+import java.util.*
 import kotlin.test.*
 
 private const val i = 0
@@ -167,17 +169,27 @@ internal class SignupTests {
     }
 
 
-
     @Test
     fun `test signup account avec un password invalid`() {
-        validator.validateProperty(AccountCredentials("123"),"password").map {
-            i(it.message)
+        val wrongPassword = "123"
+
+        validator.validateProperty(
+            AccountCredentials(wrongPassword),
+            "password"
+        ).map { i(it.messageTemplate)
+            context.getBean<MessageSource>().getMessage(
+                it.messageTemplate,
+                null,
+                Locale.getDefault()
+            )
         }
+
+
         assertEquals(0, countAccount(dao))
         client.post()
             .uri(SIGNUP_API_PATH)
             .contentType(APPLICATION_PROBLEM_JSON)
-            .bodyValue(defaultAccount.copy(password = "123"))
+            .bodyValue(defaultAccount.copy(password = wrongPassword))
             .exchange()
             .expectStatus()
             .isBadRequest
