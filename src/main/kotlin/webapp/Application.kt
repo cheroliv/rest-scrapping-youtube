@@ -4,6 +4,9 @@ package webapp
 
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import jakarta.validation.MessageInterpolator
+import jakarta.validation.Validation.byDefaultProvider
+import jakarta.validation.ValidatorFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext
@@ -20,13 +23,17 @@ import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Hooks.onOperatorDebug
 import reactor.core.publisher.Mono
+import java.util.*
+import java.util.regex.Pattern.compile
 
 
 @EnableWebFlux
 @SpringBootApplication
 @EnableConfigurationProperties(Properties::class)
-class Application(private val properties: Properties,
-                  private val context: ApplicationContext) : WebFluxConfigurer {
+class Application(
+    private val properties: Properties,
+    private val context: ApplicationContext
+) : WebFluxConfigurer {
 
     @Component
     class SpaWebFilter : WebFilter {
@@ -51,10 +58,51 @@ class Application(private val properties: Properties,
         }
     }
 
+    class CustomInterpolator(private val interpolator: MessageInterpolator) : MessageInterpolator {
+        override fun interpolate(
+            messageTemplate: String,
+            context: MessageInterpolator.Context
+        ) = replaceParameters(
+            interpolator.interpolate(messageTemplate, context)
+        )
+
+        override fun interpolate(
+            messageTemplate: String,
+            context: MessageInterpolator.Context,
+            locale: Locale
+        ): String = replaceParameters(
+            interpolator.interpolate(messageTemplate, context)
+        )
+
+        companion object {
+            private val parametersPattern = compile("\\[(.+)\\]$")
+        }
+
+        private fun replaceParameters(message: String): String {
+            var message = message
+            val matcher = parametersPattern.matcher(message)
+            var values = arrayOf<String?>()
+            if (matcher.find()) {
+                values = matcher.group(1).split("\\s*,\\s*".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                message = message.substring(0, matcher.start())
+                for (i in values.indices) {
+                    message = message.replace("{$i}", values[i]!!)
+                }
+            }
+            return message
+        }
+    }
+
+    @Bean
+    fun validation(): ValidatorFactory = byDefaultProvider().configure().apply {
+        messageInterpolator(CustomInterpolator(defaultMessageInterpolator))
+    }.buildValidatorFactory()
+
+
     @Bean
     fun validator(): Validator = LocalValidatorFactoryBean()
 
-//    @Bean
+    //    @Bean
 //    fun foo()=Validation.byDefaultProvider().
     @Bean
     fun javaTimeModule(): JavaTimeModule = JavaTimeModule()
@@ -72,12 +120,12 @@ class Application(private val properties: Properties,
     // TODO: remove when this is supported in spring-boot
     @Bean
     fun reactiveSortHandlerMethodArgumentResolver() = ReactiveSortHandlerMethodArgumentResolver()
-/*
-<bean class="org.springframework.validation.beanvalidation.MethodValidationPostProcessor">
-    <property name="validatedAnnotationType" value="javax.validation.Valid" />
-    <property name="validator" ref="refToYOurLocalValidatorFactoryBean" />
-</bean>
- */
+    /*
+    <bean class="org.springframework.validation.beanvalidation.MethodValidationPostProcessor">
+        <property name="validatedAnnotationType" value="javax.validation.Valid" />
+        <property name="validator" ref="refToYOurLocalValidatorFactoryBean" />
+    </bean>
+     */
     /*
         @Bean
         fun registrationCustomizer(): ResourceHandlerRegistrationCustomizer {

@@ -43,7 +43,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-
+import javax.inject.Inject
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -76,16 +76,16 @@ internal abstract class AbstractIntegrationTest {
         )
     }
 
-    @Autowired
+    @Inject
     lateinit var context: ApplicationContext
 
-    @Autowired
+    @Inject
     lateinit var db: DatabaseClient
 
-    @Autowired
+    @Inject
     lateinit var r2dbcEntityTemplate: R2dbcEntityTemplate
 
-    @Autowired
+    @Inject
     lateinit var objectMapper: ObjectMapper
 
     suspend fun countAuthority(): Long = db

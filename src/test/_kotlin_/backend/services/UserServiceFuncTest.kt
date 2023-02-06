@@ -23,13 +23,13 @@ import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 import java.time.temporal.ChronoUnit.HOURS
 import kotlin.test.*
-
+import javax.inject.Inject
 /**
  * Functional tests for {@link UserService}.
  */
 @Suppress("NonAsciiCharacters")
 class UserServiceFuncTest : AbstractBaseFunctionalTest() {
-    @Autowired
+    @Inject
     private lateinit var userService: UserService
 
     @BeforeTest

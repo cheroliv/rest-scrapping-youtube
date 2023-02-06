@@ -41,30 +41,28 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 
-val ByteArray.logBody: ByteArray
-    get() = apply {
-        if (isNotEmpty()) map { it.toInt().toChar().toString() }
-            .reduce { request, s ->
-                request + buildString {
-                    append(s)
-                    if (s == VIRGULE && request.last().isDigit())
-                        append("\n\t")
-                }
-            }.replace("{\"", "\n{\n\t\"")
-            .replace("\"}", "\"\n}")
-            .replace("\",\"", "\",\n\t\"")
-            .run { i(this) }
+fun ByteArray.logBody(): ByteArray = apply {
+    if (isNotEmpty()) map { it.toInt().toChar().toString() }
+        .reduce { request, s ->
+            request + buildString {
+                append(s)
+                if (s == VIRGULE && request.last().isDigit())
+                    append("\n\t")
+            }
+        }.replace("{\"", "\n{\n\t\"")
+        .replace("\"}", "\"\n}")
+        .replace("\",\"", "\",\n\t\"")
+        .run { i("\nbody:\n$this") }
+}
 
-    }
-val ByteArray.logBodyRaw: ByteArray
-    get() = apply {
-        if (isNotEmpty()) map {
-            it.toInt()
-                .toChar()
-                .toString()
-        }.reduce { request, s -> request + s }
-            .run { i(this) }
-    }
+fun ByteArray.logBodyRaw(): ByteArray = apply {
+    if (isNotEmpty()) map {
+        it.toInt()
+            .toChar()
+            .toString()
+    }.reduce { request, s -> request + s }
+        .run { i(this) }
+}
 
 
 fun launcher(vararg profiles: String) = runApplication<Application> {

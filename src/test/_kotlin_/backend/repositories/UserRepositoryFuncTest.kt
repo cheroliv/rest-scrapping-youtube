@@ -15,11 +15,11 @@ import java.time.LocalDateTime.now
 import java.time.ZoneId.systemDefault
 import java.util.*
 import kotlin.test.*
-
+import javax.inject.Injectimport javax.inject.Inject
 @Suppress("NonAsciiCharacters")
 class UserRepositoryFuncTest : AbstractBaseFunctionalTest() {
 
-    @Autowired
+    @Inject
     private lateinit var userRepository: UserRepository
 
     @BeforeTest

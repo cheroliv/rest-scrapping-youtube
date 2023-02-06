@@ -8,10 +8,10 @@ import backend.tdd.functional.AbstractBaseFunctionalTest
 import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
-
+import javax.inject.Inject
 class MessageSourceFuncTest : AbstractBaseFunctionalTest() {
 
-    @Autowired
+    @Inject
     lateinit var messageSource: MessageSource
 
     @Test

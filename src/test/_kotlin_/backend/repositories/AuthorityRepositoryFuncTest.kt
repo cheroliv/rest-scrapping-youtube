@@ -6,10 +6,10 @@ import backend.repositories.entities.Authority
 import backend.tdd.functional.AbstractBaseFunctionalTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-
+import javax.inject.Inject
 class AuthorityRepositoryFuncTest : AbstractBaseFunctionalTest() {
 
-    @Autowired
+    @Inject
     private lateinit var authorityRepository: AuthorityRepository
 
     @Test

@@ -10,10 +10,10 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-
+import javax.inject.Inject
 class UserAuthRepositoryFuncTest : AbstractBaseFunctionalTest() {
 
-    @Autowired
+    @Inject
     private lateinit var userAuthRepository: UserAuthRepository
 
     @BeforeTest

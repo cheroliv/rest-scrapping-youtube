@@ -6,7 +6,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.springframework.beans.factory.getBean
 import org.springframework.context.ConfigurableApplicationContext
-import org.springframework.context.MessageSource
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON
@@ -19,10 +18,9 @@ import webapp.Logging.i
 import webapp.accounts.models.AccountCredentials
 import webapp.accounts.models.AccountUtils
 import java.net.URI
-import java.util.*
 import kotlin.test.*
 
-private const val i = 0
+
 
 internal class SignupTests {
 
@@ -169,6 +167,7 @@ internal class SignupTests {
     }
 
 
+
     @Test
     fun `test signup account avec un password invalid`() {
         val wrongPassword = "123"
@@ -176,12 +175,15 @@ internal class SignupTests {
         validator.validateProperty(
             AccountCredentials(wrongPassword),
             "password"
-        ).map { i(it.messageTemplate)
-            context.getBean<MessageSource>().getMessage(
-                it.messageTemplate,
-                null,
-                Locale.getDefault()
-            )
+        ).map {
+            i(it.messageTemplate)
+//            context.getBean<MessageSource>().getMessage(
+//                it.messageTemplate,
+//                null,
+//                Locale.getDefault()
+//            )
+//            validator.
+            i(it.message)
         }
 
 
@@ -195,7 +197,7 @@ internal class SignupTests {
             .isBadRequest
             .returnResult<Unit>()
             .responseBodyContent!!
-            .logBody
+            .logBody()
             .isNotEmpty()
             .run { assertTrue(this) }
         assertEquals(0, countAccount(dao))

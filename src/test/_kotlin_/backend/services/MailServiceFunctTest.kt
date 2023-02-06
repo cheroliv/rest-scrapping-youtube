@@ -25,20 +25,20 @@ import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeMultipart
 import kotlin.test.Test
 import kotlin.test.assertNotNull
-
+import javax.inject.Inject
 /**
  * Functional tests {@link MailService}.
  */
 class MailServiceFunctTest : AbstractBaseFunctionalTest() {
     lateinit var mailService: MailService
 
-    @Autowired
+    @Inject
     lateinit var properties: ApplicationProperties
 
-    @Autowired
+    @Inject
     lateinit var messageSource: MessageSource
 
-    @Autowired
+    @Inject
     lateinit var templateEngine: SpringWebFluxTemplateEngine
 
     @Spy

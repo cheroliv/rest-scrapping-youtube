@@ -6,10 +6,10 @@ import backend.config.Constants.PROP_ITEM
 import backend.config.Constants.PROP_MESSAGE
 import backend.tdd.functional.AbstractBaseFunctionalTest
 import kotlin.test.Test
-
+import javax.inject.Inject
 class BasePropertiesFuncTest : AbstractBaseFunctionalTest() {
 
-    @Autowired
+    @Inject
     lateinit var properties: ApplicationProperties
 
     @Value(value = "\${$PROP_MESSAGE}")

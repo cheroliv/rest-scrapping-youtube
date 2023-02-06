@@ -13,10 +13,10 @@ import backend.config.Constants.PROP_MAIL_PROPERTY_SMTP_STARTTLS_ENABLE
 import backend.config.Constants.PROP_MAIL_PROPERTY_TRANSPORT_PROTOCOL
 import backend.tdd.functional.AbstractBaseFunctionalTest
 import kotlin.test.Test
-
+import javax.inject.Inject
 class MailPropertiesFuncTest : AbstractBaseFunctionalTest() {
 
-    @Autowired
+    @Inject
     lateinit var properties: ApplicationProperties
 
     @Value("\${${PROP_MAIL_BASE_URL}}")
