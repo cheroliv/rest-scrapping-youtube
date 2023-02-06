@@ -219,9 +219,8 @@ data class ProblemsModel(
 class ProblemTranslator(
     private val env: Environment,
     private val properties: ApplicationProperties
-) //: ProblemHandling, SecurityAdviceTrait
-{
-
+) {
+//ProblemHandling, SecurityAdviceTrait
     companion object {
         private const val FIELD_ERRORS_KEY = "fieldErrors"
         private const val MESSAGE_KEY = "message"
