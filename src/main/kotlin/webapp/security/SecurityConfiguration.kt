@@ -21,7 +21,7 @@ import org.springframework.security.web.server.util.matcher.ServerWebExchangeMat
 import org.springframework.web.cors.reactive.CorsWebFilter
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 import webapp.Application.SpaWebFilter
-import webapp.ApplicationProperties
+import webapp.Properties
 import webapp.Constants.CONTENT_SECURITY_POLICY
 import webapp.Constants.FEATURE_POLICY
 import webapp.Constants.ROLE_ADMIN
@@ -31,7 +31,7 @@ import webapp.Logging.d
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
 class SecurityConfiguration(
-    private val properties: ApplicationProperties,
+    private val properties: Properties,
     private val security: Security,
     private val userDetailsService: ReactiveUserDetailsService,
 ) {

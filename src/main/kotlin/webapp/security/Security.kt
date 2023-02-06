@@ -15,13 +15,13 @@ import org.springframework.security.core.userdetails.User
 import org.springframework.stereotype.Component
 import webapp.Constants
 import webapp.Logging
-import webapp.ApplicationProperties
+import webapp.Properties
 import java.security.Key
 import java.util.*
 
 @Component
 class Security(
-    private val properties: ApplicationProperties,
+    private val properties: Properties,
     private var key: Key? = null,
     private var tokenValidityInMilliseconds: Long = 0,
     private var tokenValidityInMillisecondsForRememberMe: Long = 0

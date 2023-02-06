@@ -19,7 +19,7 @@ class ConfigurationsTests {
 
     private lateinit var context: ConfigurableApplicationContext
     private val messageSource: MessageSource by lazy { context.getBean() }
-    private val properties: ApplicationProperties by lazy { context.getBean() }
+    private val properties: Properties by lazy { context.getBean() }
 
     @BeforeAll
     fun `lance le server en profile test`() = launcher().run { context = this }

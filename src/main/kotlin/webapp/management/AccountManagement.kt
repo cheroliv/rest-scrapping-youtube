@@ -154,7 +154,7 @@ import java.util.*
 //class AccountController(
 //    private val userService: UserService,
 //    private val mailService: MailService,
-//    private val properties: ApplicationProperties
+//    private val properties: Properties
 //) {
 //    companion object {
 //        private val ALLOWED_ORDERED_PROPERTIES =

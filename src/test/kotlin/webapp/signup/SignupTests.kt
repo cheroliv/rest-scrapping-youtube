@@ -14,10 +14,13 @@ import org.springframework.test.web.reactive.server.returnResult
 import webapp.*
 import webapp.Constants.SIGNUP_API_PATH
 import webapp.DataTests.defaultAccount
+import webapp.Logging.i
 import webapp.accounts.models.AccountCredentials
 import webapp.accounts.models.AccountUtils
 import java.net.URI
 import kotlin.test.*
+
+private const val i = 0
 
 internal class SignupTests {
 
@@ -168,7 +171,7 @@ internal class SignupTests {
     @Test
     fun `test signup account avec un password invalid`() {
         validator.validateProperty(AccountCredentials("123"),"password").map {
-            Logging.i(it.message)
+            i(it.message)
         }
         assertEquals(0, countAccount(dao))
         client.post()

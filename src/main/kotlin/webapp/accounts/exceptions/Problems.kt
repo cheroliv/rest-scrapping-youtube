@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.server.ServerWebExchange
-import webapp.ApplicationProperties
+import webapp.Properties
 import java.io.Serializable
 
 //import org.zalando.problem.Problem.DEFAULT_TYPE as PROBLEM_DEFAULT_TYPE
@@ -218,7 +218,7 @@ data class ProblemsModel(
 @ControllerAdvice
 class ProblemTranslator(
     private val env: Environment,
-    private val properties: ApplicationProperties
+    private val properties: Properties
 ) {
 //ProblemHandling, SecurityAdviceTrait
     companion object {

@@ -24,8 +24,8 @@ import reactor.core.publisher.Mono
 
 @EnableWebFlux
 @SpringBootApplication
-@EnableConfigurationProperties(ApplicationProperties::class)
-class Application(private val properties: ApplicationProperties,
+@EnableConfigurationProperties(Properties::class)
+class Application(private val properties: Properties,
                   private val context: ApplicationContext) : WebFluxConfigurer {
 
     @Component
@@ -89,7 +89,7 @@ class Application(private val properties: ApplicationProperties,
             // Use a cache filter that only match selected paths
             return CachingHttpHeadersFilter(
                 TimeUnit.DAYS.toMillis(
-                    ApplicationProperties.getHttp().getCache().getTimeToLiveInDays()
+                    Properties.getHttp().getCache().getTimeToLiveInDays()
                 )
             )
         }

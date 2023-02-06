@@ -19,9 +19,7 @@ import webapp.Constants.MSG_WRONG_ACTIVATION_KEY
 import webapp.Constants.ROLE_USER
 import webapp.Constants.SIGNUP_API
 import webapp.Constants.SYSTEM_USER
-import webapp.Logging.d
 import webapp.Logging.i
-import webapp.accounts.entities.AccountRecord.Companion.PASSWORD_FIELD
 import webapp.accounts.exceptions.EmailAlreadyUsedException
 import webapp.accounts.exceptions.InvalidPasswordException
 import webapp.accounts.exceptions.UsernameAlreadyUsedException
@@ -59,9 +57,6 @@ class SignupController(
     @Transactional
     suspend fun signup(@RequestBody account: AccountCredentials) = when {
         validator.validate(account).isNotEmpty() -> {
-
-            d(validator.validateProperty(account, PASSWORD_FIELD).size.toString())
-
             badRequest().body(forStatus(BAD_REQUEST).apply {
                 type = INVALID_PASSWORD_TYPE
                 title = "Incorrect password"
