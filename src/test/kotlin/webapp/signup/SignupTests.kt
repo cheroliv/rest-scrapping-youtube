@@ -174,6 +174,8 @@ internal class SignupTests {
             .apply { assertFalse(isEmpty()) }
             .map { i(it.message) }
 
+
+
         assertEquals(0, countAccount(dao))
         client.post()
             .uri(SIGNUP_API_PATH)

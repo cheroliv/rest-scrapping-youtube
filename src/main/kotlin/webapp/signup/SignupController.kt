@@ -54,7 +54,7 @@ class SignupController(
     @ResponseStatus(CREATED)
     @Transactional
     suspend fun signup(
-        @RequestBody @Valid
+        @Valid @RequestBody
         account: AccountCredentials
     ): ResponseEntity<ProblemDetail> = account.run {
         isLoginAvailable(this)
