@@ -5,11 +5,11 @@
 
 
 import org.gradle.api.JavaVersion.VERSION_17
-import org.gradle.api.JavaVersion.VERSION_1_8
 import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
+import GradleUtils.appDependencies
+import Versions.kotlin_version
 
 buildscript {
     repositories {
@@ -17,7 +17,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${properties["kotlin.version"]}")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin_version}")
     }
 }
 
@@ -65,87 +65,13 @@ tasks.register<DefaultTask>("addMailSlurpConfiguration") {
 //    doFirst { springBoot.mainClass.set("webapp.CliBootstrap") }
 //    finalizedBy("bootRun")
 //}
-
 repositories {
     google()
     mavenCentral()
-    maven("https://repo.spring.io/milestone")
-    maven("https://repo.spring.io/snapshot")
-    maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap/")
-    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-    maven("https://jitpack.io")
 }
 
 dependencies {
-//    implementation(project(path = ":common"))
-    //Kotlin lib: jdk8, reflexion, coroutines
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${properties["kotlinx_serialization_json.version"]}")
-    // Kotlin Tests
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-    testImplementation("io.projectreactor:reactor-test")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:${properties["mockito_kotlin_version"]}")
-    // Spring Test dependencies
-    testImplementation("org.springframework.boot:spring-boot-starter-test") { exclude(module = "mockito-core") }
-    // Mocking
-    testImplementation("io.mockk:mockk:${properties["mockk.version"]}")
-    testImplementation("com.github.tomakehurst:wiremock-jre8:${properties["wiremock.version"]}")
-    testImplementation("com.ninja-squad:springmockk:${properties["springmockk.version"]}")
-    // testcontainer
-//    testImplementation("org.testcontainers:junit-jupiter")
-//    testImplementation("org.testcontainers:postgresql")
-//    testImplementation("org.testcontainers:r2dbc")
-    //testImplementation("com.tngtech.archunit:archunit-junit5-api:${properties["archunit_junit5_version"]}")
-    //testRuntimeOnly("com.tngtech.archunit:archunit-junit5-engine:${properties["archunit_junit5_version"]}")
-//    testImplementation( "org.springframework.cloud:spring-cloud-starter-contract-verifier")
-    //blockhound
-//    implementation("io.projectreactor.tools:blockhound:${properties["blockhound_version"]}")
-//    testImplementation("io.projectreactor.tools:blockhound-junit-platform:${properties["blockhound_version"]}")
-    //jackson mapping (json/xml)
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    //strings manipulation
-    implementation("org.apache.commons:commons-lang3")
-    //spring conf
-    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-    //spring dev tools
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
-    //spring actuator
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
-    //Spring mail
-    implementation("org.springframework.boot:spring-boot-starter-mail")
-    //spring thymeleaf for mail templating
-    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
-    //MailSlurp
-    implementation("com.mailslurp:mailslurp-client-kotlin:${properties["mailslurp-client-kotlin.version"]}")
-    //Spring bean validation JSR 303
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    //spring webflux reactive http
-    implementation("org.springframework.boot:spring-boot-starter-webflux")
-    //spring r2dbc
-    implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
-    //H2database
-    runtimeOnly("com.h2database:h2")
-    runtimeOnly("io.r2dbc:r2dbc-h2")
-    //Postgresql
-//    runtimeOnly("io.r2dbc:r2dbc-postgresql")
-//    runtimeOnly("org.postgresql:postgresql")
-    //Spring Security
-    implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.security:spring-security-data")
-    testImplementation("org.springframework.security:spring-security-test")
-    // JWT authentication
-    implementation("io.jsonwebtoken:jjwt-impl:${properties["jsonwebtoken.version"]}")
-    implementation("io.jsonwebtoken:jjwt-jackson:${properties["jsonwebtoken.version"]}")
-    //SSL
-    implementation("io.netty:netty-tcnative-boringssl-static:${properties["boring_ssl.version"]}")
-    //Spring Cloud
-//    implementation("org.springframework.cloud:spring-cloud-gcp-starter-storage")
-//    runtimeOnly ("com.google.appengine:appengine:+")
-    runtimeOnly("org.springframework.boot:spring-boot-properties-migrator")
+    appDependencies()
 }
 
 configurations {
@@ -166,6 +92,11 @@ tasks.withType<KotlinCompile> {
     }
 }
 
+modernizer {
+    failOnViolations = true
+    includeTestClasses = true
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
     testLogging { events(FAILED, SKIPPED) }
@@ -173,11 +104,6 @@ tasks.withType<Test> {
         html.isEnabled = true
         ignoreFailures = true
     }
-}
-
-modernizer {
-    failOnViolations = true
-    includeTestClasses = true
 }
 
 tasks.register<Delete>("cleanResources") {

@@ -4,8 +4,6 @@ pluginManagement {
         gradlePluginPortal()
         mavenCentral()
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-        maven("https://repo.spring.io/milestone")
-        maven("https://repo.spring.io/snapshot")
     }
     plugins {
         kotlin("jvm").version(extra["kotlin.version"].toString())
