@@ -21,7 +21,6 @@ import java.net.URI
 import kotlin.test.*
 
 
-
 internal class SignupTests {
 
     private lateinit var context: ConfigurableApplicationContext
@@ -138,7 +137,7 @@ internal class SignupTests {
         client
             .post()
             .uri(SIGNUP_API_PATH)
-            .contentType(APPLICATION_JSON)
+            .contentType(APPLICATION_PROBLEM_JSON)
             .bodyValue(defaultAccount.copy(login = "funky-log(n"))
             .exchange()
             .expectStatus()
@@ -167,25 +166,13 @@ internal class SignupTests {
     }
 
 
-
     @Test
     fun `test signup account avec un password invalid`() {
         val wrongPassword = "123"
 
-        validator.validateProperty(
-            AccountCredentials(wrongPassword),
-            "password"
-        ).map {
-            i(it.messageTemplate)
-//            context.getBean<MessageSource>().getMessage(
-//                it.messageTemplate,
-//                null,
-//                Locale.getDefault()
-//            )
-//            validator.
-            i(it.message)
-        }
-
+        validator.validateProperty(AccountCredentials(wrongPassword), "password")
+            .apply { assertFalse(isEmpty()) }
+            .map { i(it.message) }
 
         assertEquals(0, countAccount(dao))
         client.post()

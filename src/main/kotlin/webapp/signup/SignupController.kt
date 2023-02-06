@@ -1,12 +1,11 @@
 package webapp.signup
 
+import jakarta.validation.Valid
 import jakarta.validation.Validator
-import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE
-import org.springframework.http.ProblemDetail.forStatus
+import org.springframework.http.ProblemDetail
 import org.springframework.http.ResponseEntity
-import org.springframework.http.ResponseEntity.badRequest
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
@@ -14,13 +13,11 @@ import webapp.Constants.ACCOUNT_API
 import webapp.Constants.ACTIVATE_API
 import webapp.Constants.ACTIVATE_API_KEY
 import webapp.Constants.DEFAULT_LANGUAGE
-import webapp.Constants.INVALID_PASSWORD_TYPE
 import webapp.Constants.MSG_WRONG_ACTIVATION_KEY
 import webapp.Constants.ROLE_USER
 import webapp.Constants.SIGNUP_API
 import webapp.Constants.SYSTEM_USER
 import webapp.Logging.i
-import webapp.accounts.entities.AccountRecord.Companion.PASSWORD_FIELD
 import webapp.accounts.exceptions.EmailAlreadyUsedException
 import webapp.accounts.exceptions.InvalidPasswordException
 import webapp.accounts.exceptions.UsernameAlreadyUsedException
@@ -56,7 +53,34 @@ class SignupController(
     )
     @ResponseStatus(CREATED)
     @Transactional
-    suspend fun signup(@RequestBody account: AccountCredentials) = when {
+    suspend fun signup(
+        @RequestBody @Valid
+        account: AccountCredentials
+    ): ResponseEntity<ProblemDetail> = account.run {
+        isLoginAvailable(this)
+        isEmailAvailable(this)
+        now().run {
+            copy(
+                password = passwordEncoder.encode(password),
+                activationKey = generateActivationKey,
+                authorities = setOf(ROLE_USER),
+                langKey = when {
+                    langKey.isNullOrBlank() -> DEFAULT_LANGUAGE
+                    else -> langKey
+                },
+                activated = false,
+                createdBy = SYSTEM_USER,
+                createdDate = this,
+                lastModifiedBy = SYSTEM_USER,
+                lastModifiedDate = this
+            ).run {
+                accountRepository.signup(this)
+                mailService.sendActivationEmail(this)
+            }
+        }
+        ResponseEntity(CREATED)
+    }
+    /*= when {
         validator.validateProperty(account, PASSWORD_FIELD).isNotEmpty() -> {
             badRequest().body(forStatus(BAD_REQUEST).apply {
                 type = INVALID_PASSWORD_TYPE
@@ -64,30 +88,7 @@ class SignupController(
             })
         }
 
-        else -> {
-            isLoginAvailable(account)
-            isEmailAvailable(account)
-            val createdDate = now()
-            account.copy(
-                password = passwordEncoder.encode(account.password),
-                activationKey = generateActivationKey,
-                authorities = setOf(ROLE_USER),
-                langKey = when {
-                    account.langKey.isNullOrBlank() -> DEFAULT_LANGUAGE
-                    else -> account.langKey
-                },
-                createdBy = SYSTEM_USER,
-                createdDate = createdDate,
-                lastModifiedBy = SYSTEM_USER,
-                lastModifiedDate = createdDate,
-                activated = false
-            ).run {
-                accountRepository.signup(this)
-                mailService.sendActivationEmail(this)
-            }
-            ResponseEntity(CREATED)
-        }
-    }
+        else -> {*/
 
     /**
      * `GET  /activate` : activate the signed-up user.

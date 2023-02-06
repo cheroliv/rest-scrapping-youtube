@@ -59,6 +59,10 @@ class Application(
     }
 
     class CustomInterpolator(private val interpolator: MessageInterpolator) : MessageInterpolator {
+        companion object {
+            private val parametersPattern = compile("\\[(.+)\\]$")
+        }
+
         override fun interpolate(
             messageTemplate: String,
             context: MessageInterpolator.Context
@@ -74,16 +78,16 @@ class Application(
             interpolator.interpolate(messageTemplate, context)
         )
 
-        companion object {
-            private val parametersPattern = compile("\\[(.+)\\]$")
-        }
-
         private fun replaceParameters(message: String): String {
             var message = message
             val matcher = parametersPattern.matcher(message)
             var values = arrayOf<String?>()
             if (matcher.find()) {
-                values = matcher.group(1).split("\\s*,\\s*".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                values = matcher
+                    .group(1)
+                    .split("\\s*,\\s*".toRegex())
+                    .dropLastWhile { it.isEmpty() }
+                    .toTypedArray()
                 message = message.substring(0, matcher.start())
                 for (i in values.indices) {
                     message = message.replace("{$i}", values[i]!!)
