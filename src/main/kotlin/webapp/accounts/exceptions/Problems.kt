@@ -125,6 +125,17 @@ data class ProblemsModel(
 }
 */
 
+/*
+    /*= when {
+        validator.validateProperty(account, PASSWORD_FIELD).isNotEmpty() -> {
+            badRequest().body(forStatus(BAD_REQUEST).apply {
+                type = INVALID_PASSWORD_TYPE
+                title = "Incorrect password"
+            })
+        }
+
+        else -> {*/
+ */
 
 /*=================================================================================*/
 //class Foo(
