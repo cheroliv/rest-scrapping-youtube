@@ -8,13 +8,13 @@ import org.springframework.beans.factory.getBean
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.http.MediaType.APPLICATION_JSON
-import org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON
 import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.test.web.reactive.server.WebTestClient.bindToServer
 import org.springframework.test.web.reactive.server.returnResult
 import webapp.*
+import webapp.Constants.BASE_URL_DEV
 import webapp.Constants.SIGNUP_API_PATH
 import webapp.DataTests.defaultAccount
-import webapp.Logging.i
 import webapp.accounts.models.AccountCredentials
 import webapp.accounts.models.AccountUtils
 import java.net.URI
@@ -24,15 +24,13 @@ import kotlin.test.*
 internal class SignupTests {
 
     private lateinit var context: ConfigurableApplicationContext
-
-    private val client: WebTestClient by lazy {
-        WebTestClient.bindToServer()
-            .baseUrl(Constants.BASE_URL_DEV)
-            .build()
-    }
-
     private val dao: R2dbcEntityTemplate by lazy { context.getBean() }
     private val validator: Validator by lazy { context.getBean() }
+    private val client: WebTestClient by lazy {
+        bindToServer()
+            .baseUrl(BASE_URL_DEV)
+            .build()
+    }
 
     @BeforeAll
     fun `lance le server en profile test`() {
@@ -137,7 +135,7 @@ internal class SignupTests {
         client
             .post()
             .uri(SIGNUP_API_PATH)
-            .contentType(APPLICATION_PROBLEM_JSON)
+            .contentType(APPLICATION_JSON)
             .bodyValue(defaultAccount.copy(login = "funky-log(n"))
             .exchange()
             .expectStatus()
@@ -169,17 +167,17 @@ internal class SignupTests {
     @Test
     fun `test signup account avec un password invalid`() {
         val wrongPassword = "123"
-
-        validator.validateProperty(AccountCredentials(wrongPassword), "password")
-            .apply { assertFalse(isEmpty()) }
-            .map { i(it.message) }
-
-
-
+        validator.validateProperty(
+            AccountCredentials(wrongPassword),
+            "password"
+        ).apply {
+            assertFalse(isEmpty())
+            assertEquals("{jakarta.validation.constraints.Size.message}", first().messageTemplate)
+        }
         assertEquals(0, countAccount(dao))
         client.post()
             .uri(SIGNUP_API_PATH)
-            .contentType(APPLICATION_PROBLEM_JSON)
+            .contentType(APPLICATION_JSON)
             .bodyValue(defaultAccount.copy(password = wrongPassword))
             .exchange()
             .expectStatus()
@@ -426,7 +424,7 @@ internal class SignupTests {
                 .uri("${Constants.ACTIVATE_API_PATH}${Constants.ACTIVATE_API_PARAM}", this)
                 .exchange()
                 .returnResult<Unit>().url.let {
-                    assertEquals(URI("${Constants.BASE_URL_DEV}${Constants.ACTIVATE_API_PATH}$this"), it)
+                    assertEquals(URI("$BASE_URL_DEV${Constants.ACTIVATE_API_PATH}$this"), it)
                 }
         }
     }

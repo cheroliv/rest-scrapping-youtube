@@ -319,43 +319,6 @@ class ProblemTranslator(
 //            }).build(), request
 //    )
 //
-//    @ExceptionHandler
-//    fun handleEmailAlreadyUsedException(
-//        ex: EmailAlreadyUsedException,
-//        request: ServerWebExchange
-//    ): Mono<ResponseEntity<Problem>> {
-//        val problem = EmailAlreadyUsedProblem()
-//        return create(
-//            problem,
-//            request,
-//            createFailureAlert(
-//                applicationName = properties.clientApp.name,
-//                enableTranslation = true,
-//                entityName = problem.entityName,
-//                errorKey = problem.errorKey,
-//                defaultMessage = problem.message
-//            )
-//        )
-//    }
-//
-//    @ExceptionHandler
-//    fun handleUsernameAlreadyUsedException(
-//        ex: UsernameAlreadyUsedException,
-//        request: ServerWebExchange
-//    ): Mono<ResponseEntity<Problem>> {
-//        val problem = LoginAlreadyUsedProblem()
-//        return create(
-//            problem,
-//            request,
-//            createFailureAlert(
-//                applicationName = properties.clientApp.name,
-//                enableTranslation = true,
-//                entityName = problem.entityName,
-//                errorKey = problem.errorKey,
-//                defaultMessage = problem.message
-//            )
-//        )
-//    }
 //
 //    @ExceptionHandler
 //    fun handleInvalidPasswordException(
