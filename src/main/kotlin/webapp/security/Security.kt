@@ -14,7 +14,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.stereotype.Component
 import webapp.Constants
+import webapp.Constants.INVALID_TOKEN
+import webapp.Constants.VALID_TOKEN
 import webapp.Logging
+import webapp.Logging.i
+import webapp.Logging.t
 import webapp.Properties
 import java.security.Key
 import java.util.*
@@ -112,20 +116,19 @@ class Security(
             }
     }
 
-    fun validateToken(token: String): Boolean {
-        try {
-            Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-            return Constants.VALID_TOKEN
-        } catch (e: JwtException) {
-            Logging.i("Invalid Jwt token.")
-            Logging.t("Invalid Jwt token trace. $e")
-        } catch (e: IllegalArgumentException) {
-            Logging.i("Invalid Jwt token.")
-            Logging.t("Invalid Jwt token trace. $e")
-        }
-        return Constants.INVALID_TOKEN
+    fun validateToken(token: String): Boolean = try {
+        Jwts.parserBuilder()
+            .setSigningKey(key)
+            .build()
+            .parseClaimsJws(token)
+        VALID_TOKEN
+    } catch (e: JwtException) {
+        i("Invalid Jwt token.")
+        t("Invalid Jwt token trace. $e")
+        INVALID_TOKEN
+    } catch (e: IllegalArgumentException) {
+        i("Invalid Jwt token.")
+        t("Invalid Jwt token trace. $e")
+        INVALID_TOKEN
     }
 }
