@@ -1,5 +1,6 @@
 package webapp.signup
 
+import jakarta.validation.ConstraintViolationException
 import jakarta.validation.Valid
 import jakarta.validation.Validator
 import org.springframework.http.HttpStatus.CREATED
@@ -47,12 +48,13 @@ class SignupController(
      * @throws webapp.LoginAlreadyUsedProblem {@code 400 (Bad Request)} if the login is already used.
      */
     @PostMapping(SIGNUP_API, produces = [APPLICATION_PROBLEM_JSON_VALUE])
-    @Throws(
-        UsernameAlreadyUsedException::class,
-        EmailAlreadyUsedException::class
-    )
     @ResponseStatus(CREATED)
     @Transactional
+    @Throws(
+        UsernameAlreadyUsedException::class,
+        EmailAlreadyUsedException::class,
+        ConstraintViolationException::class
+    )
     suspend fun signup(
         @Valid @RequestBody
         account: AccountCredentials
