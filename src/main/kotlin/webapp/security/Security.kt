@@ -1,27 +1,30 @@
 package webapp.security
 
 import io.jsonwebtoken.JwtException
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
-import io.jsonwebtoken.io.Decoders
+import io.jsonwebtoken.Jwts.builder
+import io.jsonwebtoken.Jwts.parserBuilder
+import io.jsonwebtoken.SignatureAlgorithm.HS512
+import io.jsonwebtoken.io.Decoders.BASE64
 import io.jsonwebtoken.jackson.io.JacksonSerializer
-import io.jsonwebtoken.lang.Strings
-import io.jsonwebtoken.security.Keys
+import io.jsonwebtoken.lang.Strings.hasLength
+import io.jsonwebtoken.security.Keys.hmacShaKeyFor
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.stereotype.Component
-import webapp.Constants
+import webapp.Constants.AUTHORITIES_KEY
 import webapp.Constants.INVALID_TOKEN
 import webapp.Constants.VALID_TOKEN
-import webapp.Logging
+import webapp.Logging.d
 import webapp.Logging.i
 import webapp.Logging.t
+import webapp.Logging.w
 import webapp.Properties
 import java.security.Key
 import java.util.*
+import kotlin.text.Charsets.UTF_8
 
 @Component
 class Security(
@@ -40,16 +43,16 @@ class Security(
             .jwt
             .secret
             .run {
-                key = Keys.hmacShaKeyFor(
+                key = hmacShaKeyFor(
                     when {
-                        !Strings.hasLength(this) -> Logging.w(
+                        !hasLength(this) -> w(
                             "Warning: the Jwt key used is not Base64-encoded. " +
                                     "We recommend using the `webapp.security.authentication.jwt.base64-secret`" +
                                     " key for optimum security."
-                        ).run { toByteArray(Charsets.UTF_8) }
+                        ).run { toByteArray(UTF_8) }
 
-                        else -> Logging.d("Using a Base64-encoded Jwt secret key").run {
-                            Decoders.BASE64.decode(
+                        else -> d("Using a Base64-encoded Jwt secret key").run {
+                            BASE64.decode(
                                 properties
                                     .security
                                     .authentication
@@ -76,19 +79,21 @@ class Security(
         authentication: Authentication,
         rememberMe: Boolean
     ): String {
-        Date().time.apply {
-            return@createToken Jwts.builder()
+        Date().time.run {
+            return builder()
                 .setSubject(authentication.name)
                 .claim(
-                    Constants.AUTHORITIES_KEY,
+                    AUTHORITIES_KEY,
                     authentication.authorities
                         .asSequence()
                         .map { it.authority }
                         .joinToString(separator = ","))
-                .signWith(key, SignatureAlgorithm.HS512)
+                .signWith(key, HS512)
                 .setExpiration(
-                    if (rememberMe) Date(this + tokenValidityInMillisecondsForRememberMe)
-                    else Date(this + tokenValidityInMilliseconds)
+                    when {
+                        rememberMe -> Date(this + tokenValidityInMillisecondsForRememberMe)
+                        else -> Date(this + tokenValidityInMilliseconds)
+                    }
                 )
                 .serializeToJsonWith(JacksonSerializer())
                 .compact()
@@ -96,13 +101,13 @@ class Security(
     }
 
     fun getAuthentication(token: String): Authentication {
-        Jwts.parserBuilder()
+        parserBuilder()
             .setSigningKey(key)
             .build()
             .parseClaimsJws(token)
             .body
             .apply {
-                this[Constants.AUTHORITIES_KEY]
+                this[AUTHORITIES_KEY]
                     .toString()
                     .splitToSequence(",")
                     .mapTo(mutableListOf()) { SimpleGrantedAuthority(it) }
@@ -117,7 +122,7 @@ class Security(
     }
 
     fun validateToken(token: String): Boolean = try {
-        Jwts.parserBuilder()
+        parserBuilder()
             .setSigningKey(key)
             .build()
             .parseClaimsJws(token)

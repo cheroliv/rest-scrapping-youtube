@@ -17,15 +17,15 @@ import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.security.web.server.header.ReferrerPolicyServerHttpHeadersWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN
 import org.springframework.security.web.server.util.matcher.NegatedServerWebExchangeMatcher
 import org.springframework.security.web.server.util.matcher.OrServerWebExchangeMatcher
-import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers
+import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers.pathMatchers
 import org.springframework.web.cors.reactive.CorsWebFilter
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 import webapp.Application.SpaWebFilter
-import webapp.Properties
 import webapp.Constants.CONTENT_SECURITY_POLICY
 import webapp.Constants.FEATURE_POLICY
 import webapp.Constants.ROLE_ADMIN
 import webapp.Logging.d
+import webapp.Properties
 
 @Configuration
 @EnableWebFluxSecurity
@@ -42,14 +42,14 @@ class SecurityConfiguration(
         http.securityMatcher(
             NegatedServerWebExchangeMatcher(
                 OrServerWebExchangeMatcher(
-                    ServerWebExchangeMatchers.pathMatchers(
+                    pathMatchers(
                         "/app/**",
                         "/i18n/**",
                         "/content/**",
                         "/swagger-ui/**",
                         "/test/**",
                         "/webjars/**"
-                    ), ServerWebExchangeMatchers.pathMatchers(OPTIONS, "/**")
+                    ), pathMatchers(OPTIONS, "/**")
                 )
             )
         ).csrf()
@@ -96,7 +96,7 @@ class SecurityConfiguration(
             .build()
 
     @Bean
-    fun corsFilter(): CorsWebFilter = CorsWebFilter(UrlBasedCorsConfigurationSource().apply source@{
+    fun corsFilter() = CorsWebFilter(UrlBasedCorsConfigurationSource().apply source@{
         properties.cors.apply config@{
             if (allowedOrigins != null && allowedOrigins!!.isNotEmpty()) {
                 d("Registering CORS filter").run {
