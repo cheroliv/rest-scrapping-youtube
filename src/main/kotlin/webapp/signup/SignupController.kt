@@ -99,6 +99,34 @@ class SignupController(
     @ResponseStatus(CREATED)
     @Transactional
     suspend fun signup(@RequestBody account: AccountCredentials) = account.run {
+        /*
+            @field:NotNull
+    @field:Size(
+        min = PASSWORD_MIN_LENGTH,
+        max = PASSWORD_MAX_LENGTH
+    )
+    val password: String? = null,
+    val activationKey: String? = null,
+    val resetKey: String? = null,
+    val id: UUID? = null,
+    @field:NotBlank
+    @field:Pattern(regexp = LOGIN_REGEX)
+    @field:Size(min = 1, max = 50)
+    val login: String? = null,
+    @field:Size(max = 50)
+    val firstName: String? = null,
+    @field:Size(max = 50)
+    val lastName: String? = null,
+    @field:Email
+    @field:Size(min = 5, max = 254)
+    val email: String? = null,
+    @field:Size(max = 256)
+    val imageUrl: String? = IMAGE_URL_DEFAULT,
+    val activated: Boolean = false,
+    @field:Size(min = 2, max = 10)
+    val langKey: String? = null,
+         */
+
         when {
             validator.validateProperty(account, "password").isNotEmpty() -> return badRequest().body<ProblemDetail>(
                 forStatusAndDetail(

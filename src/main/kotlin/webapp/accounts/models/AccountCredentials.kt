@@ -1,11 +1,13 @@
+@file:Suppress("unused")
+
 package webapp.accounts.models
 
 import jakarta.validation.constraints.*
-import webapp.Utils.objectName
 import webapp.Constants.IMAGE_URL_DEFAULT
 import webapp.Constants.LOGIN_REGEX
 import webapp.Constants.PASSWORD_MAX_LENGTH
 import webapp.Constants.PASSWORD_MIN_LENGTH
+import webapp.Utils.objectName
 import java.time.Instant
 import java.util.*
 
