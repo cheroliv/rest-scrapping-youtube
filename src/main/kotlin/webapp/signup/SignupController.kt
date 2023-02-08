@@ -21,6 +21,7 @@ import webapp.Constants.ROLE_USER
 import webapp.Constants.SIGNUP_API
 import webapp.Constants.SYSTEM_USER
 import webapp.Logging.i
+import webapp.accounts.entities.AccountRecord.Companion.signupFields
 import webapp.accounts.exceptions.EmailAlreadyUsedException
 import webapp.accounts.exceptions.UsernameAlreadyUsedException
 import webapp.accounts.models.AccountCredentials
@@ -95,14 +96,8 @@ class SignupController(
     @ResponseStatus(CREATED)
     @Transactional
     suspend fun signup(@RequestBody account: AccountCredentials) = account.run {
-        setOf(
-            "password",
-            "email",
-            "login",
-            "firstName",
-            "lastName"
-        ).forEach {
-            validator.validateProperty(account, it).run {
+        signupFields.forEach {
+            validator.validateProperty(this, it).run {
                 when {
                     isNotEmpty() -> return badRequest().body<ProblemDetail>(
                         forStatusAndDetail(

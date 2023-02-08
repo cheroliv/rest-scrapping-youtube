@@ -1,3 +1,5 @@
+@file:Suppress("MemberVisibilityCanBePrivate")
+
 package webapp.accounts.entities
 
 import webapp.accounts.models.Account
@@ -34,6 +36,20 @@ interface AccountRecord<AUTH : AuthorityRecord> {
         const val ACCOUNT_AUTH_USER_ID_FIELD = "userId"
         const val ACTIVATION_KEY_FIELD = "activationKey"
         const val RESET_KEY_FIELD = "resetKey"
+        const val FIRST_NAME_FIELD = "firstName"
+        const val LAST_NAME_FIELD = "lastName"
+
+        val signupFields=setOf(
+            PASSWORD_FIELD,
+            EMAIL_FIELD,
+            LOGIN_FIELD,
+            FIRST_NAME_FIELD,
+            LAST_NAME_FIELD
+        )
+
+
+
+
     }
 
     val toModel: Account
