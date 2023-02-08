@@ -55,6 +55,26 @@ class SignupController(
     }
 
     internal class SignupException(message: String) : RuntimeException(message)
+    data class ProblemsModel(
+        val type: String,
+        val title: String,
+        val status: Int,
+        val path: String,
+        val message: String,
+        val fieldErrors: MutableSet<Map<String, String>> = mutableSetOf()
+    ) {
+        @Suppress("MemberVisibilityCanBePrivate")
+        companion object {
+            const val PROBLEM_OBJECT_NAME = "objectName"
+            const val PROBLEM_FIELD = "field"
+            const val PROBLEM_MESSAGE = "message"
+            val detailsKeys = setOf(
+                PROBLEM_OBJECT_NAME,
+                PROBLEM_FIELD,
+                PROBLEM_MESSAGE
+            )
+        }
+    }
     /**
      * {@code POST  /signup} : register the user.
      *
@@ -64,8 +84,22 @@ class SignupController(
     @ResponseStatus(CREATED)
     @Transactional
     suspend fun signup(@RequestBody account: AccountCredentials) = account.run {
+        val problem=ProblemsModel(
+            type = "https://www.cheroliv.com/problem/constraint-violation",
+            title = "Data binding and validation failure",
+            path = "$ACCOUNT_API/$SIGNUP_API",
+            message = "error.validation",
+            status = 400,
+        )
         signupFields.forEach {
             validator.validateProperty(this, it).run {
+//                problem.fieldErrors.add(
+//                    mapOf(
+//                        "objectName" to objectName,
+//                        "field" to field,
+//                        "message" to first().message
+//                    )
+//                )
                 when {
                     isNotEmpty() -> return badRequest().body<ProblemDetail>(
                         forStatusAndDetail(
