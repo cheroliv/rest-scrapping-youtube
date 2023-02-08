@@ -1,15 +1,17 @@
 package webapp.signup
 
-import jakarta.validation.ConstraintViolationException
-import jakarta.validation.Valid
 import jakarta.validation.Validator
+import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE
 import org.springframework.http.ProblemDetail
+import org.springframework.http.ProblemDetail.forStatusAndDetail
 import org.springframework.http.ResponseEntity
+import org.springframework.http.ResponseEntity.badRequest
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.i18n.LocaleContextResolver
 import webapp.Constants.ACCOUNT_API
 import webapp.Constants.ACTIVATE_API
 import webapp.Constants.ACTIVATE_API_KEY
@@ -27,6 +29,7 @@ import webapp.accounts.models.AccountUtils.generateActivationKey
 import webapp.accounts.repository.AccountRepository
 import webapp.mail.MailService
 import java.time.Instant.now
+import java.util.*
 
 @RestController
 @RequestMapping(ACCOUNT_API)
@@ -35,10 +38,55 @@ class SignupController(
     private val mailService: MailService,
     private val passwordEncoder: PasswordEncoder,
     private val validator: Validator,
-
-    ) {
+    private val request: LocaleContextResolver
+) {
     internal class SignupException(message: String) : RuntimeException(message)
+//    @ExceptionHandler(ConstraintViolationException::class)
+//    fun handleConstraintViolationException(
+//        cve: ConstraintViolationException,
+//        req: WebRequest
+//    ): ResponseEntity<ProblemDetail> = badRequest().build<ProblemDetail?>().apply {
+//        i(messageSource!!.getMessage(cve.constraintViolations.first().messageTemplate, null, ENGLISH))
+//        i("passé par ici: ${cve.message}")
+//    }
+//
+//    @ExceptionHandler(UsernameAlreadyUsedException::class)
+//    suspend fun handleUsernameAlreadyUsedException(
+//        ex: UsernameAlreadyUsedException,
+//        request: ServerWebExchange
+//    ): ResponseEntity<ProblemDetail> {
+//        val problem = LoginAlreadyUsedProblem()
+//        return create(
+//            problem,
+//            request,
+//            createFailureAlert(
+//                applicationName = properties.clientApp.name,
+//                enableTranslation = true,
+//                entityName = problem.entityName,
+//                errorKey = problem.errorKey,
+//                defaultMessage = problem.message
+//            )
+//        )
+//    }
 
+    //    @ExceptionHandler
+//    fun handleEmailAlreadyUsedException(
+//        ex: EmailAlreadyUsedException,
+//        request: ServerWebExchange
+//    ): Mono<ResponseEntity<Problem>> {
+//        val problem = EmailAlreadyUsedProblem()
+//        return create(
+//            problem,
+//            request,
+//            createFailureAlert(
+//                applicationName = properties.clientApp.name,
+//                enableTranslation = true,
+//                entityName = problem.entityName,
+//                errorKey = problem.errorKey,
+//                defaultMessage = problem.message
+//            )
+//        )
+//    }
     /**
      * {@code POST  /signup} : register the user.
      *
@@ -50,17 +98,27 @@ class SignupController(
     @PostMapping(SIGNUP_API, produces = [APPLICATION_PROBLEM_JSON_VALUE])
     @ResponseStatus(CREATED)
     @Transactional
-    @Throws(
-        UsernameAlreadyUsedException::class,
-        EmailAlreadyUsedException::class,
-        ConstraintViolationException::class
-    )
-    suspend fun signup(
-        @Valid @RequestBody
-        account: AccountCredentials
-    ): ResponseEntity<ProblemDetail> = account.run {
-        isLoginAvailable(this)
-        isEmailAvailable(this)
+    suspend fun signup(@RequestBody account: AccountCredentials) = account.run {
+        if (validator.validateProperty(account, "password").isNotEmpty())
+
+       return badRequest().body<ProblemDetail>(
+           forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                validator.validateProperty(account, "password").first().message
+            )
+       )
+//        .build<ProblemDetail?>().apply {
+//            i(messageSource!!.getMessage(cve.constraintViolations.first().messageTemplate, null, Locale.ENGLISH))
+//            i("passé par ici: ${cve.message}")
+//        }
+        try {
+            isLoginAvailable(this)
+            isEmailAvailable(this)
+        } catch (uaue: UsernameAlreadyUsedException) {
+            return badRequest().build<ProblemDetail>()
+        } catch (eaue: EmailAlreadyUsedException) {
+            return badRequest().build<ProblemDetail>()
+        }
         now().run {
             copy(
                 password = passwordEncoder.encode(password),
@@ -80,7 +138,8 @@ class SignupController(
                 mailService.sendActivationEmail(this)
             }
         }
-        ResponseEntity(CREATED)
+        ResponseEntity<ProblemDetail>(CREATED)
+
     }
 
     /**

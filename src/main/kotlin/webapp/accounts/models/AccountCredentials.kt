@@ -1,6 +1,7 @@
 package webapp.accounts.models
 
 import jakarta.validation.constraints.*
+import webapp.Utils.objectName
 import webapp.Constants.IMAGE_URL_DEFAULT
 import webapp.Constants.LOGIN_REGEX
 import webapp.Constants.PASSWORD_MAX_LENGTH
@@ -76,4 +77,8 @@ data class AccountCredentials(
         lastModifiedDate = lastModifiedDate,
         authorities = authorities
     )
+
+    companion object {
+        val objectName = AccountCredentials::class.java.simpleName.objectName
+    }
 }
