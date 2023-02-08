@@ -115,7 +115,94 @@ class SignupController(
         }
         ResponseEntity<ProblemDetail>(CREATED)
     }
+/*
+    suspend fun signup(@RequestBody account: AccountCredentials) = account.run acc@{
+        ProblemsModel(
+            type = "https://www.cheroliv.com/problem/constraint-violation",
+            title = "Data binding and validation failure",
+            path = "$ACCOUNT_API/$SIGNUP_API",
+            message = "error.validation",
+            status = 400,
+        ).run {
+            signupFields.forEach { field ->
+                validator.validateProperty(this, field).run {
+                    fieldErrors.add(
+                        mapOf(
+                            "objectName" to objectName,
+                            "field" to field,
+                            "message" to first().message
+                        )
+                    )
 
+
+                    when {
+                        isNotEmpty() -> return ResponseEntity.badRequest().body<ProblemDetail>(
+                            forStatusAndDetail(
+                                BAD_REQUEST,
+                                first().message
+                            )
+                        )
+                    }
+                }
+            }
+            try {
+                isLoginAvailable(this@acc)
+                isEmailAvailable(this@acc)
+            } catch (e: UsernameAlreadyUsedException) {
+
+                fieldErrors.add(
+                    mapOf(
+                        "objectName" to objectName,
+                        "field" to LOGIN_FIELD,
+                        "message" to e.message!!
+                    )
+                )
+
+                return ResponseEntity.badRequest().body<ProblemDetail>(
+                    forStatusAndDetail(
+                        BAD_REQUEST,
+                        e.message!!
+                    )
+                )
+            } catch (e: EmailAlreadyUsedException) {
+                fieldErrors.add(
+                    mapOf(
+                        "objectName" to objectName,
+                        "field" to EMAIL_FIELD,
+                        "message" to e.message!!
+                    )
+                )
+                return ResponseEntity.badRequest().body<ProblemDetail>(
+                    forStatusAndDetail(
+                        BAD_REQUEST,
+                        e.message!!
+                    )
+                )
+            }
+        }
+        now().run {
+            copy(
+                password = passwordEncoder.encode(password),
+                activationKey = generateActivationKey,
+                authorities = setOf(ROLE_USER),
+                langKey = when {
+                    langKey.isNullOrBlank() -> DEFAULT_LANGUAGE
+                    else -> langKey
+                },
+                activated = false,
+                createdBy = SYSTEM_USER,
+                createdDate = this,
+                lastModifiedBy = SYSTEM_USER,
+                lastModifiedDate = this
+            ).run {
+                accountRepository.signup(this)
+                mailService.sendActivationEmail(this)
+            }
+        }
+        ResponseEntity<ProblemDetail>(CREATED)
+    }
+
+ */
     /**
      * `GET  /activate` : activate the signed-up user.
      *
