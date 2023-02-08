@@ -12,6 +12,8 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.WebTestClient.bindToServer
 import org.springframework.test.web.reactive.server.returnResult
 import webapp.*
+import webapp.Constants.ACTIVATE_API_PARAM
+import webapp.Constants.ACTIVATE_API_PATH
 import webapp.Constants.BASE_URL_DEV
 import webapp.Constants.SIGNUP_API_PATH
 import webapp.DataTests.defaultAccount
@@ -21,7 +23,7 @@ import webapp.accounts.entities.AccountRecord.Companion.LAST_NAME_FIELD
 import webapp.accounts.entities.AccountRecord.Companion.LOGIN_FIELD
 import webapp.accounts.entities.AccountRecord.Companion.PASSWORD_FIELD
 import webapp.accounts.models.AccountCredentials
-import webapp.accounts.models.AccountUtils
+import webapp.accounts.models.AccountUtils.generateActivationKey
 import java.net.URI
 import kotlin.test.*
 
@@ -55,8 +57,8 @@ internal class SignupTests {
             .exchange()
             .returnResult<Unit>()
             .requestBodyContent!!
-            .map { it.toInt().toChar().toString() }
-            .reduce { acc: String, s: String -> acc + s }
+            .logBody()
+            .requestToString()
             .run {
                 defaultAccount.run {
                     setOf(
@@ -69,6 +71,18 @@ internal class SignupTests {
                 }
             }
     }
+    @Test
+    fun `vérifie que la requête avec mauvaise URI renvoi la bonne URL erreur`() {
+        generateActivationKey.run {
+            client
+                .get()
+                .uri("$ACTIVATE_API_PATH$ACTIVATE_API_PARAM", this)
+                .exchange()
+                .returnResult<Unit>()
+                .url
+                .let { assertEquals(URI("$BASE_URL_DEV$ACTIVATE_API_PATH$this"), it) }
+        }
+    }
 
     @Test //TODO: mock sendmail
     fun `test signup avec un account valide`() {
@@ -76,8 +90,18 @@ internal class SignupTests {
         val countUserAuthBefore = countAccountAuthority(dao)
         assertEquals(0, countUserBefore)
         assertEquals(0, countUserAuthBefore)
-        client.post().uri(SIGNUP_API_PATH).contentType(APPLICATION_JSON).bodyValue(defaultAccount).exchange()
-            .expectStatus().isCreated.returnResult<Unit>().responseBodyContent!!.isEmpty().run { assertTrue(this) }
+        client
+            .post()
+            .uri(SIGNUP_API_PATH)
+            .contentType(APPLICATION_JSON)
+            .bodyValue(defaultAccount)
+            .exchange()
+            .expectStatus()
+            .isCreated
+            .returnResult<Unit>()
+            .responseBodyContent!!
+            .isEmpty()
+            .run { assertTrue(this) }
         assertEquals(countUserBefore + 1, countAccount(dao))
         assertEquals(countUserAuthBefore + 1, countAccountAuthority(dao))
         findOneByEmail(defaultAccount.email!!, dao).run {
@@ -100,7 +124,8 @@ internal class SignupTests {
             .expectStatus()
             .isBadRequest
             .returnResult<Unit>()
-            .responseBodyContent!!.isNotEmpty()
+            .responseBodyContent!!
+            .isNotEmpty()
             .run { assertTrue(this) }
         assertEquals(0, countAccount(dao))
     }
@@ -338,19 +363,9 @@ internal class SignupTests {
 
 
     @Test
-    fun `vérifie que la requête activate contient bien des données cohérentes`() {
-        AccountUtils.generateActivationKey.run {
-            client.get().uri("${Constants.ACTIVATE_API_PATH}${Constants.ACTIVATE_API_PARAM}", this).exchange()
-                .returnResult<Unit>().url.let {
-                    assertEquals(URI("$BASE_URL_DEV${Constants.ACTIVATE_API_PATH}$this"), it)
-                }
-        }
-    }
-
-    @Test
     fun `test activate avec une mauvaise clé`() {
         client.get().uri(
-            "${Constants.ACTIVATE_API_PATH}${Constants.ACTIVATE_API_PARAM}", "wrongActivationKey"
+            "$ACTIVATE_API_PATH$ACTIVATE_API_PARAM", "wrongActivationKey"
         ).exchange().expectStatus().is5xxServerError.returnResult<Unit>()
     }
 
@@ -363,7 +378,7 @@ internal class SignupTests {
         assertEquals(1, countAccountAuthority(dao))
 
         client.get().uri(
-            "${Constants.ACTIVATE_API_PATH}${Constants.ACTIVATE_API_PARAM}",
+            "$ACTIVATE_API_PATH$ACTIVATE_API_PARAM",
             findOneByLogin(defaultAccount.login!!, dao)!!.apply {
                 assertTrue(activationKey!!.isNotBlank())
                 assertFalse(activated)

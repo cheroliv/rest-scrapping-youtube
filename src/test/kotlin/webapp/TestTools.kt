@@ -40,6 +40,9 @@ import kotlin.reflect.full.createInstance
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+fun ByteArray.requestToString(): String = map {
+    it.toInt().toChar().toString()
+}.reduce { acc: String, s: String -> acc + s }
 
 fun ByteArray.logBody(): ByteArray = apply {
     if (isNotEmpty()) map { it.toInt().toChar().toString() }
@@ -52,7 +55,7 @@ fun ByteArray.logBody(): ByteArray = apply {
         }.replace("{\"", "\n{\n\t\"")
         .replace("\"}", "\"\n}")
         .replace("\",\"", "\",\n\t\"")
-        .run { i("\nbody:\n$this") }
+        .run { i("\nbody:$this") }
 }
 
 fun ByteArray.logBodyRaw(): ByteArray = apply {
