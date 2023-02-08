@@ -28,6 +28,7 @@ import webapp.accounts.entities.AccountRecord.Companion.PASSWORD_FIELD
 import webapp.accounts.exceptions.EmailAlreadyUsedException
 import webapp.accounts.exceptions.UsernameAlreadyUsedException
 import webapp.accounts.models.AccountCredentials
+import webapp.accounts.models.AccountCredentials.Companion.objectName
 import webapp.accounts.models.AccountUtils.generateActivationKey
 import webapp.accounts.repository.AccountRepository
 import webapp.mail.MailService
@@ -115,13 +116,13 @@ class SignupController(
             isLoginAvailable(this)
             isEmailAvailable(this)
         } catch (e: UsernameAlreadyUsedException) {
-//            problem.fieldErrors.add(
-//                mapOf(
-//                    "objectName" to objectName,
-//                    "field" to LOGIN_FIELD,
-//                    "message" to e.message!!
-//                )
-//            )
+            problem.fieldErrors.add(
+                mapOf(
+                    "objectName" to objectName,
+                    "field" to LOGIN_FIELD,
+                    "message" to e.message!!
+                )
+            )
             return badRequest().body<ProblemDetail>(
                 forStatusAndDetail(
                     BAD_REQUEST,
@@ -129,13 +130,13 @@ class SignupController(
                 )
             )
         } catch (e: EmailAlreadyUsedException) {
-//            problem.fieldErrors.add(
-//                mapOf(
-//                    "objectName" to objectName,
-//                    "field" to EMAIL_FIELD,
-//                    "message" to e.message!!
-//                )
-//            )
+            problem.fieldErrors.add(
+                mapOf(
+                    "objectName" to objectName,
+                    "field" to EMAIL_FIELD,
+                    "message" to e.message!!
+                )
+            )
             return badRequest().body<ProblemDetail>(
                 forStatusAndDetail(
                     BAD_REQUEST,
