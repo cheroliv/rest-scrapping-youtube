@@ -4,6 +4,7 @@
 )
 
 import AppDeps.implementationDeps
+import GradleUtils.sep
 import GradleUtils.appDependencies
 import org.gradle.api.JavaVersion.VERSION_17
 import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
@@ -76,13 +77,23 @@ tasks.withType<Test> {
 tasks.register<Delete>("cleanResources") {
     description = "Delete directory build/resources"
     group = "build"
-    delete("build/resources")
+    delete(buildString {
+        append("build")
+        append(sep)
+        append("resources")
+    })
 }
 
 tasks.register<TestReport>("testReport") {
     description = "Generates an HTML test report from the results of testReport task."
     group = "report"
-    destinationDir = file("$buildDir/reports/tests")
+    destinationDir = file(buildString {
+        append(buildDir)
+        append(sep)
+        append("reports")
+        append(sep)
+        append("tests")
+    })
     reportOn("test")
 }
 
