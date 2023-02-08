@@ -85,13 +85,13 @@ class SignupController(
     @ResponseStatus(CREATED)
     @Transactional
     suspend fun signup(@RequestBody account: AccountCredentials) = account.run {
-//        val problem = ProblemsModel(
-//            type = "https://www.cheroliv.com/problem/constraint-violation",
-//            title = "Data binding and validation failure",
-//            path = "$ACCOUNT_API/$SIGNUP_API",
-//            message = "error.validation",
-//            status = 400,
-//        )
+        val problem = ProblemsModel(
+            type = "https://www.cheroliv.com/problem/constraint-violation",
+            title = "Data binding and validation failure",
+            path = "$ACCOUNT_API/$SIGNUP_API",
+            message = "error.validation",
+            status = 400,
+        )
         signupFields.forEach {
             validator.validateProperty(this, it).run {
 //                problem.fieldErrors.add(
