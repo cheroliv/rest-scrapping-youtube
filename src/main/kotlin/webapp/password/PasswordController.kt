@@ -6,10 +6,12 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import webapp.Constants
+import webapp.Constants.CHANGE_PASSWORD_API
 import webapp.Constants.RESET_PASSWORD_API_FINISH
 import webapp.Constants.RESET_PASSWORD_API_INIT
 import webapp.Logging
 import webapp.accounts.exceptions.InvalidPasswordException
+import webapp.accounts.exceptions.InvalidPasswordException.Companion.isPasswordLengthInvalid
 import webapp.accounts.models.KeyAndPassword
 import webapp.accounts.models.PasswordChange
 import webapp.mail.MailService
@@ -30,10 +32,10 @@ class PasswordController(
      * @param passwordChange current and new password.
      * @throws InvalidPasswordProblem {@code 400 (Bad Request)} if the new password is incorrect.
      */
-    @PostMapping(Constants.CHANGE_PASSWORD_API)
+    @PostMapping(CHANGE_PASSWORD_API)
     suspend fun changePassword(@RequestBody passwordChange: PasswordChange): Unit =
         InvalidPasswordException().run {
-            if (InvalidPasswordException.isPasswordLengthInvalid(passwordChange.newPassword)) throw this
+            if (isPasswordLengthInvalid(passwordChange.newPassword)) throw this
             else if (passwordChange.currentPassword != null
                 && passwordChange.newPassword != null
             ) passwordService.changePassword(
@@ -65,7 +67,7 @@ class PasswordController(
     @PostMapping(RESET_PASSWORD_API_FINISH)
     suspend fun finishPasswordReset(@RequestBody keyAndPassword: KeyAndPassword): Unit =
         with(InvalidPasswordException()) {
-            if (InvalidPasswordException.isPasswordLengthInvalid(keyAndPassword.newPassword)) throw this
+            if (isPasswordLengthInvalid(keyAndPassword.newPassword)) throw this
             else if (keyAndPassword.newPassword != null
                 && keyAndPassword.key != null
                 && passwordService.completePasswordReset(
