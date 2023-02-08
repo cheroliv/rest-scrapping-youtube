@@ -22,7 +22,6 @@ import webapp.Constants.SIGNUP_API
 import webapp.Constants.SYSTEM_USER
 import webapp.Logging.i
 import webapp.accounts.exceptions.EmailAlreadyUsedException
-import webapp.accounts.exceptions.InvalidPasswordException
 import webapp.accounts.exceptions.UsernameAlreadyUsedException
 import webapp.accounts.models.AccountCredentials
 import webapp.accounts.models.AccountUtils.generateActivationKey
@@ -91,91 +90,67 @@ class SignupController(
      * {@code POST  /signup} : register the user.
      *
      * @param account the managed user View Model.
-     * @throws webapp.InvalidPasswordException {@code 400 (Bad Request)} if the password is incorrect.
-     * @throws webapp.EmailAlreadyUsedProblem {@code 400 (Bad Request)} if the email is already used.
-     * @throws webapp.LoginAlreadyUsedProblem {@code 400 (Bad Request)} if the login is already used.
      */
     @PostMapping(SIGNUP_API, produces = [APPLICATION_PROBLEM_JSON_VALUE])
     @ResponseStatus(CREATED)
     @Transactional
     suspend fun signup(@RequestBody account: AccountCredentials) = account.run {
-        /*
-            @field:NotNull
-    @field:Size(
-        min = PASSWORD_MIN_LENGTH,
-        max = PASSWORD_MAX_LENGTH
-    )
-    val password: String? = null,
-    val activationKey: String? = null,
-    val resetKey: String? = null,
-    val id: UUID? = null,
-    @field:NotBlank
-    @field:Pattern(regexp = LOGIN_REGEX)
-    @field:Size(min = 1, max = 50)
-    val login: String? = null,
-    @field:Size(max = 50)
-    val firstName: String? = null,
-    @field:Size(max = 50)
-    val lastName: String? = null,
-    @field:Email
-    @field:Size(min = 5, max = 254)
-    val email: String? = null,
-    @field:Size(max = 256)
-    val imageUrl: String? = IMAGE_URL_DEFAULT,
-    val activated: Boolean = false,
-    @field:Size(min = 2, max = 10)
-    val langKey: String? = null,
-         */
-
-        when {
-            validator.validateProperty(account, "password").isNotEmpty() -> return badRequest().body<ProblemDetail>(
-                forStatusAndDetail(
-                    BAD_REQUEST,
-                    validator.validateProperty(account, "password").first().message
-                )
-            )
-            else -> {
-                try {
-                    isLoginAvailable(this)
-                    isEmailAvailable(this)
-                } catch (uaue: UsernameAlreadyUsedException) {
-                    return badRequest().body<ProblemDetail>(
+        setOf(
+            "password",
+            "email",
+            "login",
+            "firstName",
+            "lastName"
+        ).forEach {
+            validator.validateProperty(account, it).run {
+                when {
+                    isNotEmpty() -> return badRequest().body<ProblemDetail>(
                         forStatusAndDetail(
                             BAD_REQUEST,
-                            uaue.message!!
-                        )
-                    )
-                } catch (eaue: EmailAlreadyUsedException) {
-                    return badRequest().body<ProblemDetail>(
-                        forStatusAndDetail(
-                            BAD_REQUEST,
-                            eaue.message!!
+                            first().message
                         )
                     )
                 }
-                now().run {
-                    copy(
-                        password = passwordEncoder.encode(password),
-                        activationKey = generateActivationKey,
-                        authorities = setOf(ROLE_USER),
-                        langKey = when {
-                            langKey.isNullOrBlank() -> DEFAULT_LANGUAGE
-                            else -> langKey
-                        },
-                        activated = false,
-                        createdBy = SYSTEM_USER,
-                        createdDate = this,
-                        lastModifiedBy = SYSTEM_USER,
-                        lastModifiedDate = this
-                    ).run {
-                        accountRepository.signup(this)
-                        mailService.sendActivationEmail(this)
-                    }
-                }
-                ResponseEntity<ProblemDetail>(CREATED)
             }
         }
-
+        try {
+            isLoginAvailable(this)
+            isEmailAvailable(this)
+        } catch (e: UsernameAlreadyUsedException) {
+            return badRequest().body<ProblemDetail>(
+                forStatusAndDetail(
+                    BAD_REQUEST,
+                    e.message!!
+                )
+            )
+        } catch (e: EmailAlreadyUsedException) {
+            return badRequest().body<ProblemDetail>(
+                forStatusAndDetail(
+                    BAD_REQUEST,
+                    e.message!!
+                )
+            )
+        }
+        now().run {
+            copy(
+                password = passwordEncoder.encode(password),
+                activationKey = generateActivationKey,
+                authorities = setOf(ROLE_USER),
+                langKey = when {
+                    langKey.isNullOrBlank() -> DEFAULT_LANGUAGE
+                    else -> langKey
+                },
+                activated = false,
+                createdBy = SYSTEM_USER,
+                createdDate = this,
+                lastModifiedBy = SYSTEM_USER,
+                lastModifiedDate = this
+            ).run {
+                accountRepository.signup(this)
+                mailService.sendActivationEmail(this)
+            }
+        }
+        ResponseEntity<ProblemDetail>(CREATED)
     }
 
     /**

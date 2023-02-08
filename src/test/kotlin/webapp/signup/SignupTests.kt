@@ -100,24 +100,39 @@ internal class SignupTests {
     }
 
 
-    @Test @Ignore
+    @Test
     fun `test signup account avec login invalid`() {
         assertEquals(0, countAccount(dao))
-        client.post().uri(SIGNUP_API_PATH).contentType(APPLICATION_JSON)
-            .bodyValue(defaultAccount.copy(login = "funky-log(n")).exchange()
-            .expectStatus().isBadRequest.returnResult<Unit>().responseBodyContent!!.isNotEmpty()
+        client
+            .post()
+            .uri(SIGNUP_API_PATH)
+            .contentType(APPLICATION_JSON)
+            .bodyValue(defaultAccount.copy(login = "funky-log(n"))
+            .exchange()
+            .expectStatus()
+            .isBadRequest
+            .returnResult<Unit>()
+            .responseBodyContent!!.isNotEmpty()
             .run { assertTrue(this) }
         assertEquals(0, countAccount(dao))
     }
 
 
-    @Test @Ignore
+    @Test
     fun `test signup account avec un email invalid`() {
         val countBefore = countAccount(dao)
         assertEquals(0, countBefore)
-        client.post().uri(SIGNUP_API_PATH).contentType(APPLICATION_JSON)
-            .bodyValue(defaultAccount.copy(password = "inv")).exchange()
-            .expectStatus().isBadRequest.returnResult<Unit>().responseBodyContent!!.isNotEmpty()
+        client
+            .post()
+            .uri(SIGNUP_API_PATH)
+            .contentType(APPLICATION_JSON)
+            .bodyValue(defaultAccount.copy(password = "inv"))
+            .exchange()
+            .expectStatus()
+            .isBadRequest
+            .returnResult<Unit>()
+            .responseBodyContent!!
+            .isNotEmpty()
             .run { assertTrue(this) }
         assertEquals(0, countBefore)
     }
