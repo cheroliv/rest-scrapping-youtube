@@ -16,47 +16,25 @@ import java.util.*
  * pour la vue
  */
 data class AccountCredentials(
-    @field:NotNull(
-//        groups = [SignupGroup::class]
-    )
     @field:Size(
         min = PASSWORD_MIN_LENGTH,
-        max = PASSWORD_MAX_LENGTH,
-//        groups = [SignupGroup::class]
+        max = PASSWORD_MAX_LENGTH
     )
+    @field:NotNull
     val password: String? = null,
     val activationKey: String? = null,
     val resetKey: String? = null,
     val id: UUID? = null,
-    @field:NotBlank(
-//        groups = [SignupGroup::class]
-    )
-    @field:Pattern(
-        regexp = LOGIN_REGEX,
-//        groups = [SignupGroup::class]
-    )
-    @field:Size(
-        min = 1, max = 50,
-//        groups = [SignupGroup::class]
-    )
+    @field:NotBlank
+    @field:Pattern(regexp = LOGIN_REGEX)
+    @field:Size(min = 1, max = 50)
     val login: String? = null,
-    @field:Size(
-        max = 50,
-//        groups = [SignupGroup::class]
-    )
+    @field:Size(max = 50)
     val firstName: String? = null,
-    @field:Size(
-        max = 50,
-//        groups = [SignupGroup::class]
-    )
+    @field:Size(max = 50)
     val lastName: String? = null,
-    @field:Email(
-//        groups = [SignupGroup::class]
-    )
-    @field:Size(
-        min = 5, max = 254,
-//        groups = [SignupGroup::class]
-    )
+    @field:Email
+    @field:Size(min = 5, max = 254)
     val email: String? = null,
     @field:Size(max = 256)
     val imageUrl: String? = IMAGE_URL_DEFAULT,
