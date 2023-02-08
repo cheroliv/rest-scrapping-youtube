@@ -1,7 +1,7 @@
 package webapp.signup
 
 import jakarta.validation.Validator
-import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE
 import org.springframework.http.ProblemDetail
@@ -103,21 +103,26 @@ class SignupController(
 
        return badRequest().body<ProblemDetail>(
            forStatusAndDetail(
-                HttpStatus.BAD_REQUEST,
+                BAD_REQUEST,
                 validator.validateProperty(account, "password").first().message
             )
        )
-//        .build<ProblemDetail?>().apply {
-//            i(messageSource!!.getMessage(cve.constraintViolations.first().messageTemplate, null, Locale.ENGLISH))
-//            i("passé par ici: ${cve.message}")
-//        }
         try {
             isLoginAvailable(this)
             isEmailAvailable(this)
         } catch (uaue: UsernameAlreadyUsedException) {
-            return badRequest().build<ProblemDetail>()
+            return badRequest().body<ProblemDetail>(
+                forStatusAndDetail(
+                    BAD_REQUEST,
+                    uaue.message!!                )
+            )
         } catch (eaue: EmailAlreadyUsedException) {
-            return badRequest().build<ProblemDetail>()
+            return badRequest().body<ProblemDetail>(
+                forStatusAndDetail(
+                    BAD_REQUEST,
+                    eaue.message!!
+                )
+            )
         }
         now().run {
             copy(

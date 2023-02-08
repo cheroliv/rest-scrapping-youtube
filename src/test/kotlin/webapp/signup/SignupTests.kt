@@ -136,9 +136,9 @@ internal class SignupTests {
             assertFalse(isEmpty())
             first().run {
                 assertEquals("{jakarta.validation.constraints.Size.message}", messageTemplate)
-//                Logging.i(message)
             }
         }
+
         assertEquals(0, countAccount(dao))
         client.post()
             .uri(SIGNUP_API_PATH)
@@ -150,12 +150,12 @@ internal class SignupTests {
             .returnResult<Unit>()
             .responseBodyContent!!
             .logBody()
-//            .isNotEmpty()
-//            .run { assertTrue(this) }
+            .isNotEmpty()
+            .run { assertTrue(this) }
         assertEquals(0, countAccount(dao))
     }
 
-    @Test @Ignore
+    @Test
     fun `test signup account avec un password null`() {
         assertEquals(0, countAccount(dao))
         client.post().uri(SIGNUP_API_PATH).contentType(APPLICATION_JSON).bodyValue(defaultAccount.copy(password = null))
