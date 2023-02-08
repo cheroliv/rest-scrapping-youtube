@@ -5,8 +5,8 @@ package webapp.accounts.models
 import jakarta.validation.constraints.*
 import webapp.Constants.IMAGE_URL_DEFAULT
 import webapp.Constants.LOGIN_REGEX
-import webapp.Constants.PASSWORD_MAX_LENGTH
-import webapp.Constants.PASSWORD_MIN_LENGTH
+import webapp.Constants.PASSWORD_MAX
+import webapp.Constants.PASSWORD_MIN
 import webapp.Utils.objectName
 import java.time.Instant
 import java.util.*
@@ -16,31 +16,28 @@ import java.util.*
  * pour la vue
  */
 data class AccountCredentials(
-    @field:Size(
-        min = PASSWORD_MIN_LENGTH,
-        max = PASSWORD_MAX_LENGTH
-    )
+    val id: UUID? = null,
+    @field:Size(min = PASSWORD_MIN, max = PASSWORD_MAX)
     @field:NotNull
     val password: String? = null,
-    val activationKey: String? = null,
-    val resetKey: String? = null,
-    val id: UUID? = null,
     @field:NotBlank
     @field:Pattern(regexp = LOGIN_REGEX)
     @field:Size(min = 1, max = 50)
     val login: String? = null,
+    @field:Email
+    @field:Size(min = 5, max = 254)
+    val email: String? = null,
     @field:Size(max = 50)
     val firstName: String? = null,
     @field:Size(max = 50)
     val lastName: String? = null,
-    @field:Email
-    @field:Size(min = 5, max = 254)
-    val email: String? = null,
-    @field:Size(max = 256)
-    val imageUrl: String? = IMAGE_URL_DEFAULT,
-    val activated: Boolean = false,
     @field:Size(min = 2, max = 10)
     val langKey: String? = null,
+    @field:Size(max = 256)
+    val imageUrl: String? = IMAGE_URL_DEFAULT,
+    val activationKey: String? = null,
+    val resetKey: String? = null,
+    val activated: Boolean = false,
     val createdBy: String? = null,
     val createdDate: Instant? = null,
     val lastModifiedBy: String? = null,

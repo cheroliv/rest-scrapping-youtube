@@ -9,8 +9,8 @@ class InvalidPasswordException :
         fun isPasswordLengthInvalid(password: String?) = when {
             password == null -> false
             password.isEmpty() -> false
-            else -> (password.length < Constants.PASSWORD_MIN_LENGTH) ||
-                    (password.length > Constants.PASSWORD_MAX_LENGTH)
+            else -> (password.length < Constants.PASSWORD_MIN) ||
+                    (password.length > Constants.PASSWORD_MAX)
         }
     }
 

@@ -141,8 +141,8 @@ object Constants {
     @Suppress("SpellCheckingInspection")
     const val ANONYMOUS_USER: String = "anonymoususer"
     const val DEFAULT_LANGUAGE = "en"
-    const val PASSWORD_MIN_LENGTH: Int = 4
-    const val PASSWORD_MAX_LENGTH: Int = 24
+    const val PASSWORD_MIN: Int = 4
+    const val PASSWORD_MAX: Int = 24
     const val ERR_CONCURRENCY_FAILURE: String = "error.concurrencyFailure"
     const val ERR_VALIDATION: String = "error.validation"
     const val USER_INITIAL_ACTIVATED_VALUE = false
