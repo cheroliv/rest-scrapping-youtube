@@ -33,7 +33,9 @@ internal class SignupTests {
     private val dao: R2dbcEntityTemplate by lazy { context.getBean() }
     private val validator: Validator by lazy { context.getBean() }
     private val client: WebTestClient by lazy {
-        bindToServer().baseUrl(BASE_URL_DEV).build()
+        bindToServer()
+            .baseUrl(BASE_URL_DEV)
+            .build()
     }
 
     @BeforeAll
@@ -71,18 +73,7 @@ internal class SignupTests {
                 }
             }
     }
-    @Test
-    fun `vérifie que la requête avec mauvaise URI renvoi la bonne URL erreur`() {
-        generateActivationKey.run {
-            client
-                .get()
-                .uri("$ACTIVATE_API_PATH$ACTIVATE_API_PARAM", this)
-                .exchange()
-                .returnResult<Unit>()
-                .url
-                .let { assertEquals(URI("$BASE_URL_DEV$ACTIVATE_API_PATH$this"), it) }
-        }
-    }
+
 
     @Test //TODO: mock sendmail
     fun `test signup avec un account valide`() {
@@ -114,6 +105,20 @@ internal class SignupTests {
 
     @Test
     fun `test signup account avec login invalid`() {
+        val wrongLogin = "funky-log(n"
+        validator
+            .validateProperty(AccountCredentials(login = wrongLogin), LOGIN_FIELD)
+            .run {
+                assertTrue(isNotEmpty())
+                first().run {
+                    assertEquals(
+                        "{jakarta.validation.constraints.Pattern.message}",
+                        messageTemplate
+                    )
+                }
+            }
+
+
         assertEquals(0, countAccount(dao))
         client
             .post()
@@ -125,6 +130,7 @@ internal class SignupTests {
             .isBadRequest
             .returnResult<Unit>()
             .responseBodyContent!!
+            .logBody()
             .isNotEmpty()
             .run { assertTrue(this) }
         assertEquals(0, countAccount(dao))
@@ -167,7 +173,8 @@ internal class SignupTests {
             }
 
         assertEquals(0, countAccount(dao))
-        client.post()
+        client
+            .post()
             .uri(SIGNUP_API_PATH)
             .contentType(APPLICATION_JSON)
             .bodyValue(defaultAccount.copy(password = wrongPassword))
@@ -388,6 +395,19 @@ internal class SignupTests {
         findOneByLogin(defaultAccount.login!!, dao)!!.run {
             assertNull(activationKey)
             assertTrue(activated)
+        }
+    }
+
+    @Test
+    fun `vérifie que la requête avec mauvaise URI renvoi la bonne URL erreur`() {
+        generateActivationKey.run {
+            client
+                .get()
+                .uri("$ACTIVATE_API_PATH$ACTIVATE_API_PARAM", this)
+                .exchange()
+                .returnResult<Unit>()
+                .url
+                .let { assertEquals(URI("$BASE_URL_DEV$ACTIVATE_API_PATH$this"), it) }
         }
     }
 }
