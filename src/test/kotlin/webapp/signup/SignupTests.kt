@@ -60,12 +60,12 @@ internal class SignupTests {
             .run {
                 defaultAccount.run {
                     setOf(
-                        "$LOGIN_FIELD:$login",
-                        "$PASSWORD_FIELD:$password",
-                        "$FIRST_NAME_FIELD:$firstName",
-                        "$LAST_NAME_FIELD:$lastName",
-                        "$EMAIL_FIELD:$email",
-                    ).forEach { assertTrue(contains(it)) }
+                        "\"$LOGIN_FIELD\":\"${login}\"",
+                        "\"$PASSWORD_FIELD\":\"${password}\"",
+                        "\"$FIRST_NAME_FIELD\":\"${firstName}\"",
+                        "\"$LAST_NAME_FIELD\":\"${lastName}\"",
+                        "\"$EMAIL_FIELD\":\"${email}\"",
+                    ).map { assertTrue(contains(it)) }
                 }
             }
     }
