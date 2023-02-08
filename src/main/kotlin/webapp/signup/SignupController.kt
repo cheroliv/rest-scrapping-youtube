@@ -99,51 +99,54 @@ class SignupController(
     @ResponseStatus(CREATED)
     @Transactional
     suspend fun signup(@RequestBody account: AccountCredentials) = account.run {
-        if (validator.validateProperty(account, "password").isNotEmpty())
-
-       return badRequest().body<ProblemDetail>(
-           forStatusAndDetail(
-                BAD_REQUEST,
-                validator.validateProperty(account, "password").first().message
-            )
-       )
-        try {
-            isLoginAvailable(this)
-            isEmailAvailable(this)
-        } catch (uaue: UsernameAlreadyUsedException) {
-            return badRequest().body<ProblemDetail>(
+        when {
+            validator.validateProperty(account, "password").isNotEmpty() -> return badRequest().body<ProblemDetail>(
                 forStatusAndDetail(
                     BAD_REQUEST,
-                    uaue.message!!                )
-            )
-        } catch (eaue: EmailAlreadyUsedException) {
-            return badRequest().body<ProblemDetail>(
-                forStatusAndDetail(
-                    BAD_REQUEST,
-                    eaue.message!!
+                    validator.validateProperty(account, "password").first().message
                 )
             )
-        }
-        now().run {
-            copy(
-                password = passwordEncoder.encode(password),
-                activationKey = generateActivationKey,
-                authorities = setOf(ROLE_USER),
-                langKey = when {
-                    langKey.isNullOrBlank() -> DEFAULT_LANGUAGE
-                    else -> langKey
-                },
-                activated = false,
-                createdBy = SYSTEM_USER,
-                createdDate = this,
-                lastModifiedBy = SYSTEM_USER,
-                lastModifiedDate = this
-            ).run {
-                accountRepository.signup(this)
-                mailService.sendActivationEmail(this)
+            else -> {
+                try {
+                    isLoginAvailable(this)
+                    isEmailAvailable(this)
+                } catch (uaue: UsernameAlreadyUsedException) {
+                    return badRequest().body<ProblemDetail>(
+                        forStatusAndDetail(
+                            BAD_REQUEST,
+                            uaue.message!!
+                        )
+                    )
+                } catch (eaue: EmailAlreadyUsedException) {
+                    return badRequest().body<ProblemDetail>(
+                        forStatusAndDetail(
+                            BAD_REQUEST,
+                            eaue.message!!
+                        )
+                    )
+                }
+                now().run {
+                    copy(
+                        password = passwordEncoder.encode(password),
+                        activationKey = generateActivationKey,
+                        authorities = setOf(ROLE_USER),
+                        langKey = when {
+                            langKey.isNullOrBlank() -> DEFAULT_LANGUAGE
+                            else -> langKey
+                        },
+                        activated = false,
+                        createdBy = SYSTEM_USER,
+                        createdDate = this,
+                        lastModifiedBy = SYSTEM_USER,
+                        lastModifiedDate = this
+                    ).run {
+                        accountRepository.signup(this)
+                        mailService.sendActivationEmail(this)
+                    }
+                }
+                ResponseEntity<ProblemDetail>(CREATED)
             }
         }
-        ResponseEntity<ProblemDetail>(CREATED)
 
     }
 

@@ -15,7 +15,6 @@ import webapp.*
 import webapp.Constants.BASE_URL_DEV
 import webapp.Constants.SIGNUP_API_PATH
 import webapp.DataTests.defaultAccount
-import webapp.Logging.i
 import webapp.accounts.models.AccountCredentials
 import webapp.accounts.models.AccountUtils
 import java.net.URI
@@ -126,8 +125,6 @@ internal class SignupTests {
 
     @Test
     fun `test signup account avec un password invalid`() {
-        i(AccountCredentials.objectName)
-
         val wrongPassword = "123"
         validator.validateProperty(
             AccountCredentials(wrongPassword),
@@ -165,7 +162,6 @@ internal class SignupTests {
     }
 
     @Test
-    @Ignore
     fun `test signup account activé avec un email existant`() {
         assertEquals(0, countAccount(dao))
         assertEquals(0, countAccountAuthority(dao))
@@ -179,14 +175,22 @@ internal class SignupTests {
             assertNull(activationKey)
         }
 
-        client.post().uri(SIGNUP_API_PATH).contentType(APPLICATION_JSON).bodyValue(defaultAccount.copy(login = "foo"))
-            .exchange().expectStatus().isBadRequest.returnResult<Unit>().responseBodyContent!!.isNotEmpty()
+        client
+            .post()
+            .uri(SIGNUP_API_PATH)
+            .contentType(APPLICATION_JSON)
+            .bodyValue(defaultAccount.copy(login = "foo"))
+            .exchange()
+            .expectStatus()
+            .isBadRequest
+            .returnResult<Unit>()
+            .responseBodyContent!!
+            .isNotEmpty()
             .run { assertTrue(this) }
     }
 
 
     @Test
-    @Ignore
     fun `test signup account activé avec un login existant`() {
         assertEquals(0, countAccount(dao))
         assertEquals(0, countAccountAuthority(dao))
@@ -200,14 +204,21 @@ internal class SignupTests {
         assertEquals(1, countAccount(dao))
         assertEquals(1, countAccountAuthority(dao))
 
-        client.post().uri(SIGNUP_API_PATH).contentType(APPLICATION_JSON)
-            .bodyValue(defaultAccount.copy(email = "foo@localhost")).exchange()
-            .expectStatus().isBadRequest.returnResult<Unit>().responseBodyContent!!.isNotEmpty()
+        client
+            .post()
+            .uri(SIGNUP_API_PATH)
+            .contentType(APPLICATION_JSON)
+            .bodyValue(defaultAccount.copy(email = "foo@localhost"))
+            .exchange()
+            .expectStatus()
+            .isBadRequest
+            .returnResult<Unit>()
+            .responseBodyContent!!
+            .isNotEmpty()
             .run { assertTrue(this) }
     }
 
     @Test//TODO: mock sendmail
-    @Ignore
     fun `test signup account avec un email dupliqué`() {
 
         assertEquals(0, countAccount(dao))
