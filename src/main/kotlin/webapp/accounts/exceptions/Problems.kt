@@ -219,6 +219,53 @@ data class ProblemsModel(
 //                "params" to entityName
 //            )
 //    }
+//    @ExceptionHandler(ConstraintViolationException::class)
+//    fun handleConstraintViolationException(
+//        cve: ConstraintViolationException,
+//        req: WebRequest
+//    ): ResponseEntity<ProblemDetail> = badRequest().build<ProblemDetail?>().apply {
+//        i(messageSource!!.getMessage(cve.constraintViolations.first().messageTemplate, null, ENGLISH))
+//        i("passé par ici: ${cve.message}")
+//    }
+//
+//    @ExceptionHandler(UsernameAlreadyUsedException::class)
+//    suspend fun handleUsernameAlreadyUsedException(
+//        ex: UsernameAlreadyUsedException,
+//        request: ServerWebExchange
+//    ): ResponseEntity<ProblemDetail> {
+//        val problem = LoginAlreadyUsedProblem()
+//        return create(
+//            problem,
+//            request,
+//            createFailureAlert(
+//                applicationName = properties.clientApp.name,
+//                enableTranslation = true,
+//                entityName = problem.entityName,
+//                errorKey = problem.errorKey,
+//                defaultMessage = problem.message
+//            )
+//        )
+//    }
+
+//    @ExceptionHandler
+//    fun handleEmailAlreadyUsedException(
+//        ex: EmailAlreadyUsedException,
+//        request: ServerWebExchange
+//    ): Mono<ResponseEntity<Problem>> {
+//        val problem = EmailAlreadyUsedProblem()
+//        return create(
+//            problem,
+//            request,
+//            createFailureAlert(
+//                applicationName = properties.clientApp.name,
+//                enableTranslation = true,
+//                entityName = problem.entityName,
+//                errorKey = problem.errorKey,
+//                defaultMessage = problem.message
+//            )
+//        )
+//    }
+
 //}
 
 /*=================================================================================*/

@@ -55,52 +55,6 @@ class SignupController(
     }
 
     internal class SignupException(message: String) : RuntimeException(message)
-//    @ExceptionHandler(ConstraintViolationException::class)
-//    fun handleConstraintViolationException(
-//        cve: ConstraintViolationException,
-//        req: WebRequest
-//    ): ResponseEntity<ProblemDetail> = badRequest().build<ProblemDetail?>().apply {
-//        i(messageSource!!.getMessage(cve.constraintViolations.first().messageTemplate, null, ENGLISH))
-//        i("passé par ici: ${cve.message}")
-//    }
-//
-//    @ExceptionHandler(UsernameAlreadyUsedException::class)
-//    suspend fun handleUsernameAlreadyUsedException(
-//        ex: UsernameAlreadyUsedException,
-//        request: ServerWebExchange
-//    ): ResponseEntity<ProblemDetail> {
-//        val problem = LoginAlreadyUsedProblem()
-//        return create(
-//            problem,
-//            request,
-//            createFailureAlert(
-//                applicationName = properties.clientApp.name,
-//                enableTranslation = true,
-//                entityName = problem.entityName,
-//                errorKey = problem.errorKey,
-//                defaultMessage = problem.message
-//            )
-//        )
-//    }
-
-    //    @ExceptionHandler
-//    fun handleEmailAlreadyUsedException(
-//        ex: EmailAlreadyUsedException,
-//        request: ServerWebExchange
-//    ): Mono<ResponseEntity<Problem>> {
-//        val problem = EmailAlreadyUsedProblem()
-//        return create(
-//            problem,
-//            request,
-//            createFailureAlert(
-//                applicationName = properties.clientApp.name,
-//                enableTranslation = true,
-//                entityName = problem.entityName,
-//                errorKey = problem.errorKey,
-//                defaultMessage = problem.message
-//            )
-//        )
-//    }
     /**
      * {@code POST  /signup} : register the user.
      *
@@ -169,6 +123,7 @@ class SignupController(
      * @throws RuntimeException `500 (Internal Application Error)` if the user couldn't be activated.
      */
     @GetMapping(ACTIVATE_API)
+    @Throws(SignupException::class)
     suspend fun activateAccount(@RequestParam(ACTIVATE_API_KEY) key: String) {
         if (!accountRepository.findOneByActivationKey(key).run no@{
                 return@no if (this == null) false.apply { i("no activation for key: $key") }
