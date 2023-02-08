@@ -15,6 +15,11 @@ import webapp.*
 import webapp.Constants.BASE_URL_DEV
 import webapp.Constants.SIGNUP_API_PATH
 import webapp.DataTests.defaultAccount
+import webapp.accounts.entities.AccountRecord.Companion.EMAIL_FIELD
+import webapp.accounts.entities.AccountRecord.Companion.FIRST_NAME_FIELD
+import webapp.accounts.entities.AccountRecord.Companion.LAST_NAME_FIELD
+import webapp.accounts.entities.AccountRecord.Companion.LOGIN_FIELD
+import webapp.accounts.entities.AccountRecord.Companion.PASSWORD_FIELD
 import webapp.accounts.models.AccountCredentials
 import webapp.accounts.models.AccountUtils
 import java.net.URI
@@ -40,44 +45,27 @@ internal class SignupTests {
     @AfterEach
     fun tearDown() = deleteAllAccounts(dao)
 
-
-    @Test//TODO: lever les exceptions avec le bon problem
-    fun `vérification des exceptions problems en response`() {
-        client.post().uri("").contentType(APPLICATION_JSON).bodyValue(defaultAccount).exchange()
-            .returnResult<Unit>().requestBodyContent!!.map { it.toInt().toChar().toString() }
-            .reduce { acc: String, s: String -> acc + s }.run {
-                defaultAccount.run {
-                    setOf(
-                        "\"login\":\"${login}\"",
-                        "\"password\":\"${password}\"",
-                        "\"firstName\":\"${firstName}\"",
-                        "\"lastName\":\"${lastName}\"",
-                        "\"email\":\"${email}\"",
-                    ).map {
-                        //test request contient les paramètres passés
-                        assertTrue(contains(it))
-                    }
-                }
-            }
-    }
-
-
     @Test
     fun `vérifie que la requête contient bien des données cohérentes`() {
-        client.post().uri("").contentType(APPLICATION_JSON).bodyValue(defaultAccount).exchange()
-            .returnResult<Unit>().requestBodyContent!!.map { it.toInt().toChar().toString() }
-            .reduce { acc: String, s: String -> acc + s }.run {
+        client
+            .post()
+            .uri("")
+            .contentType(APPLICATION_JSON)
+            .bodyValue(defaultAccount)
+            .exchange()
+            .returnResult<Unit>()
+            .requestBodyContent!!
+            .map { it.toInt().toChar().toString() }
+            .reduce { acc: String, s: String -> acc + s }
+            .run {
                 defaultAccount.run {
                     setOf(
-                        "\"login\":\"${login}\"",
-                        "\"password\":\"${password}\"",
-                        "\"firstName\":\"${firstName}\"",
-                        "\"lastName\":\"${lastName}\"",
-                        "\"email\":\"${email}\"",
-                    ).map {
-                        //test request contient les paramètres passés
-                        assertTrue(contains(it))
-                    }
+                        "$LOGIN_FIELD:$login",
+                        "$PASSWORD_FIELD:$password",
+                        "$FIRST_NAME_FIELD:$firstName",
+                        "$LAST_NAME_FIELD:$lastName",
+                        "$EMAIL_FIELD:$email",
+                    ).forEach { assertTrue(contains(it)) }
                 }
             }
     }
@@ -141,15 +129,17 @@ internal class SignupTests {
     @Test
     fun `test signup account avec un password invalid`() {
         val wrongPassword = "123"
-        validator.validateProperty(
-            AccountCredentials(wrongPassword),
-            "password"
-        ).run {
-            assertFalse(isEmpty())
-            first().run {
-                assertEquals("{jakarta.validation.constraints.Size.message}", messageTemplate)
+        validator
+            .validateProperty(AccountCredentials(password = wrongPassword), PASSWORD_FIELD)
+            .run {
+                assertTrue(isNotEmpty())
+                first().run {
+                    assertEquals(
+                        "{jakarta.validation.constraints.Size.message}",
+                        messageTemplate
+                    )
+                }
             }
-        }
 
         assertEquals(0, countAccount(dao))
         client.post()
