@@ -29,7 +29,6 @@ interface AccountRecord<AUTH : AuthorityRecord> {
     var lastModifiedDate: Instant?
 
     companion object {
-
         const val LOGIN_FIELD = "login"
         const val PASSWORD_FIELD = "password"
         const val EMAIL_FIELD = "email"
@@ -38,18 +37,6 @@ interface AccountRecord<AUTH : AuthorityRecord> {
         const val RESET_KEY_FIELD = "resetKey"
         const val FIRST_NAME_FIELD = "firstName"
         const val LAST_NAME_FIELD = "lastName"
-
-        val signupFields=setOf(
-            PASSWORD_FIELD,
-            EMAIL_FIELD,
-            LOGIN_FIELD,
-            FIRST_NAME_FIELD,
-            LAST_NAME_FIELD
-        )
-
-
-
-
     }
 
     val toModel: Account

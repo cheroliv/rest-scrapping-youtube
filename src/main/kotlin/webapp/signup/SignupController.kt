@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity.badRequest
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.server.i18n.LocaleContextResolver
 import webapp.Constants.ACCOUNT_API
 import webapp.Constants.ACTIVATE_API
 import webapp.Constants.ACTIVATE_API_KEY
@@ -21,7 +20,11 @@ import webapp.Constants.ROLE_USER
 import webapp.Constants.SIGNUP_API
 import webapp.Constants.SYSTEM_USER
 import webapp.Logging.i
-import webapp.accounts.entities.AccountRecord.Companion.signupFields
+import webapp.accounts.entities.AccountRecord.Companion.EMAIL_FIELD
+import webapp.accounts.entities.AccountRecord.Companion.FIRST_NAME_FIELD
+import webapp.accounts.entities.AccountRecord.Companion.LAST_NAME_FIELD
+import webapp.accounts.entities.AccountRecord.Companion.LOGIN_FIELD
+import webapp.accounts.entities.AccountRecord.Companion.PASSWORD_FIELD
 import webapp.accounts.exceptions.EmailAlreadyUsedException
 import webapp.accounts.exceptions.UsernameAlreadyUsedException
 import webapp.accounts.models.AccountCredentials
@@ -38,8 +41,19 @@ class SignupController(
     private val mailService: MailService,
     private val passwordEncoder: PasswordEncoder,
     private val validator: Validator,
-    private val request: LocaleContextResolver
+//    private val request: LocaleContextResolver//to get accepted locales
 ) {
+    companion object {
+        val signupFields
+            get() = setOf(
+                PASSWORD_FIELD,
+                EMAIL_FIELD,
+                LOGIN_FIELD,
+                FIRST_NAME_FIELD,
+                LAST_NAME_FIELD
+            )
+    }
+
     internal class SignupException(message: String) : RuntimeException(message)
 //    @ExceptionHandler(ConstraintViolationException::class)
 //    fun handleConstraintViolationException(
