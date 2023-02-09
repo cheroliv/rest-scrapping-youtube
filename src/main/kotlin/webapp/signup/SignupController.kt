@@ -1,5 +1,6 @@
 package webapp.signup
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.validation.Validator
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.CREATED
@@ -33,6 +34,7 @@ import webapp.accounts.models.AccountCredentials.Companion.objectName
 import webapp.accounts.models.AccountUtils.generateActivationKey
 import webapp.accounts.repository.AccountRepository
 import webapp.mail.MailService
+import webapp.signup.SignupController.ProblemsModel.FieldErrors
 import java.net.URI
 import java.time.Instant.now
 import java.util.*
@@ -44,6 +46,7 @@ class SignupController(
     private val mailService: MailService,
     private val passwordEncoder: PasswordEncoder,
     private val validator: Validator,
+    private val mapper:ObjectMapper,
 //    private val request: LocaleContextResolver//to get accepted locales
 ) {
     companion object {
@@ -56,6 +59,8 @@ class SignupController(
                 LAST_NAME_FIELD
             )
     }
+fun signupValidation(){}
+    fun availability(){}
 
     internal class SignupException(message: String) : RuntimeException(message)
     data class ProblemsModel(
@@ -63,8 +68,7 @@ class SignupController(
         val title: String,
         val status: Int,
         val path: String,
-        val message: String,
-        val fieldErrors: MutableSet<Map<String, String>> = mutableSetOf()
+        val message: String
     ) {
         @Suppress("MemberVisibilityCanBePrivate")
         companion object {
@@ -77,8 +81,8 @@ class SignupController(
                 PROBLEM_MESSAGE
             )
         }
+        data class FieldErrors(val fieldErrors: MutableSet<Map<String, String>> = mutableSetOf())
     }
-data class FieldErrors(val fieldErrors: MutableSet<Map<String, String>> = mutableSetOf())
 
     /**
      * {@code POST  /signup} : register the user.
@@ -96,14 +100,13 @@ data class FieldErrors(val fieldErrors: MutableSet<Map<String, String>> = mutabl
             message = "error.validation",
             status = BAD_REQUEST.value(),
         ).run pm@{
-//TODO: fieldErrors to json
             val fieldErrors:FieldErrors= FieldErrors()
 
             signupFields.forEach {
 
 
 
-                validator.validateProperty(this@acc, it).run {
+                validator.validateProperty(this@acc, it).run viol@{
 
 
 //
@@ -131,8 +134,15 @@ data class FieldErrors(val fieldErrors: MutableSet<Map<String, String>> = mutabl
                                 status = BAD_REQUEST.value()
                                 setProperty("path", this@pm.path)
                                 setProperty("message", this@pm.message)
-//                            setProperty("fieldErrors", JsonArray(problem.fieldErrors.toList()))
-                                setProperty("fieldErrors", this@pm.fieldErrors.toString())
+                                setProperty("fieldErrors", mapper.writeValueAsString(FieldErrors().fieldErrors.apply {
+                                    add(
+                                        mapOf(
+                                            "objectName" to objectName,
+                                            "field" to it,
+                                            "message" to this@viol.first().message
+                                        )
+                                    )
+                                }))
                             }
                         )
                     }
@@ -142,13 +152,15 @@ data class FieldErrors(val fieldErrors: MutableSet<Map<String, String>> = mutabl
                 isLoginAvailable(this@acc)
                 isEmailAvailable(this@acc)
             } catch (e: UsernameAlreadyUsedException) {
-                this@pm.fieldErrors.add(
-                    mapOf(
-                        "objectName" to objectName,
-                        "field" to LOGIN_FIELD,
-                        "message" to e.message!!
-                    )
-                )
+//                this@pm.copy(fieldErrors=FieldErrors().fieldErrors.apply {
+//                    add(
+//                        mapOf(
+//                            "objectName" to objectName,
+//                            "field" to LOGIN_FIELD,
+//                            "message" to e.message!!
+//                        )
+//                    )
+//                }.toString())
                 return ResponseEntity<ProblemDetail>(
                     forStatusAndDetail(
                         BAD_REQUEST,
@@ -157,13 +169,15 @@ data class FieldErrors(val fieldErrors: MutableSet<Map<String, String>> = mutabl
                 )
 
             } catch (e: EmailAlreadyUsedException) {
-                this@pm.fieldErrors.add(
-                    mapOf(
-                        "objectName" to objectName,
-                        "field" to EMAIL_FIELD,
-                        "message" to e.message!!
-                    )
-                )
+//                this@pm.copy(fieldErrors= mapper.writeValueAsString(FieldErrors().fieldErrors.apply {
+//                    add(
+//                        mapOf(
+//                            "objectName" to objectName,
+//                            "field" to EMAIL_FIELD,
+//                            "message" to e.message!!
+//                        )
+//                    )
+//                }))
                 return badRequest().body<ProblemDetail>(
                     forStatusAndDetail(
                         BAD_REQUEST,
