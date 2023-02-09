@@ -57,9 +57,6 @@ class SignupController(
             )
     }
 
-    fun signupValidation() {}
-    fun availability() {}
-
     internal class SignupException(message: String) : RuntimeException(message)
 
     /**
@@ -91,7 +88,6 @@ class SignupController(
                     )
                 }
             }
-            //TODO: ici un ProblemDetail.run
             when {
                 fieldErrors.isNotEmpty() -> {
                     return badRequest().body<ProblemDetail>(
@@ -110,13 +106,6 @@ class SignupController(
                 isLoginAvailable(this@acc)
                 isEmailAvailable(this@acc)
             } catch (e: UsernameAlreadyUsedException) {
-                fieldErrors.add(
-                    mapOf(
-                        "objectName" to objectName,
-                        "field" to LOGIN_FIELD,
-                        "message" to e.message!!
-                    )
-                )
                 return badRequest().body<ProblemDetail>(
                     forStatus(BAD_REQUEST).apply {
                         type = URI(this@pm.type)
@@ -124,17 +113,18 @@ class SignupController(
                         status = BAD_REQUEST.value()
                         setProperty("path", this@pm.path)
                         setProperty("message", this@pm.message)
-                        setProperty("fieldErrors", this@pm.fieldErrors)
+                        setProperty("fieldErrors", this@pm.fieldErrors.apply {
+                            add(
+                                mapOf(
+                                    "objectName" to objectName,
+                                    "field" to LOGIN_FIELD,
+                                    "message" to e.message!!
+                                )
+                            )
+                        })
                     }
                 )
             } catch (e: EmailAlreadyUsedException) {
-                fieldErrors.add(
-                    mapOf(
-                        "objectName" to objectName,
-                        "field" to EMAIL_FIELD,
-                        "message" to e.message!!
-                    )
-                )
                 return badRequest().body<ProblemDetail>(
                     forStatus(BAD_REQUEST).apply {
                         type = URI(this@pm.type)
@@ -142,10 +132,17 @@ class SignupController(
                         status = BAD_REQUEST.value()
                         setProperty("path", path)
                         setProperty("message", this@pm.message)
-                        setProperty("fieldErrors", this@pm.fieldErrors)
+                        setProperty("fieldErrors", this@pm.fieldErrors.apply {
+                            add(
+                                mapOf(
+                                    "objectName" to objectName,
+                                    "field" to EMAIL_FIELD,
+                                    "message" to e.message!!
+                                )
+                            )
+                        })
                     }
                 )
-
             }
         }
 
@@ -183,9 +180,16 @@ class SignupController(
     @Throws(SignupException::class)
     suspend fun activateAccount(@RequestParam(ACTIVATE_API_KEY) key: String) {
         if (!accountRepository.findOneByActivationKey(key).run no@{
-                return@no if (this == null) false.apply { i("no activation for key: $key") }
-                else accountRepository.save(copy(activated = true, activationKey = null)).run yes@{
-                    return@yes if (this != null) true.apply { i("activation: $login") } else false
+                return@no when {
+                    this == null -> false.apply { i("no activation for key: $key") }
+                    else -> accountRepository
+                        .save(copy(activated = true, activationKey = null))
+                        .run yes@{
+                            return@yes when {
+                                this != null -> true.apply { i("activation: $login") }
+                                else -> false
+                            }
+                        }
                 }
             }) throw SignupException(MSG_WRONG_ACTIVATION_KEY)
     }
