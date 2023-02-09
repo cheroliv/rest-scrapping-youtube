@@ -88,90 +88,91 @@ data class FieldErrors(val fieldErrors: MutableSet<Map<String, String>> = mutabl
     @PostMapping(SIGNUP_API, produces = [APPLICATION_PROBLEM_JSON_VALUE])
     @ResponseStatus(CREATED)
     @Transactional
-    suspend fun signup(@RequestBody account: AccountCredentials) = account.run {
-        val problem = ProblemsModel(
+    suspend fun signup(@RequestBody account: AccountCredentials) = account.run acc@{
+        ProblemsModel(
             type = "https://www.cheroliv.com/problem/constraint-violation",
             title = "Data binding and validation failure",
             path = "$ACCOUNT_API$SIGNUP_API",
             message = "error.validation",
             status = BAD_REQUEST.value(),
-        )
-
+        ).run pm@{
 //TODO: fieldErrors to json
-        val fieldErrors:FieldErrors= FieldErrors()
+            val fieldErrors:FieldErrors= FieldErrors()
 
-        signupFields.forEach {
+            signupFields.forEach {
 
 
 
-            validator.validateProperty(this, it).run {
+                validator.validateProperty(this@acc, it).run {
 
 
 //
-                /*
-                {
-                  "type": "https://www.cheroliv.com/problem/constraint-violation",
-                  "title": "Data binding and validation failure",
-                  "status": 400,
-                  "path": "/api/register",
-                  "message": "error.validation",
-                  "fieldErrors": [
+                    /*
                     {
-                      "objectName": "managedUserVM",
-                      "field": "password",
-                      "message": "la taille doit être comprise entre 4 et 100"
-                    }
-                  ]
-                }
-*/
-                when {
-                    isNotEmpty() -> return badRequest().body<ProblemDetail>(
-                        forStatus(BAD_REQUEST).apply {
-                            type = URI(problem.type)
-                            title = problem.title
-                            status = BAD_REQUEST.value()
-                            setProperty("path", problem.path)
-                            setProperty("message", problem.message)
-//                            setProperty("fieldErrors", JsonArray(problem.fieldErrors.toList()))
-                            setProperty("fieldErrors", problem.fieldErrors.toString())
+                      "type": "https://www.cheroliv.com/problem/constraint-violation",
+                      "title": "Data binding and validation failure",
+                      "status": 400,
+                      "path": "/api/register",
+                      "message": "error.validation",
+                      "fieldErrors": [
+                        {
+                          "objectName": "managedUserVM",
+                          "field": "password",
+                          "message": "la taille doit être comprise entre 4 et 100"
                         }
-                    )
+                      ]
+                    }
+    */
+                    when {
+                        isNotEmpty() -> return badRequest().body<ProblemDetail>(
+                            forStatus(BAD_REQUEST).apply {
+                                type = URI(this@pm.type)
+                                title = this@pm.title
+                                status = BAD_REQUEST.value()
+                                setProperty("path", this@pm.path)
+                                setProperty("message", this@pm.message)
+//                            setProperty("fieldErrors", JsonArray(problem.fieldErrors.toList()))
+                                setProperty("fieldErrors", this@pm.fieldErrors.toString())
+                            }
+                        )
+                    }
                 }
             }
-        }
-        try {
-            isLoginAvailable(this)
-            isEmailAvailable(this)
-        } catch (e: UsernameAlreadyUsedException) {
-            problem.fieldErrors.add(
-                mapOf(
-                    "objectName" to objectName,
-                    "field" to LOGIN_FIELD,
-                    "message" to e.message!!
+            try {
+                isLoginAvailable(this@acc)
+                isEmailAvailable(this@acc)
+            } catch (e: UsernameAlreadyUsedException) {
+                this@pm.fieldErrors.add(
+                    mapOf(
+                        "objectName" to objectName,
+                        "field" to LOGIN_FIELD,
+                        "message" to e.message!!
+                    )
                 )
-            )
-            return ResponseEntity<ProblemDetail>(
-                forStatusAndDetail(
-                    BAD_REQUEST,
-                    e.message!!
-                ), BAD_REQUEST
-            )
+                return ResponseEntity<ProblemDetail>(
+                    forStatusAndDetail(
+                        BAD_REQUEST,
+                        e.message!!
+                    ), BAD_REQUEST
+                )
 
-        } catch (e: EmailAlreadyUsedException) {
-            problem.fieldErrors.add(
-                mapOf(
-                    "objectName" to objectName,
-                    "field" to EMAIL_FIELD,
-                    "message" to e.message!!
+            } catch (e: EmailAlreadyUsedException) {
+                this@pm.fieldErrors.add(
+                    mapOf(
+                        "objectName" to objectName,
+                        "field" to EMAIL_FIELD,
+                        "message" to e.message!!
+                    )
                 )
-            )
-            return badRequest().body<ProblemDetail>(
-                forStatusAndDetail(
-                    BAD_REQUEST,
-                    e.message!!
+                return badRequest().body<ProblemDetail>(
+                    forStatusAndDetail(
+                        BAD_REQUEST,
+                        e.message!!
+                    )
                 )
-            )
+            }
         }
+
         now().run {
             copy(
                 password = passwordEncoder.encode(password),
