@@ -23,13 +23,6 @@ object GradleUtils {
     }
 
     /*=================================================================================*/
-//    fun Project.appDependencies() {
-//        appModules.forEach { module ->
-//            module.value.first.forEach {
-//                dependencies.add(module.key, dependency(it))
-//            }
-//        }
-//    }
 
     fun Project.appDependencies() {
         appModules.forEach { module ->
