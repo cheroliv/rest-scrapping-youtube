@@ -1,7 +1,6 @@
 package webapp.signup
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT
 import jakarta.validation.Validator
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.CREATED
@@ -35,7 +34,6 @@ import webapp.accounts.models.AccountCredentials.Companion.objectName
 import webapp.accounts.models.AccountUtils.generateActivationKey
 import webapp.accounts.repository.AccountRepository
 import webapp.mail.MailService
-import webapp.signup.SignupController.ProblemsModel.FieldErrors
 import java.net.URI
 import java.time.Instant.now
 import java.util.*
@@ -70,7 +68,8 @@ class SignupController(
         val title: String,
         val status: Int,
         val path: String,
-        val message: String
+        val message: String,
+        val fieldErrors: MutableSet<Map<String, String>> = mutableSetOf()
     ) {
         @Suppress("MemberVisibilityCanBePrivate")
         companion object {
@@ -83,8 +82,6 @@ class SignupController(
                 PROBLEM_MESSAGE
             )
         }
-
-        data class FieldErrors(val fieldErrors: MutableSet<Map<String, String>> = mutableSetOf())
     }
 
     /**
@@ -117,25 +114,35 @@ class SignupController(
                                 setProperty("path", this@pm.path)
                                 setProperty("message", this@pm.message)
                                 setProperty(
-                                    "fieldErrors",
-                                    mapper
-                                        .enable(INDENT_OUTPUT)
-//                                        .writer()
-//                                        .withRootValueSeparator("\n")
-                                        .writeValueAsString(
-                                            FieldErrors()
-                                                .fieldErrors
-                                                .apply {
-                                                    add(
-                                                        mapOf(
-                                                            "objectName" to objectName,
-                                                            "field" to it,
-                                                            "message" to this@viol.first().message
-                                                        )
-                                                    )
-                                                }).replace("\n","")
-                                        .replace("\\","")
+                                    "fieldErrors", this@pm.fieldErrors.apply {  add(
+                                            mapOf(
+                                                "objectName" to objectName,
+                                                "field" to it,
+                                                "message" to this@viol.first().message
+                                            )
+
+                                    )}
                                 )
+//                                setProperty(
+//                                    "fieldErrors",
+//                                    mapper
+//                                        .enable(INDENT_OUTPUT)
+////                                        .writer()
+////                                        .withRootValueSeparator("\n")
+//                                        .writeValueAsString(
+//                                            FieldErrors()
+//                                                .fieldErrors
+//                                                .apply {
+//                                                    add(
+//                                                        mapOf(
+//                                                            "objectName" to objectName,
+//                                                            "field" to it,
+//                                                            "message" to this@viol.first().message
+//                                                        )
+//                                                    )
+//                                                }).replace("\n","")
+//                                        .replace("\\","")
+//                                )
                             }
                         )
                     }
