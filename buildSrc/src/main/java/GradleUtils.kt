@@ -7,6 +7,7 @@
 import AppDeps.appModules
 import Constants.BLANK
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.module
 import java.lang.System.getProperty
 
 object GradleUtils {
@@ -23,10 +24,30 @@ object GradleUtils {
     }
 
     /*=================================================================================*/
+//    fun Project.appDependencies() {
+//        appModules.forEach { module ->
+//            module.value.first.forEach {
+//                dependencies.add(module.key, dependency(it))
+//            }
+//        }
+//    }
+
     fun Project.appDependencies() {
-        appModules.forEach { module ->
-            module.value.first.forEach {
-                dependencies.add(module.key, dependency(it))
+        appModules.forEach { module: Map.Entry<String, Pair<Set<Triple<String, String, Set<Map<String, String?>>?>>, Set<Pair<String, String?>>?>> ->
+            module.value.first.forEach { dep: Triple<String, String, Set<Map<String, String?>>?> ->
+                mapOf(dep.first to dep.second).entries.first().run {
+                    dependencies.add(module.key, dependency(this))
+                    dependencies.module(dependency(this)) {
+                        dep.third?.forEach { excl->
+                            excl.forEach { t: String, u: String? ->
+
+                            }
+                        }
+                    }
+//                        dependency(this))
+
+
+                }
             }
         }
     }
