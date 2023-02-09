@@ -22,6 +22,7 @@ import webapp.Constants.ROLE_USER
 import webapp.Constants.SIGNUP_API
 import webapp.Constants.SYSTEM_USER
 import webapp.Logging.i
+import webapp.ProblemsModel
 import webapp.accounts.entities.AccountRecord.Companion.EMAIL_FIELD
 import webapp.accounts.entities.AccountRecord.Companion.FIRST_NAME_FIELD
 import webapp.accounts.entities.AccountRecord.Companion.LAST_NAME_FIELD
@@ -63,26 +64,6 @@ class SignupController(
     fun availability() {}
 
     internal class SignupException(message: String) : RuntimeException(message)
-    data class ProblemsModel(
-        val type: String,
-        val title: String,
-        val status: Int,
-        val path: String,
-        val message: String,
-        val fieldErrors: MutableSet<Map<String, String>> = mutableSetOf()
-    ) {
-        @Suppress("MemberVisibilityCanBePrivate")
-        companion object {
-            const val PROBLEM_OBJECT_NAME = "objectName"
-            const val PROBLEM_FIELD = "field"
-            const val PROBLEM_MESSAGE = "message"
-            val detailsKeys = setOf(
-                PROBLEM_OBJECT_NAME,
-                PROBLEM_FIELD,
-                PROBLEM_MESSAGE
-            )
-        }
-    }
 
     /**
      * {@code POST  /signup} : register the user.
@@ -100,91 +81,33 @@ class SignupController(
             message = "error.validation",
             status = BAD_REQUEST.value(),
         ).run pm@{
-            signupFields.forEach {
-
-                val viols = validator.validateProperty(this@acc, it)
-
-                viols.run viol@{
-                    when {
-                        isNotEmpty() -> return badRequest().body<ProblemDetail>(
-                            forStatus(BAD_REQUEST).apply {
-                                type = URI(this@pm.type)
-                                title = this@pm.title
-                                status = BAD_REQUEST.value()
-                                setProperty("path", this@pm.path)
-                                setProperty("message", this@pm.message)
-                                setProperty(
-                                    "fieldErrors", this@pm.fieldErrors.apply {  add(
-                                            mapOf(
-                                                "objectName" to objectName,
-                                                "field" to it,
-                                                "message" to this@viol.first().message
-                                            )
-
-                                    )}
-                                )
-//                                setProperty(
-//                                    "fieldErrors",
-//                                    mapper
-//                                        .enable(INDENT_OUTPUT)
-////                                        .writer()
-////                                        .withRootValueSeparator("\n")
-//                                        .writeValueAsString(
-//                                            FieldErrors()
-//                                                .fieldErrors
-//                                                .apply {
-//                                                    add(
-//                                                        mapOf(
-//                                                            "objectName" to objectName,
-//                                                            "field" to it,
-//                                                            "message" to this@viol.first().message
-//                                                        )
-//                                                    )
-//                                                }).replace("\n","")
-//                                        .replace("\\","")
-//                                )
-                            }
+            signupFields.map { field ->
+                field to validator.validateProperty(this@acc, field)
+            }.forEach { violated ->
+                violated.second.forEach {
+                    fieldErrors.add(
+                        mapOf(
+                            "objectName" to objectName,
+                            "field" to violated.first,
+                            "message" to it.message
                         )
-                    }
+                    )
                 }
             }
-            /*
-{
-  "type": "https://www.cheroliv.com/problem/constraint-violation",
-  "title": "Data binding and validation failure",
-  "status": 400,
-  "path": "/api/register",
-  "message": "error.validation",
-  "fieldErrors": [
-    {
-      "objectName": "managedUserVM",
-      "field": "password",
-      "message": "la taille doit être comprise entre 4 et 100"
-    }
-  ]
-}
-*/
-            try {
-                isLoginAvailable(this@acc)
-                isEmailAvailable(this@acc)
-            } catch (e: UsernameAlreadyUsedException) {
-//                this@pm.copy(fieldErrors=FieldErrors().fieldErrors.apply {
-//                    add(
-//                        mapOf(
-//                            "objectName" to objectName,
-//                            "field" to LOGIN_FIELD,
-//                            "message" to e.message!!
-//                        )
-//                    )
-//                }.toString())
-                return ResponseEntity<ProblemDetail>(
-                    forStatusAndDetail(
-                        BAD_REQUEST,
-                        e.message!!
-                    ), BAD_REQUEST
-                )
+            when {
+                fieldErrors.isNotEmpty() -> {
+                    return badRequest().body<ProblemDetail>(
+                        forStatus(BAD_REQUEST).apply {
+                            type = URI(this@pm.type)
+                            title = this@pm.title
+                            status = BAD_REQUEST.value()
+                            setProperty("path", this@pm.path)
+                            setProperty("message", this@pm.message)
+                            setProperty("fieldErrors", this@pm.fieldErrors)
+                        }
+                    )
+                }
 
-            } catch (e: EmailAlreadyUsedException) {
 //                this@pm.copy(fieldErrors= mapper.writeValueAsString(FieldErrors().fieldErrors.apply {
 //                    add(
 //                        mapOf(
@@ -194,12 +117,83 @@ class SignupController(
 //                        )
 //                    )
 //                }))
-                return badRequest().body<ProblemDetail>(
-                    forStatusAndDetail(
-                        BAD_REQUEST,
-                        e.message!!
+                //                this@pm.copy(fieldErrors=FieldErrors().fieldErrors.apply {
+//                    add(
+//                        mapOf(
+//                            "objectName" to objectName,
+//                            "field" to LOGIN_FIELD,
+//                            "message" to e.message!!
+//                        )
+//                    )
+//                }.toString())
+
+
+
+                //            signupFields.forEach {
+                //                val viols = validator.validateProperty(this@acc, it)
+                //                viols.run viol@{
+                //                    when {
+                //                        isNotEmpty() -> return badRequest().body<ProblemDetail>(
+                //                            forStatus(BAD_REQUEST).apply {
+                //                                type = URI(this@pm.type)
+                //                                title = this@pm.title
+                //                                status = BAD_REQUEST.value()
+                //                                setProperty("path", this@pm.path)
+                //                                setProperty("message", this@pm.message)
+                //                                setProperty(
+                //                                    "fieldErrors", this@pm.fieldErrors.apply {
+                //                                        add(
+                //                                            mapOf(
+                //                                                "objectName" to objectName,
+                //                                                "field" to it,
+                //                                                "message" to this@viol.first().message
+                //                                            )
+                //
+                //                                        )
+                //                                    }
+                //                                )
+                //                            }
+                //                        )
+                //                    }
+                //                }
+                //            }
+                else -> try {
+                    isLoginAvailable(this@acc)
+                    isEmailAvailable(this@acc)
+                } catch (e: UsernameAlreadyUsedException) {
+                    //                this@pm.copy(fieldErrors=FieldErrors().fieldErrors.apply {
+                    //                    add(
+                    //                        mapOf(
+                    //                            "objectName" to objectName,
+                    //                            "field" to LOGIN_FIELD,
+                    //                            "message" to e.message!!
+                    //                        )
+                    //                    )
+                    //                }.toString())
+                    return ResponseEntity<ProblemDetail>(
+                        forStatusAndDetail(
+                            BAD_REQUEST,
+                            e.message!!
+                        ), BAD_REQUEST
                     )
-                )
+
+                } catch (e: EmailAlreadyUsedException) {
+                    //                this@pm.copy(fieldErrors= mapper.writeValueAsString(FieldErrors().fieldErrors.apply {
+                    //                    add(
+                    //                        mapOf(
+                    //                            "objectName" to objectName,
+                    //                            "field" to EMAIL_FIELD,
+                    //                            "message" to e.message!!
+                    //                        )
+                    //                    )
+                    //                }))
+                    return badRequest().body<ProblemDetail>(
+                        forStatusAndDetail(
+                            BAD_REQUEST,
+                            e.message!!
+                        )
+                    )
+                }
             }
         }
 
