@@ -89,9 +89,9 @@ class SignupController(
         val problem = ProblemsModel(
             type = "https://www.cheroliv.com/problem/constraint-violation",
             title = "Data binding and validation failure",
-            path = "$ACCOUNT_API/$SIGNUP_API",
+            path = "$ACCOUNT_API$SIGNUP_API",
             message = "error.validation",
-            status = 400,
+            status = BAD_REQUEST.value(),
         )
         signupFields.forEach {
             validator.validateProperty(this, it).run {
@@ -102,6 +102,8 @@ class SignupController(
 //                        "message" to first().message
 //                    )
 //                )
+//
+                if (isNotEmpty()) i("problemModel: $problem")
                 when {
                     isNotEmpty() -> return badRequest().body<ProblemDetail>(
                         forStatusAndDetail(
@@ -123,12 +125,13 @@ class SignupController(
                     "message" to e.message!!
                 )
             )
-            return badRequest().body<ProblemDetail>(
+            return ResponseEntity<ProblemDetail>(
                 forStatusAndDetail(
                     BAD_REQUEST,
                     e.message!!
-                )
+                ), BAD_REQUEST
             )
+
         } catch (e: EmailAlreadyUsedException) {
             problem.fieldErrors.add(
                 mapOf(
@@ -165,94 +168,7 @@ class SignupController(
         }
         ResponseEntity<ProblemDetail>(CREATED)
     }
-    /*
-        suspend fun signup(@RequestBody account: AccountCredentials) = account.run acc@{
-            ProblemsModel(
-                type = "https://www.cheroliv.com/problem/constraint-violation",
-                title = "Data binding and validation failure",
-                path = "$ACCOUNT_API/$SIGNUP_API",
-                message = "error.validation",
-                status = 400,
-            ).run {
-                signupFields.forEach { field ->
-                    validator.validateProperty(this, field).run {
-                        fieldErrors.add(
-                            mapOf(
-                                "objectName" to objectName,
-                                "field" to field,
-                                "message" to first().message
-                            )
-                        )
 
-
-                        when {
-                            isNotEmpty() -> return ResponseEntity.badRequest().body<ProblemDetail>(
-                                forStatusAndDetail(
-                                    BAD_REQUEST,
-                                    first().message
-                                )
-                            )
-                        }
-                    }
-                }
-                try {
-                    isLoginAvailable(this@acc)
-                    isEmailAvailable(this@acc)
-                } catch (e: UsernameAlreadyUsedException) {
-
-                    fieldErrors.add(
-                        mapOf(
-                            "objectName" to objectName,
-                            "field" to LOGIN_FIELD,
-                            "message" to e.message!!
-                        )
-                    )
-
-                    return ResponseEntity.badRequest().body<ProblemDetail>(
-                        forStatusAndDetail(
-                            BAD_REQUEST,
-                            e.message!!
-                        )
-                    )
-                } catch (e: EmailAlreadyUsedException) {
-                    fieldErrors.add(
-                        mapOf(
-                            "objectName" to objectName,
-                            "field" to EMAIL_FIELD,
-                            "message" to e.message!!
-                        )
-                    )
-                    return ResponseEntity.badRequest().body<ProblemDetail>(
-                        forStatusAndDetail(
-                            BAD_REQUEST,
-                            e.message!!
-                        )
-                    )
-                }
-            }
-            now().run {
-                copy(
-                    password = passwordEncoder.encode(password),
-                    activationKey = generateActivationKey,
-                    authorities = setOf(ROLE_USER),
-                    langKey = when {
-                        langKey.isNullOrBlank() -> DEFAULT_LANGUAGE
-                        else -> langKey
-                    },
-                    activated = false,
-                    createdBy = SYSTEM_USER,
-                    createdDate = this,
-                    lastModifiedBy = SYSTEM_USER,
-                    lastModifiedDate = this
-                ).run {
-                    accountRepository.signup(this)
-                    mailService.sendActivationEmail(this)
-                }
-            }
-            ResponseEntity<ProblemDetail>(CREATED)
-        }
-
-     */
     /**
      * `GET  /activate` : activate the signed-up user.
      *
@@ -274,16 +190,20 @@ class SignupController(
     @Throws(UsernameAlreadyUsedException::class)
     private suspend fun isLoginAvailable(model: AccountCredentials) {
         accountRepository.findOne(model.login!!).run {
-            if (this != null) if (!activated) accountRepository.delete(toAccount())
-            else throw UsernameAlreadyUsedException()
+            when {
+                this != null -> if (!activated) accountRepository.delete(toAccount())
+                else throw UsernameAlreadyUsedException()
+            }
         }
     }
 
     @Throws(EmailAlreadyUsedException::class)
     private suspend fun isEmailAvailable(model: AccountCredentials) {
         accountRepository.findOne(model.email!!).run {
-            if (this != null) if (!activated) accountRepository.delete(toAccount())
-            else throw EmailAlreadyUsedException()
+            when {
+                this != null -> if (!activated) accountRepository.delete(toAccount())
+                else throw EmailAlreadyUsedException()
+            }
         }
     }
 }
