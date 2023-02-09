@@ -1,6 +1,7 @@
 package webapp.signup
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT
 import jakarta.validation.Validator
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.CREATED
@@ -46,7 +47,7 @@ class SignupController(
     private val mailService: MailService,
     private val passwordEncoder: PasswordEncoder,
     private val validator: Validator,
-    private val mapper:ObjectMapper,
+    private val mapper: ObjectMapper,
 //    private val request: LocaleContextResolver//to get accepted locales
 ) {
     companion object {
@@ -59,8 +60,9 @@ class SignupController(
                 LAST_NAME_FIELD
             )
     }
-fun signupValidation(){}
-    fun availability(){}
+
+    fun signupValidation() {}
+    fun availability() {}
 
     internal class SignupException(message: String) : RuntimeException(message)
     data class ProblemsModel(
@@ -81,6 +83,7 @@ fun signupValidation(){}
                 PROBLEM_MESSAGE
             )
         }
+
         data class FieldErrors(val fieldErrors: MutableSet<Map<String, String>> = mutableSetOf())
     }
 
@@ -100,32 +103,26 @@ fun signupValidation(){}
             message = "error.validation",
             status = BAD_REQUEST.value(),
         ).run pm@{
-            val fieldErrors:FieldErrors= FieldErrors()
-
             signupFields.forEach {
 
-
-
-                validator.validateProperty(this@acc, it).run viol@{
-
-
-//
-                    /*
+                val viols = validator.validateProperty(this@acc, it)
+                /*
+                {
+                  "type": "https://www.cheroliv.com/problem/constraint-violation",
+                  "title": "Data binding and validation failure",
+                  "status": 400,
+                  "path": "/api/register",
+                  "message": "error.validation",
+                  "fieldErrors": [
                     {
-                      "type": "https://www.cheroliv.com/problem/constraint-violation",
-                      "title": "Data binding and validation failure",
-                      "status": 400,
-                      "path": "/api/register",
-                      "message": "error.validation",
-                      "fieldErrors": [
-                        {
-                          "objectName": "managedUserVM",
-                          "field": "password",
-                          "message": "la taille doit être comprise entre 4 et 100"
-                        }
-                      ]
+                      "objectName": "managedUserVM",
+                      "field": "password",
+                      "message": "la taille doit être comprise entre 4 et 100"
                     }
-    */
+                  ]
+                }
+*/
+                viols.run viol@{
                     when {
                         isNotEmpty() -> return badRequest().body<ProblemDetail>(
                             forStatus(BAD_REQUEST).apply {
@@ -134,15 +131,21 @@ fun signupValidation(){}
                                 status = BAD_REQUEST.value()
                                 setProperty("path", this@pm.path)
                                 setProperty("message", this@pm.message)
-                                setProperty("fieldErrors", mapper.writeValueAsString(FieldErrors().fieldErrors.apply {
-                                    add(
-                                        mapOf(
-                                            "objectName" to objectName,
-                                            "field" to it,
-                                            "message" to this@viol.first().message
-                                        )
-                                    )
-                                }))
+                                setProperty(
+                                    "fieldErrors", mapper
+                                        .enable(INDENT_OUTPUT)
+                                        .writeValueAsString(FieldErrors()
+                                            .fieldErrors
+                                            .apply {
+                                                add(
+                                                    mapOf(
+                                                        "objectName" to objectName,
+                                                        "field" to it,
+                                                        "message" to this@viol.first().message
+                                                    )
+                                                )
+                                            })
+                                )
                             }
                         )
                     }
