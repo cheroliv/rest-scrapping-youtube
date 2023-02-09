@@ -3,9 +3,8 @@
     "DEPRECATION",
 )
 
-import AppDeps.implementationDeps
-import GradleUtils.sep
 import GradleUtils.appDependencies
+import GradleUtils.sep
 import org.gradle.api.JavaVersion.VERSION_17
 import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
@@ -48,8 +47,17 @@ dependencies {
 
 configurations {
     compileOnly { extendsFrom(configurations.annotationProcessor.get()) }
+//    appModules.forEach { module ->
+//        if (module.first == AppDeps.implementation) implementation.configure {
+//            module.second.forEach { exclude(it.first, it.second) }
+//        }
+//    }
     implementation.configure {
-        implementationDeps.second.forEach { exclude(it.first, it.second) }
+        setOf(
+            "org.junit.vintage" to "junit-vintage-engine",
+            "org.springframework.boot" to "spring-boot-starter-tomcat",
+            "org.apache.tomcat" to null
+        ).forEach { exclude(it.first, it.second) }
     }
 }
 

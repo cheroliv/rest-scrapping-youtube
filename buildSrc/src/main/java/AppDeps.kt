@@ -15,7 +15,7 @@ object AppDeps {
 
     @JvmStatic
     val appModules by lazy {
-        mapOf(
+        setOf(
             implementation to implementationDeps,
             runtimeOnly to runtimeOnlyDeps,
             developmentOnly to developmentOnlyDeps,
