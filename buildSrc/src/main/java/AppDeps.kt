@@ -1,17 +1,19 @@
+@file:Suppress("MemberVisibilityCanBePrivate")
+
 import Constants.BLANK
 
 //import BuildDeps.KOTLIN_VERSION
 //import DomainDeps.KOIN_VERSION
 
 object AppDeps {
-    private const val implementation = "implementation"
-    private const val runtimeOnly = "runtimeOnly"
-    private const val developmentOnly = "developmentOnly"
-    private const val testImplementation = "testImplementation"
-    private const val testRuntimeOnly = "testRuntimeOnly"
-    private const val kapt = "kapt"
-    private const val annotationProcessor = "annotationProcessor"
-    private const val testAnnotationProcessor = "testAnnotationProcessor"
+    const val implementation = "implementation"
+    const val runtimeOnly = "runtimeOnly"
+    const val developmentOnly = "developmentOnly"
+    const val testImplementation = "testImplementation"
+    const val testRuntimeOnly = "testRuntimeOnly"
+    const val kapt = "kapt"
+    const val annotationProcessor = "annotationProcessor"
+    const val testAnnotationProcessor = "testAnnotationProcessor"
 
     @JvmStatic
     val appModules by lazy {

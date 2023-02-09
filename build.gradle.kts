@@ -3,6 +3,7 @@
     "DEPRECATION",
 )
 
+import AppDeps.appModules
 import GradleUtils.appDependencies
 import GradleUtils.sep
 import org.gradle.api.JavaVersion.VERSION_17
@@ -47,17 +48,12 @@ dependencies {
 
 configurations {
     compileOnly { extendsFrom(configurations.annotationProcessor.get()) }
-//    appModules.forEach { module ->
-//        if (module.first == AppDeps.implementation) implementation.configure {
-//            module.second.forEach { exclude(it.first, it.second) }
-//        }
-//    }
     implementation.configure {
-        setOf(
-            "org.junit.vintage" to "junit-vintage-engine",
-            "org.springframework.boot" to "spring-boot-starter-tomcat",
-            "org.apache.tomcat" to null
-        ).forEach { exclude(it.first, it.second) }
+        appModules
+            .first { it.first == AppDeps.implementation }
+            .second
+            .second
+            ?.forEach { exclude(it.first, it.second) }
     }
 }
 
