@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE
 import org.springframework.http.ProblemDetail
+import org.springframework.http.ProblemDetail.forStatus
 import org.springframework.http.ProblemDetail.forStatusAndDetail
 import org.springframework.http.ResponseEntity
 import org.springframework.http.ResponseEntity.badRequest
@@ -32,6 +33,7 @@ import webapp.accounts.models.AccountCredentials.Companion.objectName
 import webapp.accounts.models.AccountUtils.generateActivationKey
 import webapp.accounts.repository.AccountRepository
 import webapp.mail.MailService
+import java.net.URI
 import java.time.Instant.now
 import java.util.*
 
@@ -76,6 +78,7 @@ class SignupController(
             )
         }
     }
+data class FieldErrors(val fieldErrors: MutableSet<Map<String, String>> = mutableSetOf())
 
     /**
      * {@code POST  /signup} : register the user.
@@ -93,23 +96,45 @@ class SignupController(
             message = "error.validation",
             status = BAD_REQUEST.value(),
         )
+
+//TODO: fieldErrors to json
+        val fieldErrors:FieldErrors= FieldErrors()
+
         signupFields.forEach {
+
+
+
             validator.validateProperty(this, it).run {
-//                problem.fieldErrors.add(
-//                    mapOf(
-//                        "objectName" to objectName,
-//                        "field" to it,
-//                        "message" to first().message
-//                    )
-//                )
+
+
 //
-                if (isNotEmpty()) i("problemModel: $problem")
+                /*
+                {
+                  "type": "https://www.cheroliv.com/problem/constraint-violation",
+                  "title": "Data binding and validation failure",
+                  "status": 400,
+                  "path": "/api/register",
+                  "message": "error.validation",
+                  "fieldErrors": [
+                    {
+                      "objectName": "managedUserVM",
+                      "field": "password",
+                      "message": "la taille doit être comprise entre 4 et 100"
+                    }
+                  ]
+                }
+*/
                 when {
                     isNotEmpty() -> return badRequest().body<ProblemDetail>(
-                        forStatusAndDetail(
-                            BAD_REQUEST,
-                            first().message
-                        )
+                        forStatus(BAD_REQUEST).apply {
+                            type = URI(problem.type)
+                            title = problem.title
+                            status = BAD_REQUEST.value()
+                            setProperty("path", problem.path)
+                            setProperty("message", problem.message)
+//                            setProperty("fieldErrors", JsonArray(problem.fieldErrors.toList()))
+                            setProperty("fieldErrors", problem.fieldErrors.toString())
+                        }
                     )
                 }
             }
