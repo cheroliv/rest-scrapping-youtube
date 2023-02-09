@@ -20,10 +20,10 @@ object AppDeps {
             runtimeOnly to runtimeOnlyDeps,
             developmentOnly to developmentOnlyDeps,
             testImplementation to testDeps,
-//            testRuntimeOnly to testRuntimeOnlyDeps,
-//            kapt to kaptDeps,
-//            annotationProcessor to annotationProcessorDeps,
-//            testAnnotationProcessor to testAnnotationProcessorDeps,
+            testRuntimeOnly to testRuntimeOnlyDeps,
+            kapt to kaptDeps,
+            annotationProcessor to annotationProcessorDeps,
+            testAnnotationProcessor to testAnnotationProcessorDeps,
         )
     }
 
@@ -124,20 +124,19 @@ object AppDeps {
         )
     }
 
-//    @JvmStatic
-//    val kaptDeps by lazy {
-//        Pair(emptyMap<String, String>(), emptySet<Pair<String, String?>>())
-//}
-//    @JvmStatic
-//    val testAnnotationProcessorDeps by lazy {
-//        Pair(
-//            emptyMap<String, String>(),
-//            emptySet<Pair<String, String?>>()
-//        )
-//    }
-//    @JvmStatic
-//    val testRuntimeOnlyDeps by lazy {
-//        //        //testRuntimeOnly("com.tngtech.archunit:archunit-junit5-engine" to "archunit_junit5_version",
-//        Pair(emptyMap<String, String>(), emptySet<Pair<String, String?>>())
-//    }
+    @JvmStatic
+    val kaptDeps by lazy {
+        Pair(emptySet<Triple<String, String, Set<Map<String, String>>>>(), emptySet<Pair<String, String?>>())
+    }
+
+    @JvmStatic
+    val testAnnotationProcessorDeps by lazy {
+        Pair(emptySet<Triple<String, String, Set<Map<String, String>>>>(), emptySet<Pair<String, String?>>())
+    }
+
+    @JvmStatic
+    val testRuntimeOnlyDeps by lazy {
+        //        //testRuntimeOnly("com.tngtech.archunit:archunit-junit5-engine" to "archunit_junit5_version",
+        Pair(emptySet<Triple<String, String, Set<Map<String, String>>>>(), emptySet<Pair<String, String?>>())
+    }
 }
