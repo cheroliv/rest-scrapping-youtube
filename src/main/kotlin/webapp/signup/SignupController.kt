@@ -106,22 +106,7 @@ class SignupController(
             signupFields.forEach {
 
                 val viols = validator.validateProperty(this@acc, it)
-                /*
-                {
-                  "type": "https://www.cheroliv.com/problem/constraint-violation",
-                  "title": "Data binding and validation failure",
-                  "status": 400,
-                  "path": "/api/register",
-                  "message": "error.validation",
-                  "fieldErrors": [
-                    {
-                      "objectName": "managedUserVM",
-                      "field": "password",
-                      "message": "la taille doit être comprise entre 4 et 100"
-                    }
-                  ]
-                }
-*/
+
                 viols.run viol@{
                     when {
                         isNotEmpty() -> return badRequest().body<ProblemDetail>(
@@ -132,25 +117,46 @@ class SignupController(
                                 setProperty("path", this@pm.path)
                                 setProperty("message", this@pm.message)
                                 setProperty(
-                                    "fieldErrors", mapper
+                                    "fieldErrors",
+                                    mapper
                                         .enable(INDENT_OUTPUT)
-                                        .writeValueAsString(FieldErrors()
-                                            .fieldErrors
-                                            .apply {
-                                                add(
-                                                    mapOf(
-                                                        "objectName" to objectName,
-                                                        "field" to it,
-                                                        "message" to this@viol.first().message
+//                                        .writer()
+//                                        .withRootValueSeparator("\n")
+                                        .writeValueAsString(
+                                            FieldErrors()
+                                                .fieldErrors
+                                                .apply {
+                                                    add(
+                                                        mapOf(
+                                                            "objectName" to objectName,
+                                                            "field" to it,
+                                                            "message" to this@viol.first().message
+                                                        )
                                                     )
-                                                )
-                                            })
+                                                }).replace("\n","")
+                                        .replace("\\","")
                                 )
                             }
                         )
                     }
                 }
             }
+            /*
+{
+  "type": "https://www.cheroliv.com/problem/constraint-violation",
+  "title": "Data binding and validation failure",
+  "status": 400,
+  "path": "/api/register",
+  "message": "error.validation",
+  "fieldErrors": [
+    {
+      "objectName": "managedUserVM",
+      "field": "password",
+      "message": "la taille doit être comprise entre 4 et 100"
+    }
+  ]
+}
+*/
             try {
                 isLoginAvailable(this@acc)
                 isEmailAvailable(this@acc)

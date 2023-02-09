@@ -90,7 +90,7 @@ object Constants {
     //URIs
 
     const val AUTHORITY_API = "/api/authorities"
-    const val ACCOUNT_API = "/api/account"
+    const val ACCOUNT_API = "/api/accounts"
     const val SIGNUP_API = "/signup"
     const val SIGNUP_API_PATH = "$ACCOUNT_API$SIGNUP_API"
     const val ACTIVATE_API = "/activate"

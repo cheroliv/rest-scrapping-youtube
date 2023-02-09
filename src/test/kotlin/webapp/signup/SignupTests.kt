@@ -1,5 +1,7 @@
 package webapp.signup
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
 import jakarta.validation.Validator
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -17,6 +19,7 @@ import webapp.Constants.ACTIVATE_API_PATH
 import webapp.Constants.BASE_URL_DEV
 import webapp.Constants.SIGNUP_API_PATH
 import webapp.DataTests.defaultAccount
+import webapp.Logging.i
 import webapp.accounts.entities.AccountRecord.Companion.EMAIL_FIELD
 import webapp.accounts.entities.AccountRecord.Companion.FIRST_NAME_FIELD
 import webapp.accounts.entities.AccountRecord.Companion.LAST_NAME_FIELD
@@ -32,6 +35,7 @@ internal class SignupTests {
     private lateinit var context: ConfigurableApplicationContext
     private val dao: R2dbcEntityTemplate by lazy { context.getBean() }
     private val validator: Validator by lazy { context.getBean() }
+    private val mapper: ObjectMapper by lazy { context.getBean() }
     private val client: WebTestClient by lazy {
         bindToServer()
             .baseUrl(BASE_URL_DEV)
@@ -108,7 +112,7 @@ internal class SignupTests {
         val wrongLogin = "funky-log(n"
         validator
             .validateProperty(AccountCredentials(login = wrongLogin), LOGIN_FIELD)
-            .run {
+            .run viol@{
                 assertTrue(isNotEmpty())
                 first().run {
                     assertEquals(
@@ -116,7 +120,24 @@ internal class SignupTests {
                         messageTemplate
                     )
                 }
+
+                i("""${mapper
+                    .enable(SerializationFeature.INDENT_OUTPUT)
+                    .writeValueAsString(
+                        SignupController.ProblemsModel.FieldErrors()
+                            .fieldErrors
+                            .apply {
+                                add(
+                                    mapOf(
+                                        "objectName" to AccountCredentials.objectName,
+                                        "field" to LOGIN_FIELD,
+                                        "message" to this@viol.first().message
+                                    )
+                                )
+                            })}""".trimIndent()
+                )
             }
+
 
 
         assertEquals(0, countAccount(dao))
