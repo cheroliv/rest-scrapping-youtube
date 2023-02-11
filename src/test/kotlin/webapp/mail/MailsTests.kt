@@ -1,4 +1,8 @@
-@file:Suppress("NonAsciiCharacters")
+@file:Suppress(
+    "NonAsciiCharacters",
+    "MemberVisibilityCanBePrivate",
+    "PropertyName"
+)
 
 package webapp.mail
 
@@ -29,9 +33,9 @@ import webapp.Constants.DEVELOPMENT
 import webapp.Constants.GMAIL
 import webapp.Constants.MAILSLURP
 import webapp.Constants.TEST
-import webapp.launcher
 import webapp.accounts.models.AccountCredentials
 import webapp.accounts.models.AccountUtils.generateResetKey
+import webapp.launcher
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
@@ -85,15 +89,15 @@ class MailSlurpServiceTests {
     fun `can create inboxes`() {
         assertContains(
             api.createInbox(
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
+                emailAddress = null,
+                tags = null,
+                name = null,
+                description = null,
+                useDomainPool = null,
+                favourite = null,
+                expiresAt = null,
+                expiresIn = null,
+                allowTeamAccess = null,
                 inboxType = "",
                 virtualInbox = true
             ).emailAddress, "@mailslurp"
@@ -105,15 +109,15 @@ class MailSlurpServiceTests {
     fun `can send email`() {
         // create inbox
         api.createInbox(
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
+            emailAddress = null,
+            tags = null,
+            name = null,
+            description = null,
+            useDomainPool = null,
+            favourite = null,
+            expiresAt = null,
+            expiresIn = null,
+            allowTeamAccess = null,
             inboxType = "",
             virtualInbox = true
         ).run {
@@ -177,11 +181,11 @@ class MailServiceSmtpTests {
     @Test
     fun `test sendEmail`() {
         mailService.sendEmail(
-            "john.doe@acme.com",
-            "testSubject",
-            "testContent",
-            false,
-            false
+            to = "john.doe@acme.com",
+            subject = "testSubject",
+            content = "testContent",
+            isMultipart = false,
+            isHtml = false
         )
         verify(javaMailSender).send(messageCaptor.capture())
         val message = messageCaptor.value
@@ -196,9 +200,9 @@ class MailServiceSmtpTests {
     @Test
     fun `test sendMail SendHtmlEmail`() {
         mailService.sendEmail(
-            "john.doe@acme.com",
-            "testSubject",
-            "testContent",
+            to = "john.doe@acme.com",
+            subject = "testSubject",
+            content = "testContent",
             isMultipart = false,
             isHtml = true
         )
@@ -215,9 +219,9 @@ class MailServiceSmtpTests {
     @Test
     fun `test sendMail SendMultipartEmail`() {
         mailService.sendEmail(
-            "john.doe@acme.com",
-            "testSubject",
-            "testContent",
+            to = "john.doe@acme.com",
+            subject = "testSubject",
+            content = "testContent",
             isMultipart = true,
             isHtml = false
         )
@@ -239,9 +243,9 @@ class MailServiceSmtpTests {
     @Test
     fun `test sendMail SendMultipartHtmlEmail`() {
         mailService.sendEmail(
-            "john.doe@acme.com",
-            "testSubject",
-            "testContent",
+            to = "john.doe@acme.com",
+            subject = "testSubject",
+            content = "testContent",
             isMultipart = true,
             isHtml = true
         )
@@ -343,13 +347,10 @@ class MailServiceSmtpTests {
         }
     }
 
-    @Suppress("MemberVisibilityCanBePrivate")
     val languages = arrayOf(
         "en", "fr", "de", "it", "es"
     )
-    @Suppress("PropertyName","MemberVisibilityCanBePrivate")
     val PATTERN_LOCALE_3: Pattern = compile("([a-z]{2})-([a-zA-Z]{4})-([a-z]{2})")
-    @Suppress("PropertyName","MemberVisibilityCanBePrivate")
     val PATTERN_LOCALE_2: Pattern = compile("([a-z]{2})-([a-z]{2})")
 
     @Test

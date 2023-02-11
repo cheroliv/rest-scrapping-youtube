@@ -2,9 +2,6 @@
 
 import Constants.BLANK
 
-//import BuildDeps.KOTLIN_VERSION
-//import DomainDeps.KOIN_VERSION
-
 object AppDeps {
     const val implementation = "implementation"
     const val runtimeOnly = "runtimeOnly"
@@ -87,11 +84,11 @@ object AppDeps {
             setOf(
                 Triple("org.jetbrains.kotlin:kotlin-test", BLANK, null),
                 Triple("org.jetbrains.kotlin:kotlin-test-junit5", BLANK, null),
-                Triple(
-                    "org.springframework.boot:spring-boot-starter-test",
-                    BLANK,
-                    setOf(mapOf("mockito-core" to null))
-                ),
+//                Triple(
+//                    "org.springframework.boot:spring-boot-starter-test",
+//                    BLANK,
+//                    setOf(mapOf("mockito-core" to null))
+//                ),
                 Triple("io.projectreactor:reactor-test", BLANK, null),
                 Triple("org.mockito.kotlin:mockito-kotlin", "mockito_kotlin_version", null),
                 Triple("io.mockk:mockk", "mockk.version", null),
