@@ -1,8 +1,11 @@
+@file:Suppress("NonAsciiCharacters")
+
 package webapp.signup
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import jakarta.validation.Validation.byProvider
+import jakarta.validation.Validation
 import jakarta.validation.Validator
+import jakarta.validation.constraints.Pattern
+import jakarta.validation.constraints.Size
 import org.hibernate.validator.HibernateValidator
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -32,7 +35,6 @@ import webapp.accounts.models.AccountCredentials
 import webapp.accounts.models.AccountUtils.generateActivationKey
 import java.net.URI
 import java.util.Locale.*
-import java.util.Locale.LanguageRange.parse
 import kotlin.test.*
 
 
@@ -41,7 +43,6 @@ internal class SignupTests {
     private lateinit var context: ConfigurableApplicationContext
     private val dao: R2dbcEntityTemplate by lazy { context.getBean() }
     private val validator: Validator by lazy { context.getBean() }
-    private val mapper: ObjectMapper by lazy { context.getBean() }
     private val client: WebTestClient by lazy {
         bindToServer()
             .baseUrl(BASE_URL_DEV)
@@ -58,73 +59,6 @@ internal class SignupTests {
 
     @AfterEach
     fun tearDown() = deleteAllAccounts(dao)
-
-    @Test
-    fun `internationalisation des validations`() {
-        byProvider(HibernateValidator::class.java)
-            .configure()
-            .defaultLocale(ENGLISH)
-            .locales(FRANCE, ITALY, US)
-            .localeResolver {
-                // get the locales supported by the client from the Accept-Language header
-                val acceptLanguageHeader = "it-IT;q=0.9,en-US;q=0.7"
-                val acceptedLanguages = parse(acceptLanguageHeader)
-                val resolvedLocales = filter(acceptedLanguages, it.supportedLocales)
-                if (resolvedLocales.size > 0) resolvedLocales[0]
-                else it.defaultLocale
-            }
-            .buildValidatorFactory()
-            .validator
-            .validateProperty(defaultAccount.copy(login = "funky-log(n"), LOGIN_FIELD)
-            .run viol@{
-                assertTrue(isNotEmpty())
-                first().run {
-                    assertEquals(
-                        "{jakarta.validation.constraints.Pattern.message}",
-                        messageTemplate
-                    )
-                    assertEquals(false, message.contains("doit correspondre à"))
-                    assertContains(
-                        "deve corrispondere a \"^(?>[a-zA-Z0-9!\$&*+=?^_`{|}~.-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)|(?>[_.@A-Za-z0-9-]+)\$\"",
-                        message
-                    )
-                }
-            }
-
-
-        val wrongPassword = "123"
-        validator
-            .validateProperty(AccountCredentials(password = wrongPassword), PASSWORD_FIELD)
-            .run {
-                assertTrue(isNotEmpty())
-                first().run {
-                    assertEquals(
-                        "{jakarta.validation.constraints.Size.message}",
-                        messageTemplate
-                    )
-                }
-            }
-
-        assertEquals(0, countAccount(dao))
-        client
-            .post()
-            .uri(SIGNUP_API_PATH)
-            .contentType(APPLICATION_JSON)
-            .header(ACCEPT_LANGUAGE, FRENCH.language)
-            .bodyValue(defaultAccount.copy(password = wrongPassword))
-            .exchange()
-            .expectStatus()
-            .isBadRequest
-            .returnResult<ResponseEntity<ProblemDetail>>()
-            .responseBodyContent!!
-            .run {
-                assertTrue(isNotEmpty())
-                assertContains(requestToString(), "la taille doit")
-            }
-        assertEquals(0, countAccount(dao))
-
-    }
-
 
     @Test
     fun `vérifie que la requête contient bien des données cohérentes`() {
@@ -189,7 +123,7 @@ internal class SignupTests {
                 assertTrue(isNotEmpty())
                 first().run {
                     assertEquals(
-                        "{jakarta.validation.constraints.Pattern.message}",
+                        "{${Pattern::class.java.name}.message}",
                         messageTemplate
                     )
                 }
@@ -202,7 +136,7 @@ internal class SignupTests {
             .post()
             .uri(SIGNUP_API_PATH)
             .contentType(APPLICATION_JSON)
-            .header(ACCEPT_LANGUAGE,"fr")
+            .header(ACCEPT_LANGUAGE, "fr")
             .bodyValue(defaultAccount.copy(login = "funky-log(n"))
             .exchange()
             .expectStatus()
@@ -245,7 +179,7 @@ internal class SignupTests {
                 assertTrue(isNotEmpty())
                 first().run {
                     assertEquals(
-                        "{jakarta.validation.constraints.Size.message}",
+                        "{${Size::class.java.name}.message}",
                         messageTemplate
                     )
                 }
@@ -445,6 +379,71 @@ internal class SignupTests {
         assertTrue(findAllAccountAuthority(dao).none {
             it.role.equals(Constants.ROLE_ADMIN, true)
         })
+    }
+
+    @Test
+    fun `vérifie l'internationalisation des validations`() {
+        Validation.byProvider(HibernateValidator::class.java)
+            .configure()
+            .defaultLocale(ENGLISH)
+            .locales(FRANCE, ITALY, US)
+            .localeResolver {
+                // get the locales supported by the client from the Accept-Language header
+                val acceptLanguageHeader = "it-IT;q=0.9,en-US;q=0.7"
+                val acceptedLanguages = LanguageRange.parse(acceptLanguageHeader)
+                val resolvedLocales = filter(acceptedLanguages, it.supportedLocales)
+                if (resolvedLocales.size > 0) resolvedLocales[0]
+                else it.defaultLocale
+            }
+            .buildValidatorFactory()
+            .validator
+            .validateProperty(defaultAccount.copy(login = "funky-log(n"), LOGIN_FIELD)
+            .run viol@{
+                assertTrue(isNotEmpty())
+                first().run {
+                    assertEquals(
+                        "{${Pattern::class.java.name}.message}",
+                        messageTemplate
+                    )
+                    assertEquals(false, message.contains("doit correspondre à"))
+                    assertContains(
+                        "deve corrispondere a \"^(?>[a-zA-Z0-9!\$&*+=?^_`{|}~.-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)|(?>[_.@A-Za-z0-9-]+)\$\"",
+                        message
+                    )
+                }
+            }
+
+
+        val wrongPassword = "123"
+        validator.validateProperty(AccountCredentials(password = wrongPassword), PASSWORD_FIELD)
+            .run {
+                assertTrue(isNotEmpty())
+                first().run {
+                    assertEquals(
+                        "{${Size::class.java.name}.message}",
+                        messageTemplate
+                    )
+                }
+            }
+
+        assertEquals(0, countAccount(dao))
+        client
+            .post()
+            .uri(SIGNUP_API_PATH)
+            .contentType(APPLICATION_JSON)
+            .header(ACCEPT_LANGUAGE, FRENCH.language)
+            .bodyValue(defaultAccount.copy(password = wrongPassword))
+            .exchange()
+            .expectStatus()
+            .isBadRequest
+            .returnResult<ResponseEntity<ProblemDetail>>()
+            .responseBodyContent!!
+            .run {
+                assertTrue(isNotEmpty())
+                assertContains(requestToString(), "la taille doit")
+            }
+        assertEquals(0, countAccount(dao))
+
     }
 
 
