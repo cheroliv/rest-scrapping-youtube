@@ -2,6 +2,7 @@ package webapp.signup
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.validation.Validator
+import org.hibernate.validator.messageinterpolation.ResourceBundleMessageInterpolator
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -18,6 +19,7 @@ import webapp.Constants.ACTIVATE_API_PATH
 import webapp.Constants.BASE_URL_DEV
 import webapp.Constants.SIGNUP_API_PATH
 import webapp.DataTests.defaultAccount
+import webapp.Logging.i
 import webapp.accounts.entities.AccountRecord.Companion.EMAIL_FIELD
 import webapp.accounts.entities.AccountRecord.Companion.FIRST_NAME_FIELD
 import webapp.accounts.entities.AccountRecord.Companion.LAST_NAME_FIELD
@@ -50,6 +52,14 @@ internal class SignupTests {
 
     @AfterEach
     fun tearDown() = deleteAllAccounts(dao)
+
+    @Test
+    fun `internationalisation des validations`() {
+        context
+            .getBeanNamesForType(ResourceBundleMessageInterpolator::class.java)
+            .forEach { i(it) }
+    }
+
 
     @Test
     fun `vérifie que la requête contient bien des données cohérentes`() {
