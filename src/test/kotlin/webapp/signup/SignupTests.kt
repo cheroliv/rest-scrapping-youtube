@@ -1,8 +1,9 @@
 package webapp.signup
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import jakarta.validation.Validation.byProvider
 import jakarta.validation.Validator
-import org.hibernate.validator.messageinterpolation.ResourceBundleMessageInterpolator
+import org.hibernate.validator.HibernateValidator
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -28,7 +29,10 @@ import webapp.accounts.entities.AccountRecord.Companion.PASSWORD_FIELD
 import webapp.accounts.models.AccountCredentials
 import webapp.accounts.models.AccountUtils.generateActivationKey
 import java.net.URI
+import java.util.Locale.*
+import java.util.Locale.LanguageRange.parse
 import kotlin.test.*
+
 
 internal class SignupTests {
 
@@ -55,9 +59,34 @@ internal class SignupTests {
 
     @Test
     fun `internationalisation des validations`() {
-        context
-            .getBeanNamesForType(ResourceBundleMessageInterpolator::class.java)
-            .forEach { i(it) }
+        val wrongLogin = "funky-log(n"
+        byProvider(HibernateValidator::class.java)
+            .configure()
+            .defaultLocale(ENGLISH)
+            .locales(FRANCE, ITALY, US)
+            .localeResolver {
+                // get the locales supported by the client from the Accept-Language header
+                val acceptLanguageHeader = "it-IT;q=0.9,en-US;q=0.7"
+                val acceptedLanguages = parse(acceptLanguageHeader)
+                val resolvedLocales = filter(acceptedLanguages, it.supportedLocales)
+                if (resolvedLocales.size > 0) {
+                    resolvedLocales[0]
+                } else it.defaultLocale
+            }
+            .buildValidatorFactory()
+            .validator
+            .validateProperty(defaultAccount.copy(login = wrongLogin), LOGIN_FIELD)
+            .run viol@{
+                assertTrue(isNotEmpty())
+                first().run {
+                    assertEquals(
+                        "{jakarta.validation.constraints.Pattern.message}",
+                        messageTemplate
+                    )
+                    i(message)
+                }
+            }
+
     }
 
 
