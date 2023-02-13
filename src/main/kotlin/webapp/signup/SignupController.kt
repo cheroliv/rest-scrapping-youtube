@@ -76,36 +76,39 @@ class SignupController(
             message = "error.validation",
             status = BAD_REQUEST.value(),
         ).run pm@{
-            signupFields.map { field ->
-                field to byProvider(HibernateValidator::class.java)
-                    .configure()
-                    .localeResolver {
-                        try {
-                            of(
-                                exchange
-                                    .request
-                                    .headers
-                                    .acceptLanguage
-                                    .first()
-                                    .range
+            byProvider(HibernateValidator::class.java)
+                .configure()
+                .localeResolver {
+                    try {
+                        of(
+                            exchange
+                                .request
+                                .headers
+                                .acceptLanguage
+                                .first()
+                                .range
+                        )
+                    } catch (e: Exception) {
+                        ENGLISH
+                    }
+                }
+                .buildValidatorFactory()
+                .validator.run {
+                    signupFields.map { field ->
+                        field to validateProperty(this@acc, field)
+                    }.forEach { violatedField ->
+                        violatedField.second.forEach {
+                            fieldErrors.add(
+                                mapOf(
+                                    "objectName" to objectName,
+                                    "field" to violatedField.first,
+                                    "message" to it.message
+                                )
                             )
-                        } catch (e: Exception) {
-                            ENGLISH
                         }
                     }
-                    .buildValidatorFactory()
-                    .validator.validateProperty(this@acc, field)
-            }.forEach { violatedField ->
-                violatedField.second.forEach {
-                    fieldErrors.add(
-                        mapOf(
-                            "objectName" to objectName,
-                            "field" to violatedField.first,
-                            "message" to it.message
-                        )
-                    )
                 }
-            }
+
             when {
                 fieldErrors.isNotEmpty() -> {
                     return badRequest().body<ProblemDetail>(
@@ -163,8 +166,6 @@ class SignupController(
                 )
             }
         }
-
-
         now().run {
             copy(
                 password = passwordEncoder.encode(password),
