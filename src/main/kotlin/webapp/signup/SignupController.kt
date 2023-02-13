@@ -80,14 +80,19 @@ class SignupController(
                 field to byProvider(HibernateValidator::class.java)
                     .configure()
                     .localeResolver {
-//                            i(exchange.request.headers.acceptLanguage.toString())
-//                            i(it.supportedLocales.toString())
-//                            i(toString())
-                            try {
-                                of(exchange.request.headers.acceptLanguage.first().range)
-                            } catch (npe: NullPointerException) {
-                                ENGLISH
-                            }
+                        try {
+                            of(
+                                exchange
+                                    .request
+                                    .headers
+                                    .acceptLanguage
+                                    .first()
+                                    .range
+                            )
+                        } catch (e: Exception) {
+                            i(e.message.toString())
+                            ENGLISH
+                        }
                     }
                     .buildValidatorFactory()
                     .validator.validateProperty(this@acc, field)

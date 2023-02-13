@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.springframework.beans.factory.getBean
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
+import org.springframework.http.HttpHeaders.ACCEPT_LANGUAGE
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.WebTestClient.bindToServer
@@ -107,16 +108,16 @@ internal class SignupTests {
             .post()
             .uri(SIGNUP_API_PATH)
             .contentType(APPLICATION_JSON)
-            .header("Accept-Language", "fr")
+            .header(ACCEPT_LANGUAGE, "fr")
             .bodyValue(defaultAccount.copy(password = wrongPassword))
             .exchange()
             .expectStatus()
             .isBadRequest
             .returnResult<Unit>()
             .responseBodyContent!!
-            .logBody()
-            .isNotEmpty()
-            .run { assertTrue(this)
+            .run {
+                assertTrue(isNotEmpty())
+                assertContains(requestToString(), "la taille doit")
             }
         assertEquals(0, countAccount(dao))
 
@@ -199,6 +200,7 @@ internal class SignupTests {
             .post()
             .uri(SIGNUP_API_PATH)
             .contentType(APPLICATION_JSON)
+            .header(ACCEPT_LANGUAGE,"fr")
             .bodyValue(defaultAccount.copy(login = "funky-log(n"))
             .exchange()
             .expectStatus()
