@@ -20,7 +20,6 @@ import webapp.Constants.ACTIVATE_API_PATH
 import webapp.Constants.BASE_URL_DEV
 import webapp.Constants.SIGNUP_API_PATH
 import webapp.DataTests.defaultAccount
-import webapp.Logging.i
 import webapp.accounts.entities.AccountRecord.Companion.EMAIL_FIELD
 import webapp.accounts.entities.AccountRecord.Companion.FIRST_NAME_FIELD
 import webapp.accounts.entities.AccountRecord.Companion.LAST_NAME_FIELD
@@ -59,7 +58,6 @@ internal class SignupTests {
 
     @Test
     fun `internationalisation des validations`() {
-        val wrongLogin = "funky-log(n"
         byProvider(HibernateValidator::class.java)
             .configure()
             .defaultLocale(ENGLISH)
@@ -69,13 +67,12 @@ internal class SignupTests {
                 val acceptLanguageHeader = "it-IT;q=0.9,en-US;q=0.7"
                 val acceptedLanguages = parse(acceptLanguageHeader)
                 val resolvedLocales = filter(acceptedLanguages, it.supportedLocales)
-                if (resolvedLocales.size > 0) {
-                    resolvedLocales[0]
-                } else it.defaultLocale
+                if (resolvedLocales.size > 0) resolvedLocales[0]
+                else it.defaultLocale
             }
             .buildValidatorFactory()
             .validator
-            .validateProperty(defaultAccount.copy(login = wrongLogin), LOGIN_FIELD)
+            .validateProperty(defaultAccount.copy(login = "funky-log(n"), LOGIN_FIELD)
             .run viol@{
                 assertTrue(isNotEmpty())
                 first().run {
@@ -83,9 +80,45 @@ internal class SignupTests {
                         "{jakarta.validation.constraints.Pattern.message}",
                         messageTemplate
                     )
-                    i(message)
+                    assertEquals(false, message.contains("doit correspondre à"))
+                    assertContains(
+                        "deve corrispondere a \"^(?>[a-zA-Z0-9!\$&*+=?^_`{|}~.-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*)|(?>[_.@A-Za-z0-9-]+)\$\"",
+                        message
+                    )
                 }
             }
+
+
+        val wrongPassword = "123"
+        validator
+            .validateProperty(AccountCredentials(password = wrongPassword), PASSWORD_FIELD)
+            .run {
+                assertTrue(isNotEmpty())
+                first().run {
+                    assertEquals(
+                        "{jakarta.validation.constraints.Size.message}",
+                        messageTemplate
+                    )
+                }
+            }
+
+        assertEquals(0, countAccount(dao))
+        client
+            .post()
+            .uri(SIGNUP_API_PATH)
+            .contentType(APPLICATION_JSON)
+            .header("Accept-Language", "fr")
+            .bodyValue(defaultAccount.copy(password = wrongPassword))
+            .exchange()
+            .expectStatus()
+            .isBadRequest
+            .returnResult<Unit>()
+            .responseBodyContent!!
+            .logBody()
+            .isNotEmpty()
+            .run { assertTrue(this)
+            }
+        assertEquals(0, countAccount(dao))
 
     }
 

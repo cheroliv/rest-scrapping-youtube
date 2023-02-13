@@ -1,6 +1,7 @@
 package webapp.signup
 
-import jakarta.validation.Validator
+import jakarta.validation.Validation.byProvider
+import org.hibernate.validator.HibernateValidator
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity.badRequest
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ServerWebExchange
 import webapp.Constants.ACCOUNT_API
 import webapp.Constants.ACTIVATE_API
 import webapp.Constants.ACTIVATE_API_KEY
@@ -36,6 +38,7 @@ import webapp.mail.MailService
 import java.net.URI
 import java.time.Instant.now
 import java.util.*
+import java.util.Locale.*
 
 @RestController
 @RequestMapping(ACCOUNT_API)
@@ -43,8 +46,6 @@ class SignupController(
     private val accountRepository: AccountRepository,
     private val mailService: MailService,
     private val passwordEncoder: PasswordEncoder,
-    private val validator: Validator,
-//    private val request: LocaleContextResolver//to get accepted locales
 ) {
     companion object {
         val signupFields
@@ -67,7 +68,7 @@ class SignupController(
     @PostMapping(SIGNUP_API, produces = [APPLICATION_PROBLEM_JSON_VALUE])
     @ResponseStatus(CREATED)
     @Transactional
-    suspend fun signup(@RequestBody account: AccountCredentials) = account.run acc@{
+    suspend fun signup(@RequestBody account: AccountCredentials, exchange: ServerWebExchange) = account.run acc@{
         ProblemsModel(
             type = "https://www.cheroliv.com/problem/constraint-violation",
             title = "Data binding and validation failure",
@@ -76,7 +77,20 @@ class SignupController(
             status = BAD_REQUEST.value(),
         ).run pm@{
             signupFields.map { field ->
-                field to validator.validateProperty(this@acc, field)
+                field to byProvider(HibernateValidator::class.java)
+                    .configure()
+                    .localeResolver {
+//                            i(exchange.request.headers.acceptLanguage.toString())
+//                            i(it.supportedLocales.toString())
+//                            i(toString())
+                            try {
+                                of(exchange.request.headers.acceptLanguage.first().range)
+                            } catch (npe: NullPointerException) {
+                                ENGLISH
+                            }
+                    }
+                    .buildValidatorFactory()
+                    .validator.validateProperty(this@acc, field)
             }.forEach { violatedField ->
                 violatedField.second.forEach {
                     fieldErrors.add(

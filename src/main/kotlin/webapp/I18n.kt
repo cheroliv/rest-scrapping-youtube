@@ -12,6 +12,7 @@ import webapp.Constants.REQUEST_PARAM_LANG
 import java.util.*
 import java.util.Locale.forLanguageTag
 
+
 @Suppress("unused")
 @Configuration
 class I18n : DelegatingWebFluxConfiguration() {

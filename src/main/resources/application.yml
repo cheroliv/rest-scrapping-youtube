@@ -60,6 +60,8 @@ spring:
   webflux:
     problemdetails:
       enabled: true
+  web:
+    locale: en
 ##############################################################################
 
 logging:
