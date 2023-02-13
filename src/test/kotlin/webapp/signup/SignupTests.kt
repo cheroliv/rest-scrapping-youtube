@@ -12,6 +12,8 @@ import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.http.HttpHeaders.ACCEPT_LANGUAGE
 import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.http.ProblemDetail
+import org.springframework.http.ResponseEntity
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.WebTestClient.bindToServer
 import org.springframework.test.web.reactive.server.returnResult
@@ -108,12 +110,12 @@ internal class SignupTests {
             .post()
             .uri(SIGNUP_API_PATH)
             .contentType(APPLICATION_JSON)
-            .header(ACCEPT_LANGUAGE, "fr")
+            .header(ACCEPT_LANGUAGE, FRENCH.language)
             .bodyValue(defaultAccount.copy(password = wrongPassword))
             .exchange()
             .expectStatus()
             .isBadRequest
-            .returnResult<Unit>()
+            .returnResult<ResponseEntity<ProblemDetail>>()
             .responseBodyContent!!
             .run {
                 assertTrue(isNotEmpty())

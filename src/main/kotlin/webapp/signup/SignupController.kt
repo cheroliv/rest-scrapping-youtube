@@ -90,7 +90,6 @@ class SignupController(
                                     .range
                             )
                         } catch (e: Exception) {
-                            i(e.message.toString())
                             ENGLISH
                         }
                     }
