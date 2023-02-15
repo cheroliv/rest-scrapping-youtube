@@ -16,7 +16,6 @@ import org.springframework.web.server.ServerWebExchange
 import webapp.Constants.ACCOUNT_API
 import webapp.Constants.ACTIVATE_API
 import webapp.Constants.ACTIVATE_API_KEY
-import webapp.Constants.DEFAULT_LANGUAGE
 import webapp.Constants.MSG_WRONG_ACTIVATION_KEY
 import webapp.Constants.ROLE_USER
 import webapp.Constants.SIGNUP_API
@@ -172,7 +171,7 @@ class SignupController(
                 activationKey = generateActivationKey,
                 authorities = setOf(ROLE_USER),
                 langKey = when {
-                    langKey.isNullOrBlank() -> DEFAULT_LANGUAGE
+                    langKey.isNullOrBlank() -> ENGLISH.language
                     else -> langKey
                 },
                 activated = false,
