@@ -136,7 +136,7 @@ internal class SignupTests {
             .post()
             .uri(SIGNUP_API_PATH)
             .contentType(APPLICATION_JSON)
-            .header(ACCEPT_LANGUAGE, "fr")
+            .header(ACCEPT_LANGUAGE, FRENCH.language)
             .bodyValue(defaultAccount.copy(login = "funky-log(n"))
             .exchange()
             .expectStatus()
