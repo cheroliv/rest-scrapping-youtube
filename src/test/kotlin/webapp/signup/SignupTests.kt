@@ -205,8 +205,17 @@ internal class SignupTests {
     @Test
     fun `test signup account avec un password null`() {
         assertEquals(0, countAccount(dao))
-        client.post().uri(SIGNUP_API_PATH).contentType(APPLICATION_JSON).bodyValue(defaultAccount.copy(password = null))
-            .exchange().expectStatus().isBadRequest.returnResult<Unit>().responseBodyContent!!.isNotEmpty()
+        client
+            .post()
+            .uri(SIGNUP_API_PATH)
+            .contentType(APPLICATION_JSON)
+            .bodyValue(defaultAccount.copy(password = null))
+            .exchange()
+            .expectStatus()
+            .isBadRequest
+            .returnResult<Unit>()
+            .responseBodyContent!!
+            .isNotEmpty()
             .run { assertTrue(this) }
         assertEquals(0, countAccount(dao))
     }
@@ -275,8 +284,18 @@ internal class SignupTests {
         assertEquals(0, countAccountAuthority(dao))
         // premier user
         // sign up premier user
-        client.post().uri(SIGNUP_API_PATH).contentType(APPLICATION_JSON).bodyValue(defaultAccount).exchange()
-            .expectStatus().isCreated.returnResult<Unit>().responseBodyContent!!.isEmpty().run { assertTrue(this) }
+        client
+            .post()
+            .uri(SIGNUP_API_PATH)
+            .contentType(APPLICATION_JSON)
+            .bodyValue(defaultAccount)
+            .exchange()
+            .expectStatus()
+            .isCreated
+            .returnResult<Unit>()
+            .responseBodyContent!!
+            .isEmpty()
+            .run { assertTrue(this) }
         assertEquals(1, countAccount(dao))
         assertEquals(1, countAccountAuthority(dao))
         assertFalse(findOneByEmail(defaultAccount.email!!, dao)!!.activated)
@@ -284,9 +303,17 @@ internal class SignupTests {
         // email dupliqué, login different
         // sign up un second user (non activé)
         val secondLogin = "foo"
-        client.post().uri(SIGNUP_API_PATH).contentType(APPLICATION_JSON)
+        client
+            .post()
+            .uri(SIGNUP_API_PATH)
+            .contentType(APPLICATION_JSON)
             .bodyValue(defaultAccount.copy(login = secondLogin))
-            .exchange().expectStatus().isCreated.returnResult<Unit>().responseBodyContent!!.isEmpty()
+            .exchange()
+            .expectStatus()
+            .isCreated
+            .returnResult<Unit>()
+            .responseBodyContent!!
+            .isEmpty()
             .run { assertTrue(this) }
         assertEquals(1, countAccount(dao))
         assertEquals(1, countAccountAuthority(dao))
@@ -300,11 +327,17 @@ internal class SignupTests {
         // email dupliqué - avec un email en majuscule, login différent
         // sign up un troisieme user (non activé)
         val thirdLogin = "bar"
-        client.post().uri(SIGNUP_API_PATH).contentType(APPLICATION_JSON).bodyValue(
-            defaultAccount.copy(
-                login = thirdLogin, email = defaultAccount.email!!.uppercase()
-            )
-        ).exchange().expectStatus().isCreated.returnResult<Unit>().responseBodyContent!!.isEmpty()
+        client
+            .post()
+            .uri(SIGNUP_API_PATH)
+            .contentType(APPLICATION_JSON)
+            .bodyValue(defaultAccount.copy(login = thirdLogin, email = defaultAccount.email!!.uppercase()))
+            .exchange()
+            .expectStatus()
+            .isCreated
+            .returnResult<Unit>()
+            .responseBodyContent!!
+            .isEmpty()
             .run { assertTrue(this) }
         assertEquals(1, countAccount(dao))
         assertEquals(1, countAccountAuthority(dao))
@@ -324,9 +357,17 @@ internal class SignupTests {
         val fourthLogin = "baz"
         // sign up un quatrieme user avec login different et meme email
         // le user existant au meme mail est deja activé
-        client.post().uri(SIGNUP_API_PATH).contentType(APPLICATION_JSON)
+        client
+            .post()
+            .uri(SIGNUP_API_PATH)
+            .contentType(APPLICATION_JSON)
             .bodyValue(defaultAccount.copy(login = fourthLogin))
-            .exchange().expectStatus().isBadRequest.returnResult<Unit>().responseBodyContent!!.isNotEmpty()
+            .exchange()
+            .expectStatus()
+            .isBadRequest
+            .returnResult<Unit>()
+            .responseBodyContent!!
+            .isNotEmpty()
             .run { assertTrue(this) }
         assertEquals(1, countAccount(dao))
         assertEquals(1, countAccountAuthority(dao))
@@ -353,22 +394,31 @@ internal class SignupTests {
         assertEquals(0, countUserBefore)
         assertEquals(0, countUserAuthBefore)
         val login = "badguy"
-        client.post().uri(SIGNUP_API_PATH).contentType(APPLICATION_JSON).bodyValue(
-            AccountCredentials(
-                login = login,
-                password = "password",
-                firstName = "Bad",
-                lastName = "Guy",
-                email = "badguy@example.com",
-                activated = true,
-                imageUrl = "http://placehold.it/50x50",
-                langKey = Constants.DEFAULT_LANGUAGE,
-                authorities = setOf(Constants.ROLE_ADMIN),
+        client
+            .post()
+            .uri(SIGNUP_API_PATH)
+            .contentType(APPLICATION_JSON)
+            .bodyValue(
+                AccountCredentials(
+                    login = login,
+                    password = "password",
+                    firstName = "Bad",
+                    lastName = "Guy",
+                    email = "badguy@example.com",
+                    activated = true,
+                    imageUrl = "http://placehold.it/50x50",
+                    langKey = Constants.DEFAULT_LANGUAGE,
+                    authorities = setOf(Constants.ROLE_ADMIN),
+                )
             )
-        ).exchange().expectStatus().isCreated.returnResult<Unit>().responseBodyContent.run {
-            assertNotNull(this)
-            assertTrue(isEmpty())
-        }
+            .exchange()
+            .expectStatus()
+            .isCreated
+            .returnResult<Unit>()
+            .responseBodyContent.run {
+                assertNotNull(this)
+                assertTrue(isEmpty())
+            }
         assertEquals(countUserBefore + 1, countAccount(dao))
         assertEquals(countUserAuthBefore + 1, countAccountAuthority(dao))
         findOneByLogin(login, dao).run {
@@ -449,9 +499,13 @@ internal class SignupTests {
 
     @Test
     fun `test activate avec une mauvaise clé`() {
-        client.get().uri(
-            "$ACTIVATE_API_PATH$ACTIVATE_API_PARAM", "wrongActivationKey"
-        ).exchange().expectStatus().is5xxServerError.returnResult<Unit>()
+        client
+            .get()
+            .uri("$ACTIVATE_API_PATH$ACTIVATE_API_PARAM", "wrongActivationKey")
+            .exchange()
+            .expectStatus()
+            .is5xxServerError
+            .returnResult<Unit>()
     }
 
     @Test
@@ -462,13 +516,18 @@ internal class SignupTests {
         assertEquals(1, countAccount(dao))
         assertEquals(1, countAccountAuthority(dao))
 
-        client.get().uri(
-            "$ACTIVATE_API_PATH$ACTIVATE_API_PARAM",
-            findOneByLogin(defaultAccount.login!!, dao)!!.apply {
-                assertTrue(activationKey!!.isNotBlank())
-                assertFalse(activated)
-            }.activationKey
-        ).exchange().expectStatus().isOk.returnResult<Unit>()
+        client
+            .get()
+            .uri(
+                "$ACTIVATE_API_PATH$ACTIVATE_API_PARAM",
+                findOneByLogin(defaultAccount.login!!, dao)!!.apply {
+                    assertTrue(activationKey!!.isNotBlank())
+                    assertFalse(activated)
+                }.activationKey
+            ).exchange()
+            .expectStatus()
+            .isOk
+            .returnResult<Unit>()
 
         findOneByLogin(defaultAccount.login!!, dao)!!.run {
             assertNull(activationKey)
