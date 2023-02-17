@@ -19,3 +19,4 @@ bin
 .project
 .settings
 /src/main/resources/application-mailslurp.yml
+.vscode

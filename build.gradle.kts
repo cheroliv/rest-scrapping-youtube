@@ -6,7 +6,7 @@
 import AppDeps.appModules
 import GradleUtils.appDependencies
 import GradleUtils.sep
-import org.gradle.api.JavaVersion.VERSION_17
+import org.gradle.api.JavaVersion.VERSION_19
 import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -20,6 +20,7 @@ buildscript {
 }
 
 plugins {
+    jacoco
     kotlin("jvm")
     kotlin("plugin.spring")
     kotlin("plugin.allopen")
@@ -28,9 +29,8 @@ plugins {
     id("org.springframework.boot")
     id("io.spring.dependency-management")
     id("com.google.cloud.tools.jib")
-    id("com.github.andygoossens.gradle-modernizer-plugin")
     id("com.google.cloud.tools.appengine")
-    jacoco
+    id("com.github.andygoossens.gradle-modernizer-plugin")
 }
 
 group = properties["artifact.group"].toString()
@@ -57,23 +57,24 @@ configurations {
     }
 }
 
-modernizer {
-    failOnViolations = true
-    includeTestClasses = true
-}
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf(properties["free_compiler_args_value"].toString())
-        jvmTarget = VERSION_17.toString()
+        jvmTarget = VERSION_19.toString()
     }
+}
+
+modernizer {
+    failOnViolations = true
+    includeTestClasses = true
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
     testLogging { events(FAILED, SKIPPED) }
     reports {
-        html.isEnabled = true
+        html.required.set(true)
         ignoreFailures = true
     }
 }
@@ -91,13 +92,13 @@ tasks.register<Delete>("cleanResources") {
 tasks.register<TestReport>("testReport") {
     description = "Generates an HTML test report from the results of testReport task."
     group = "report"
-    destinationDir = file(buildString {
+    destinationDirectory.set(file(buildString {
         append(buildDir)
         append(sep)
         append("reports")
         append(sep)
         append("tests")
-    })
+    }))
     reportOn("test")
 }
 
@@ -128,7 +129,7 @@ tasks.register<DefaultTask>("addMailSlurpConfiguration") {
 //when src/main/resources/application-mailslurp.yml is not found into .gitignore
 // then add src/main/resources/application-mailslurp.yml to .gitgnore
 }
-
+/* 
 jib {
     from {
         image = "eclipse-temurin@sha256:fabe27bd9db502d484a11d3f571c2f4ef7bba4a172527084d939935358fb06c4"
@@ -156,3 +157,4 @@ jib {
 //        }
     }
 }
+*/
