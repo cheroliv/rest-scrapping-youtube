@@ -131,7 +131,7 @@ tasks.register<DefaultTask>("addMailSlurpConfiguration") {
 //when src/main/resources/application-mailslurp.yml is not found into .gitignore
 // then add src/main/resources/application-mailslurp.yml to .gitgnore
 }
-/* 
+
 jib {
     from {
         image = "eclipse-temurin@sha256:fabe27bd9db502d484a11d3f571c2f4ef7bba4a172527084d939935358fb06c4"
@@ -159,4 +159,3 @@ jib {
 //        }
     }
 }
-*/
