@@ -6,6 +6,7 @@
 import AppDeps.appModules
 import GradleUtils.appDependencies
 import GradleUtils.sep
+//import org.gradle.api.JavaVersion.VERSION_8
 import org.gradle.api.JavaVersion.VERSION_19
 import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
@@ -57,6 +58,7 @@ configurations {
     }
 }
 
+//java.sourceCompatibility = JavaVersion.VERSION_8
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
