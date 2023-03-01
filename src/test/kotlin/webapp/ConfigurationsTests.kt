@@ -64,7 +64,7 @@ class ConfigurationsTests {
     @Test
     fun `test go visit message`() {
         assertEquals(
-            "https://github.com/artisan-logiciel/kotlin-springboot",
+            "https://github.com/cheroliv/kotlin-springboot",
             properties.goVisitMessage
         )
 

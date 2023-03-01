@@ -1,7 +1,7 @@
 webapp:
   message: hello
   item: item
-  go-visit-message: https://github.com/artisan-logiciel/kotlin-springboot
+  go-visit-message: https://github.com/cheroliv/kotlin-springboot
   clientApp:
     name: 'server'
   database:

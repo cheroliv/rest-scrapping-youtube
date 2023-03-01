@@ -46,16 +46,7 @@ class SignupController(
     private val mailService: MailService,
     private val passwordEncoder: PasswordEncoder,
 ) {
-    companion object {
-        val signupFields
-            get() = setOf(
-                PASSWORD_FIELD,
-                EMAIL_FIELD,
-                LOGIN_FIELD,
-                FIRST_NAME_FIELD,
-                LAST_NAME_FIELD
-            )
-    }
+
 
     internal class SignupException(message: String) : RuntimeException(message)
 
@@ -64,52 +55,82 @@ class SignupController(
      *
      * @param account the managed user View Model.
      */
-    @PostMapping(SIGNUP_API, produces = [APPLICATION_PROBLEM_JSON_VALUE])
+    @PostMapping(
+        SIGNUP_API,
+        produces = [APPLICATION_PROBLEM_JSON_VALUE]
+    )
     @ResponseStatus(CREATED)
     @Transactional
-    suspend fun signup(@RequestBody account: AccountCredentials, exchange: ServerWebExchange) = account.run acc@{
-        ProblemsModel(
-            type = "https://www.cheroliv.com/problem/constraint-violation",
-            title = "Data binding and validation failure",
-            path = "$ACCOUNT_API$SIGNUP_API",
-            message = "error.validation",
-            status = BAD_REQUEST.value(),
-        ).run pm@{
-            byProvider(HibernateValidator::class.java)
-                .configure()
-                .localeResolver {
-                    try {
-                        of(
-                            exchange
-                                .request
-                                .headers
-                                .acceptLanguage
-                                .first()
-                                .range
-                        )
-                    } catch (e: Exception) {
-                        ENGLISH
-                    }
-                }
-                .buildValidatorFactory()
-                .validator.run {
-                    signupFields.map { field ->
-                        field to validateProperty(this@acc, field)
-                    }.forEach { violatedField ->
-                        violatedField.second.forEach {
-                            fieldErrors.add(
-                                mapOf(
-                                    "objectName" to objectName,
-                                    "field" to violatedField.first,
-                                    "message" to it.message
-                                )
+    suspend fun signup(
+        @RequestBody account: AccountCredentials,
+        exchange: ServerWebExchange
+    ): ResponseEntity<ProblemDetail> = now().run {
+        account.run acc@{
+            i("signup attempt: ${this@run} $login $email")
+            ProblemsModel(
+                type = "https://cheroliv.github.io/problem/constraint-violation",
+                title = "Data binding and validation failure",
+                path = "$ACCOUNT_API$SIGNUP_API",
+                message = "error.validation",
+                status = BAD_REQUEST.value(),
+            ).run pm@{
+                byProvider(HibernateValidator::class.java)
+                    .configure()
+                    .localeResolver {
+                        try {
+                            of(
+                                exchange
+                                    .request
+                                    .headers
+                                    .acceptLanguage
+                                    .first()
+                                    .range
                             )
+                        } catch (e: Exception) {
+                            ENGLISH
                         }
                     }
-                }
+                    .buildValidatorFactory()
+                    .validator.run {
+                        setOf(
+                            PASSWORD_FIELD,
+                            EMAIL_FIELD,
+                            LOGIN_FIELD,
+                            FIRST_NAME_FIELD,
+                            LAST_NAME_FIELD
+                        ).map { field ->
+                            field to validateProperty(this@acc, field)
+                        }.forEach { violatedField ->
+                            violatedField.second.forEach {
+                                fieldErrors.add(
+                                    mapOf(
+                                        "objectName" to objectName,
+                                        "field" to violatedField.first,
+                                        "message" to it.message
+                                    )
+                                )
+                            }
+                        }
+                    }
 
-            when {
-                fieldErrors.isNotEmpty() -> {
+                when {
+                    fieldErrors.isNotEmpty() -> {
+                        return badRequest().body<ProblemDetail>(
+                            forStatus(BAD_REQUEST).apply {
+                                type = URI(this@pm.type)
+                                title = this@pm.title
+                                status = BAD_REQUEST.value()
+                                setProperty("path", this@pm.path)
+                                setProperty("message", this@pm.message)
+                                setProperty("fieldErrors", this@pm.fieldErrors)
+                            }
+                        )
+                    }
+                }
+                try {
+                    isLoginAvailable(this@acc)
+                    isEmailAvailable(this@acc)
+                } catch (e: UsernameAlreadyUsedException) {
                     return badRequest().body<ProblemDetail>(
                         forStatus(BAD_REQUEST).apply {
                             type = URI(this@pm.type)
@@ -117,55 +138,39 @@ class SignupController(
                             status = BAD_REQUEST.value()
                             setProperty("path", this@pm.path)
                             setProperty("message", this@pm.message)
-                            setProperty("fieldErrors", this@pm.fieldErrors)
+                            setProperty("fieldErrors", this@pm.fieldErrors.apply {
+                                add(
+                                    mapOf(
+                                        "objectName" to objectName,
+                                        "field" to LOGIN_FIELD,
+                                        "message" to e.message!!
+                                    )
+                                )
+                            })
+                        }
+                    )
+                } catch (e: EmailAlreadyUsedException) {
+                    return badRequest().body<ProblemDetail>(
+                        forStatus(BAD_REQUEST).apply {
+                            type = URI(this@pm.type)
+                            title = this@pm.title
+                            status = BAD_REQUEST.value()
+                            setProperty("path", path)
+                            setProperty("message", this@pm.message)
+                            setProperty("fieldErrors", this@pm.fieldErrors.apply {
+                                add(
+                                    mapOf(
+                                        "objectName" to objectName,
+                                        "field" to EMAIL_FIELD,
+                                        "message" to e.message!!
+                                    )
+                                )
+                            })
                         }
                     )
                 }
             }
-            try {
-                isLoginAvailable(this@acc)
-                isEmailAvailable(this@acc)
-            } catch (e: UsernameAlreadyUsedException) {
-                return badRequest().body<ProblemDetail>(
-                    forStatus(BAD_REQUEST).apply {
-                        type = URI(this@pm.type)
-                        title = this@pm.title
-                        status = BAD_REQUEST.value()
-                        setProperty("path", this@pm.path)
-                        setProperty("message", this@pm.message)
-                        setProperty("fieldErrors", this@pm.fieldErrors.apply {
-                            add(
-                                mapOf(
-                                    "objectName" to objectName,
-                                    "field" to LOGIN_FIELD,
-                                    "message" to e.message!!
-                                )
-                            )
-                        })
-                    }
-                )
-            } catch (e: EmailAlreadyUsedException) {
-                return badRequest().body<ProblemDetail>(
-                    forStatus(BAD_REQUEST).apply {
-                        type = URI(this@pm.type)
-                        title = this@pm.title
-                        status = BAD_REQUEST.value()
-                        setProperty("path", path)
-                        setProperty("message", this@pm.message)
-                        setProperty("fieldErrors", this@pm.fieldErrors.apply {
-                            add(
-                                mapOf(
-                                    "objectName" to objectName,
-                                    "field" to EMAIL_FIELD,
-                                    "message" to e.message!!
-                                )
-                            )
-                        })
-                    }
-                )
-            }
-        }
-        now().run {
+
             copy(
                 password = passwordEncoder.encode(password),
                 activationKey = generateActivationKey,
@@ -176,18 +181,16 @@ class SignupController(
                 },
                 activated = false,
                 createdBy = SYSTEM_USER,
-                createdDate = this,
+                createdDate = this@run,
                 lastModifiedBy = SYSTEM_USER,
-                lastModifiedDate = this
+                lastModifiedDate = this@run
             ).run {
                 accountRepository.signup(this)
                 mailService.sendActivationEmail(this)
             }
+            ResponseEntity<ProblemDetail>(CREATED)
         }
-
-        ResponseEntity<ProblemDetail>(CREATED)
     }
-
     /**
      * `GET  /activate` : activate the signed-up user.
      *

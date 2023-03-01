@@ -53,7 +53,7 @@ public class BookmarkNotFoundException extends ErrorResponseException {
 //    }
 //}
 /*{
-  "type": "https://www.cheroliv.com/problem/constraint-violation",
+  "type": "https://cheroliv.github.io/problem/constraint-violation",
   "title": "Data binding and validation failure",
   "status": 400,
   "path": "/api/register",
@@ -71,7 +71,7 @@ public class BookmarkNotFoundException extends ErrorResponseException {
 
 /*
 {
-  "type": "https://www.cheroliv.com/problem/constraint-violation",
+  "type": "https://cheroliv.github.io/problem/constraint-violation",
   "title": "Data binding and validation failure",
   "status": 400,
   "path": "/api/register",
