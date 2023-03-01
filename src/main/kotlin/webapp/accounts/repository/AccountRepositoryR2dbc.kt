@@ -9,7 +9,6 @@ import org.springframework.data.r2dbc.core.*
 import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.data.relational.core.query.Query.query
 import org.springframework.stereotype.Repository
-import webapp.Constants.ROLE_USER
 import webapp.accounts.entities.AccountAuthorityEntity
 import webapp.accounts.entities.AccountEntity
 import webapp.accounts.entities.AccountRecord
@@ -41,20 +40,6 @@ class AccountRepositoryR2dbc(
         } catch (_: NoSuchElementException) {
             null
         }
-
-    override suspend fun signup(accountCredentials: AccountCredentials) {
-        dao.insert(AccountEntity(accountCredentials))
-            .awaitSingleOrNull()
-            ?.id
-            .run {
-                if (this != null) dao.insert(
-                    AccountAuthorityEntity(
-                        userId = this,
-                        role = ROLE_USER
-                    )
-                ).awaitSingleOrNull()
-            }
-    }
 
     override suspend fun findOne(emailOrLogin: String): AccountCredentials? = dao
         .select<AccountEntity>()

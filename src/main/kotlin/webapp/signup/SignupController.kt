@@ -45,6 +45,7 @@ class SignupController(
     private val accountRepository: AccountRepository,
     private val mailService: MailService,
     private val passwordEncoder: PasswordEncoder,
+    private val signupService: SignupService,
 ) {
 
 
@@ -115,7 +116,7 @@ class SignupController(
 
                 when {
                     fieldErrors.isNotEmpty() -> {
-                        return badRequest().body<ProblemDetail>(
+                        return badRequest().body(
                             forStatus(BAD_REQUEST).apply {
                                 type = URI(this@pm.type)
                                 title = this@pm.title
@@ -185,12 +186,13 @@ class SignupController(
                 lastModifiedBy = SYSTEM_USER,
                 lastModifiedDate = this@run
             ).run {
-                accountRepository.signup(this)
+                signupService.signup(this)
                 mailService.sendActivationEmail(this)
             }
             ResponseEntity<ProblemDetail>(CREATED)
         }
     }
+
     /**
      * `GET  /activate` : activate the signed-up user.
      *
