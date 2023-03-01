@@ -72,7 +72,7 @@ object Logging {
         activeProfiles: String
     ): String = """$JUMP_LINE$JUMP_LINE$JUMP_LINE
 ----------------------------------------------------------
-go visit $goVisitMessage    
+Go visit $goVisitMessage    
 ----------------------------------------------------------
 Application '$appName' is running!
 Access URLs
@@ -94,10 +94,10 @@ $JUMP_LINE$JUMP_LINE""".trimIndent()
 
     /*=================================================================================*/
 
-    internal fun ApplicationContext.checkProfileLog(): ApplicationContext = apply {
+    internal fun ApplicationContext.checkProfileLog() = apply {
         environment.activeProfiles.run {
             if (contains(DEVELOPMENT) && contains(PRODUCTION))
-                log.error(
+                e(
                     getBean<MessageSource>().getMessage(
                         STARTUP_LOG_MSG_KEY,
                         arrayOf(DEVELOPMENT, PRODUCTION),
@@ -105,7 +105,7 @@ $JUMP_LINE$JUMP_LINE""".trimIndent()
                     )
                 )
             if (contains(DEVELOPMENT) && contains(CLOUD))
-                log.error(
+                e(
                     getBean<MessageSource>().getMessage(
                         STARTUP_LOG_MSG_KEY,
                         arrayOf(DEVELOPMENT, CLOUD),
@@ -117,8 +117,8 @@ $JUMP_LINE$JUMP_LINE""".trimIndent()
 
     /*=================================================================================*/
 
-    internal fun ApplicationContext.bootstrapLog(): ApplicationContext = apply {
-        startupLogMessage(
+    internal fun ApplicationContext.bootstrapLog() = apply {
+        i(startupLogMessage(
             appName = environment.getProperty(SPRING_APPLICATION_NAME),
             goVisitMessage = getBean<Properties>().goVisitMessage,
             protocol = if (environment.getProperty(SERVER_SSL_KEY_STORE) != null) HTTPS
@@ -142,7 +142,7 @@ $JUMP_LINE$JUMP_LINE""".trimIndent()
                     .activeProfiles
                     .reduce { accumulator, profile -> "$accumulator, $profile" }
             else EMPTY_STRING,
-        ).run { i(this) }
+        ))
     }
 }
 /*=================================================================================*/
