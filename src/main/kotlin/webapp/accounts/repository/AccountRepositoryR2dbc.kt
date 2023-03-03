@@ -113,12 +113,11 @@ class AccountRepositoryR2dbc(
                         account.email != null -> findOne(account.email)
                         else -> null
                     }).run {
-                if (this != null) {
-                    dao.delete<AccountAuthorityEntity>()
-                        .matching(query(where(ACCOUNT_AUTH_USER_ID_FIELD).`is`(id!!)))
-                        .allAndAwait()
-                    dao.delete(AccountEntity(this)).awaitSingle()
-                }
+                if (this != null) dao
+                    .delete<AccountAuthorityEntity>()
+                    .matching(query(where(ACCOUNT_AUTH_USER_ID_FIELD).`is`(id!!)))
+                    .allAndAwait()
+                    .also { dao.delete(AccountEntity(this)).awaitSingle() }
             }
         }
     }

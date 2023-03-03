@@ -2,7 +2,7 @@
 
 package webapp.signup
 
-import jakarta.validation.Validation
+import jakarta.validation.Validation.byProvider
 import jakarta.validation.Validator
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
@@ -113,12 +113,10 @@ internal class SignupTests {
         }
     }
 
-
     @Test
-    fun `test signup account avec login invalid`() {
-        val wrongLogin = "funky-log(n"
+    fun `test signup account validator avec login invalid`() {
         validator
-            .validateProperty(AccountCredentials(login = wrongLogin), LOGIN_FIELD)
+            .validateProperty(AccountCredentials(login = "funky-log(n"), LOGIN_FIELD)
             .run viol@{
                 assertTrue(isNotEmpty())
                 first().run {
@@ -128,9 +126,10 @@ internal class SignupTests {
                     )
                 }
             }
+    }
 
-
-
+    @Test
+    fun `test signup account avec login invalid`() {
         assertEquals(0, countAccount(dao))
         client
             .post()
@@ -169,9 +168,8 @@ internal class SignupTests {
         assertEquals(0, countBefore)
     }
 
-
     @Test
-    fun `test signup account avec un password invalid`() {
+    fun `test signup account validator avec un password invalid`() {
         val wrongPassword = "123"
         validator
             .validateProperty(AccountCredentials(password = wrongPassword), PASSWORD_FIELD)
@@ -184,13 +182,16 @@ internal class SignupTests {
                     )
                 }
             }
+    }
 
+    @Test
+    fun `test signup account avec un password invalid`() {
         assertEquals(0, countAccount(dao))
         client
             .post()
             .uri(SIGNUP_API_PATH)
             .contentType(APPLICATION_JSON)
-            .bodyValue(defaultAccount.copy(password = wrongPassword))
+            .bodyValue(defaultAccount.copy(password = "123"))
             .exchange()
             .expectStatus()
             .isBadRequest
@@ -432,8 +433,8 @@ internal class SignupTests {
     }
 
     @Test
-    fun `vérifie l'internationalisation des validations`() {
-        Validation.byProvider(HibernateValidator::class.java)
+    fun `vérifie l'internationalisation des validations par validator factory avec mauvais login en italien`() {
+        byProvider(HibernateValidator::class.java)
             .configure()
             .defaultLocale(ENGLISH)
             .locales(FRANCE, ITALY, US)
@@ -462,27 +463,16 @@ internal class SignupTests {
                     )
                 }
             }
-
-
-        val wrongPassword = "123"
-        validator.validateProperty(AccountCredentials(password = wrongPassword), PASSWORD_FIELD)
-            .run {
-                assertTrue(isNotEmpty())
-                first().run {
-                    assertEquals(
-                        "{${Size::class.java.name}.message}",
-                        messageTemplate
-                    )
-                }
-            }
-
+    }
+    @Test
+    fun `vérifie l'internationalisation des validations par REST avec mot de passe non conforme en francais`() {
         assertEquals(0, countAccount(dao))
         client
             .post()
             .uri(SIGNUP_API_PATH)
             .contentType(APPLICATION_JSON)
             .header(ACCEPT_LANGUAGE, FRENCH.language)
-            .bodyValue(defaultAccount.copy(password = wrongPassword))
+            .bodyValue(defaultAccount.copy(password = "123"))
             .exchange()
             .expectStatus()
             .isBadRequest
