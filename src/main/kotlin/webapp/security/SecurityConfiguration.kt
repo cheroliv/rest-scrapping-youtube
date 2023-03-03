@@ -4,7 +4,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod.*
 import org.springframework.security.authentication.ReactiveAuthenticationManager
-import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder.AUTHENTICATION
@@ -26,6 +25,7 @@ import webapp.Constants.FEATURE_POLICY
 import webapp.Constants.ROLE_ADMIN
 import webapp.Logging.d
 import webapp.Properties
+import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager as RepositoryAuthentication
 
 @Configuration
 @EnableWebFluxSecurity
@@ -58,53 +58,56 @@ class SecurityConfiguration(
             .addFilterAt(JwtFilter(security), HTTP_BASIC)
             .authenticationManager(reactiveAuthenticationManager())
             .exceptionHandling()
-//        .accessDeniedHandler(problemSupport)
-//        .authenticationEntryPoint(problemSupport)
             .and()
-            .headers()
-            .contentSecurityPolicy(CONTENT_SECURITY_POLICY)
+            .headers().contentSecurityPolicy(CONTENT_SECURITY_POLICY)
             .and()
             .referrerPolicy(STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
             .and()
-//                .permissionsPolicy(FEATURE_POLICY)
-            .featurePolicy(FEATURE_POLICY)
+            .permissionsPolicy().policy(FEATURE_POLICY)
             .and()
             .frameOptions().disable()
             .and()
             .authorizeExchange()
-            .pathMatchers("/").permitAll()
-            .pathMatchers("/**").permitAll()
-            .pathMatchers("/*.*").permitAll()
-            .pathMatchers("/api/account/signup").permitAll()
-            .pathMatchers("/api/activate").permitAll()
-            .pathMatchers("/api/authenticate").permitAll()
-            .pathMatchers("/api/account/reset-password/init").permitAll()
-            .pathMatchers("/api/account/reset-password/finish").permitAll()
-            .pathMatchers("/api/auth-info").permitAll()
-            .pathMatchers("/api/user/**").permitAll()
-            .pathMatchers("/management/health").permitAll()
-            .pathMatchers("/management/health/**").permitAll()
-            .pathMatchers("/management/info").permitAll()
-            .pathMatchers("/management/prometheus").permitAll()
-            .pathMatchers("/api/**").permitAll()
-            .pathMatchers("/services/**").authenticated()
-            .pathMatchers("/swagger-resources/**").authenticated()
-            .pathMatchers("/v2/api-docs").authenticated()
-            .pathMatchers("/management/**").hasAuthority(ROLE_ADMIN)
-            .pathMatchers("/api/admin/**").hasAuthority(ROLE_ADMIN)
+            .pathMatchers(
+                "/",
+                "/**",
+                "/*.*",
+                "/api/accounts/signup",
+                "/api/accounts/activate",
+                "/api/accounts/authenticate",
+                "/api/accounts/reset-password/init",
+                "/api/accounts/reset-password/finish",
+                "/api/auth-info",
+                "/api/users/**",
+                "/management/health",
+                "/management/health/**",
+                "/management/info",
+                "/management/prometheus",
+                "/api/**"
+            ).permitAll()
+            .pathMatchers(
+                "/services/**",
+                "/swagger-resources/**",
+                "/v2/api-docs"
+            ).authenticated()
+            .pathMatchers(
+                "/management/**",
+                "/api/admin/**"
+            ).hasAuthority(ROLE_ADMIN)
             .and()
             .build()
 
     @Bean
     fun corsFilter() = CorsWebFilter(UrlBasedCorsConfigurationSource().apply source@{
         properties.cors.apply config@{
-            if (allowedOrigins != null && allowedOrigins!!.isNotEmpty()) {
-                d("Registering CORS filter").run {
-                    this@source.apply {
-                        registerCorsConfiguration("/api/**", this@config)
-                        registerCorsConfiguration("/management/**", this@config)
-                        registerCorsConfiguration("/v2/api-docs", this@config)
-                    }
+            when {
+                allowedOrigins != null && allowedOrigins!!.isNotEmpty() -> this@source.apply {
+                    d("Registering CORS filter")
+                    setOf(
+                        "/api/**",
+                        "/management/**",
+                        "/v2/api-docs"
+                    ).forEach { registerCorsConfiguration(it, this@config) }
                 }
             }
         }
@@ -116,7 +119,7 @@ class SecurityConfiguration(
 
     @Bean
     fun reactiveAuthenticationManager(): ReactiveAuthenticationManager =
-        UserDetailsRepositoryReactiveAuthenticationManager(userDetailsService).apply {
+        RepositoryAuthentication(userDetailsService).apply {
             setPasswordEncoder(passwordEncoder())
         }
 

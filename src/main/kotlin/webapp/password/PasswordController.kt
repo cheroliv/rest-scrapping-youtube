@@ -9,7 +9,7 @@ import webapp.Constants
 import webapp.Constants.CHANGE_PASSWORD_API
 import webapp.Constants.RESET_PASSWORD_API_FINISH
 import webapp.Constants.RESET_PASSWORD_API_INIT
-import webapp.Logging
+import webapp.Logging.w
 import webapp.accounts.exceptions.InvalidPasswordException
 import webapp.accounts.exceptions.InvalidPasswordException.Companion.isPasswordLengthInvalid
 import webapp.accounts.models.KeyAndPassword
@@ -35,13 +35,14 @@ class PasswordController(
     @PostMapping(CHANGE_PASSWORD_API)
     suspend fun changePassword(@RequestBody passwordChange: PasswordChange): Unit =
         InvalidPasswordException().run {
-            if (isPasswordLengthInvalid(passwordChange.newPassword)) throw this
-            else if (passwordChange.currentPassword != null
-                && passwordChange.newPassword != null
-            ) passwordService.changePassword(
-                passwordChange.currentPassword,
-                passwordChange.newPassword
-            )
+            when {
+                isPasswordLengthInvalid(passwordChange.newPassword) -> throw this
+                passwordChange.currentPassword != null
+                        && passwordChange.newPassword != null -> passwordService.changePassword(
+                    passwordChange.currentPassword,
+                    passwordChange.newPassword
+                )
+            }
 
         }
 
@@ -53,8 +54,10 @@ class PasswordController(
     @PostMapping(RESET_PASSWORD_API_INIT)
     suspend fun requestPasswordReset(@RequestBody @Email mail: String) =
         with(passwordService.requestPasswordReset(mail)) {
-            if (this == null) Logging.w("Password reset requested for non existing mail")
-            else mailService.sendPasswordResetMail(this)
+            when {
+                this == null -> w("Password reset requested for non existing mail")
+                else -> mailService.sendPasswordResetMail(this)
+            }
         }
 
     /**
@@ -64,17 +67,18 @@ class PasswordController(
      * @throws InvalidPasswordProblem {@code 400 (Bad Request)} if the password is incorrect.
      * @throws RuntimeException         {@code 500 (Internal Application Error)} if the password could not be reset.
      */
-    @PostMapping(RESET_PASSWORD_API_FINISH)
+    @PostMapping(RESET_PASSWORD_API_FINISH)//TODO: recoder avec validateur
     suspend fun finishPasswordReset(@RequestBody keyAndPassword: KeyAndPassword): Unit =
-        with(InvalidPasswordException()) {
-            if (isPasswordLengthInvalid(keyAndPassword.newPassword)) throw this
-            else if (keyAndPassword.newPassword != null
-                && keyAndPassword.key != null
-                && passwordService.completePasswordReset(
+        InvalidPasswordException().run {
+            when {
+                isPasswordLengthInvalid(keyAndPassword.newPassword) -> throw this
+                keyAndPassword.newPassword != null
+                        && keyAndPassword.key != null
+                        && passwordService.completePasswordReset(
                     keyAndPassword.newPassword,
                     keyAndPassword.key
-                ) == null
-            ) throw PasswordException("No user was found for this reset key")
+                ) == null -> throw PasswordException("No user was found for this reset key")
+            }
         }
 
 }

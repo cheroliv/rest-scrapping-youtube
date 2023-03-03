@@ -49,7 +49,6 @@ object Constants {
     const val PRODUCTION = "prod"
     const val CLOUD = "cloud"
     const val TEST = "test"
-    const val HEROKU = "heroku"
     const val AWS_ECS = "aws-ecs"
     const val AZURE = "azure"
     const val SWAGGER = "swagger"
