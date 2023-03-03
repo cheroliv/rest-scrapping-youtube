@@ -1,30 +1,35 @@
 package webapp.signup
 
-import kotlinx.coroutines.reactor.awaitSingleOrNull
-import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import webapp.Constants.ROLE_USER
-import webapp.accounts.entities.AccountAuthorityEntity
-import webapp.accounts.entities.AccountEntity
+import webapp.accounts.models.Account
 import webapp.accounts.models.AccountCredentials
+import webapp.accounts.repository.AccountRepository
+import webapp.mail.MailService
 
 @Service
-@Transactional
 class SignupService(
-    private val dao: R2dbcEntityTemplate,
+    private val accountRepository: AccountRepository,
+    private val mailService: MailService,
+    private val passwordEncoder: PasswordEncoder
 ) {
-     suspend fun signup(accountCredentials: AccountCredentials) {
-        dao.insert(AccountEntity(accountCredentials))
-            .awaitSingleOrNull()
-            ?.id
-            .run {
-                if (this != null) dao.insert(
-                    AccountAuthorityEntity(
-                        userId = this,
-                        role = ROLE_USER
-                    )
-                ).awaitSingleOrNull()
-            }
+    fun encode(password: String?): String? = passwordEncoder.encode(password)
+    @Transactional
+    suspend fun signup(account: AccountCredentials) = account.run {
+        accountRepository.signup(this)
+        mailService.sendActivationEmail(this)
     }
+
+    @Transactional(readOnly=true)
+    suspend fun findOneByActivationKey(key: String): AccountCredentials? = accountRepository.findOneByActivationKey(key)
+
+    @Transactional(readOnly=true)
+    suspend fun findOne(emailOrLogin: String): AccountCredentials? = accountRepository.findOne(emailOrLogin)
+
+    @Transactional
+    suspend fun save(account: AccountCredentials): Account? = accountRepository.save(account)
+
+    @Transactional
+    suspend fun delete(account: Account) = accountRepository.delete(account)
 }

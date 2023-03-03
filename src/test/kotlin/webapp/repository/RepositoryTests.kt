@@ -19,7 +19,6 @@ import webapp.DataTests.defaultAccount
 import webapp.accounts.models.AccountUtils.generateActivationKey
 import webapp.accounts.repository.AccountRepository
 import webapp.accounts.repository.AccountRepositoryR2dbc
-import webapp.signup.SignupService
 import java.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -30,7 +29,6 @@ internal class AccountRepositoryR2dbcTest {
 
     private val dao: R2dbcEntityTemplate by lazy { context.getBean() }
     private val accountRepository: AccountRepository by lazy { context.getBean<AccountRepositoryR2dbc>() }
-    private val signupService: SignupService by lazy { context.getBean() }
 
     //    @BeforeAll
 //    fun `lance le server en profile test`() = runApplication<Application> {
@@ -97,7 +95,7 @@ internal class AccountRepositoryR2dbcTest {
         assertEquals(0, countAccount(dao))
         assertEquals(0, countAccountAuthority(dao))
         runBlocking {
-            signupService.signup(
+            accountRepository.signup(
                 defaultAccount.copy(
                     activationKey = generateActivationKey,
                     langKey = DEFAULT_LANGUAGE,

@@ -9,8 +9,6 @@ import org.springframework.http.ProblemDetail
 import org.springframework.http.ProblemDetail.forStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.ResponseEntity.badRequest
-import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ServerWebExchange
 import webapp.Constants.ACCOUNT_API
@@ -32,8 +30,6 @@ import webapp.accounts.exceptions.UsernameAlreadyUsedException
 import webapp.accounts.models.AccountCredentials
 import webapp.accounts.models.AccountCredentials.Companion.objectName
 import webapp.accounts.models.AccountUtils.generateActivationKey
-import webapp.accounts.repository.AccountRepository
-import webapp.mail.MailService
 import java.net.URI
 import java.time.Instant.now
 import java.util.*
@@ -41,13 +37,7 @@ import java.util.Locale.*
 
 @RestController
 @RequestMapping(ACCOUNT_API)
-class SignupController(
-    private val accountRepository: AccountRepository,
-    private val mailService: MailService,
-    private val passwordEncoder: PasswordEncoder,
-    private val signupService: SignupService,
-) {
-
+class SignupController(private val signupService: SignupService) {
 
     internal class SignupException(message: String) : RuntimeException(message)
 
@@ -61,7 +51,6 @@ class SignupController(
         produces = [APPLICATION_PROBLEM_JSON_VALUE]
     )
     @ResponseStatus(CREATED)
-    @Transactional
     suspend fun signup(
         @RequestBody account: AccountCredentials,
         exchange: ServerWebExchange
@@ -132,7 +121,7 @@ class SignupController(
                     isLoginAvailable(this@acc)
                     isEmailAvailable(this@acc)
                 } catch (e: UsernameAlreadyUsedException) {
-                    return badRequest().body<ProblemDetail>(
+                    return badRequest().body(
                         forStatus(BAD_REQUEST).apply {
                             type = URI(this@pm.type)
                             title = this@pm.title
@@ -151,7 +140,7 @@ class SignupController(
                         }
                     )
                 } catch (e: EmailAlreadyUsedException) {
-                    return badRequest().body<ProblemDetail>(
+                    return badRequest().body(
                         forStatus(BAD_REQUEST).apply {
                             type = URI(this@pm.type)
                             title = this@pm.title
@@ -172,23 +161,24 @@ class SignupController(
                 }
             }
 
-            copy(
-                password = passwordEncoder.encode(password),
-                activationKey = generateActivationKey,
-                authorities = setOf(ROLE_USER),
-                langKey = when {
-                    langKey.isNullOrBlank() -> ENGLISH.language
-                    else -> langKey
-                },
-                activated = false,
-                createdBy = SYSTEM_USER,
-                createdDate = this@run,
-                lastModifiedBy = SYSTEM_USER,
-                lastModifiedDate = this@run
-            ).run {
-                signupService.signup(this)
-                mailService.sendActivationEmail(this)
-            }
+
+            signupService.signup(
+                this@acc.copy(
+                    password = signupService.encode(password),
+                    activationKey = generateActivationKey,
+                    authorities = setOf(ROLE_USER),
+                    langKey = when {
+                        langKey.isNullOrBlank() -> ENGLISH.language
+                        else -> langKey
+                    },
+                    activated = false,
+                    createdBy = SYSTEM_USER,
+                    createdDate = this@run,
+                    lastModifiedBy = SYSTEM_USER,
+                    lastModifiedDate = this@run
+                )
+            )
+
             ResponseEntity<ProblemDetail>(CREATED)
         }
     }
@@ -202,10 +192,10 @@ class SignupController(
     @GetMapping(ACTIVATE_API)
     @Throws(SignupException::class)
     suspend fun activateAccount(@RequestParam(ACTIVATE_API_KEY) key: String) {
-        if (!accountRepository.findOneByActivationKey(key).run no@{
+        if (!signupService.findOneByActivationKey(key).run no@{
                 return@no when {
                     this == null -> false.apply { i("no activation for key: $key") }
-                    else -> accountRepository
+                    else -> signupService
                         .save(copy(activated = true, activationKey = null))
                         .run yes@{
                             return@yes when {
@@ -220,9 +210,9 @@ class SignupController(
 
     @Throws(UsernameAlreadyUsedException::class)
     private suspend fun isLoginAvailable(model: AccountCredentials) {
-        accountRepository.findOne(model.login!!).run {
+        signupService.findOne(model.login!!).run {
             when {
-                this != null -> if (!activated) accountRepository.delete(toAccount())
+                this != null -> if (!activated) signupService.delete(toAccount())
                 else throw UsernameAlreadyUsedException()
             }
         }
@@ -230,9 +220,9 @@ class SignupController(
 
     @Throws(EmailAlreadyUsedException::class)
     private suspend fun isEmailAvailable(model: AccountCredentials) {
-        accountRepository.findOne(model.email!!).run {
+        signupService.findOne(model.email!!).run {
             when {
-                this != null -> if (!activated) accountRepository.delete(toAccount())
+                this != null -> if (!activated) signupService.delete(toAccount())
                 else throw EmailAlreadyUsedException()
             }
         }
