@@ -35,7 +35,7 @@ class PasswordController(
      * @param passwordChange current and new password.
      * @throws InvalidPasswordProblem {@code 400 (Bad Request)} if the new password is incorrect.
      */
-    @PostMapping(CHANGE_PASSWORD_API)
+    @PostMapping(CHANGE_PASSWORD_API)//TODO: retourner des problemDetails
     suspend fun changePassword(@RequestBody passwordChange: PasswordChange): Unit =
         InvalidPasswordException().run {
             when {
@@ -59,7 +59,7 @@ class PasswordController(
      *
      * @param mail the mail of the user.
      */
-    @PostMapping(RESET_PASSWORD_API_INIT)
+    @PostMapping(RESET_PASSWORD_API_INIT)//TODO: retourner des problemDetails
     suspend fun requestPasswordReset(@RequestBody @Email mail: String) =
         with(passwordService.requestPasswordReset(mail)) {
             when {
@@ -75,7 +75,7 @@ class PasswordController(
      * @throws InvalidPasswordProblem {@code 400 (Bad Request)} if the password is incorrect.
      * @throws RuntimeException         {@code 500 (Internal Application Error)} if the password could not be reset.
      */
-    @PostMapping(RESET_PASSWORD_API_FINISH)
+    @PostMapping(RESET_PASSWORD_API_FINISH)//TODO: retourner des problemDetails
     suspend fun finishPasswordReset(@RequestBody keyAndPassword: KeyAndPassword): Unit =
         InvalidPasswordException().run {
             when {
