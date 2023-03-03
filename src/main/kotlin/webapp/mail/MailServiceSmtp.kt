@@ -10,8 +10,10 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import org.thymeleaf.spring6.SpringTemplateEngine
 import webapp.Constants
-import webapp.Logging
+import webapp.Logging.d
+import webapp.Logging.w
 import webapp.Properties
+import kotlin.text.Charsets.UTF_8
 
 /*=================================================================================*/
 @Async
@@ -38,7 +40,7 @@ class MailServiceSmtp(
             MimeMessageHelper(
                 this,
                 isMultipart,
-                Charsets.UTF_8.name()
+                UTF_8.name()
             ).apply {
                 setTo(to)
                 setFrom(properties.mail.from)
@@ -46,11 +48,11 @@ class MailServiceSmtp(
                 setText(content, isHtml)
             }
             mailSender.send(this)
-            Logging.d("Sent email to User '$to'")
+            d("Sent email to User '$to'")
         } catch (e: MailException) {
-            Logging.w("Email could not be sent to user '$to'", e)
+            w("Email could not be sent to user '$to'", e)
         } catch (e: MessagingException) {
-            Logging.w("Email could not be sent to user '$to'", e)
+            w("Email could not be sent to user '$to'", e)
         }
     }
 }

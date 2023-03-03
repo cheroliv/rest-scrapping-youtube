@@ -3,7 +3,6 @@ package webapp.mail
 import org.springframework.context.MessageSource
 import org.thymeleaf.context.Context
 import org.thymeleaf.spring6.SpringTemplateEngine
-import webapp.Properties
 import webapp.Constants.BASE_URL
 import webapp.Constants.TEMPLATE_NAME_CREATION
 import webapp.Constants.TEMPLATE_NAME_PASSWORD
@@ -12,6 +11,7 @@ import webapp.Constants.TITLE_KEY_PASSWORD
 import webapp.Constants.TITLE_KEY_SIGNUP
 import webapp.Constants.USER
 import webapp.Logging.d
+import webapp.Properties
 import webapp.accounts.models.AccountCredentials
 import java.util.Locale.forLanguageTag
 
@@ -56,14 +56,20 @@ abstract class AbstractMailService(
     }
 
     override fun sendActivationEmail(account: AccountCredentials) = sendEmailFromTemplate(
-        account, TEMPLATE_NAME_SIGNUP, TITLE_KEY_SIGNUP
-    ).run { d("Sending activation email to '${account.email}'") }
+        account.apply {
+            d("Sending activation email to '${account.email}'")
+        }, TEMPLATE_NAME_SIGNUP, TITLE_KEY_SIGNUP
+    )
 
     override fun sendCreationEmail(account: AccountCredentials) = sendEmailFromTemplate(
-        account, TEMPLATE_NAME_CREATION, TITLE_KEY_SIGNUP
-    ).run { d("Sending creation email to '${account.email}'") }
+        account.apply {
+            d("Sending creation email to '${account.email}'")
+        }, TEMPLATE_NAME_CREATION, TITLE_KEY_SIGNUP
+    )
 
     override fun sendPasswordResetMail(account: AccountCredentials) = sendEmailFromTemplate(
-        account, TEMPLATE_NAME_PASSWORD, TITLE_KEY_PASSWORD
-    ).run { d("Sending password reset email to '${account.email}'") }
+        account.apply {
+            d("Sending password reset email to '${account.email}'")
+        }, TEMPLATE_NAME_PASSWORD, TITLE_KEY_PASSWORD
+    )
 }
