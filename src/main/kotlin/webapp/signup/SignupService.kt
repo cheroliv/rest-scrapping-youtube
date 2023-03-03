@@ -18,6 +18,22 @@ class SignupService(
     @Transactional
     suspend fun signup(account: AccountCredentials) = account.run {
         accountRepository.signup(this)
+        /*
+        copy(
+                    password = signupService.encode(password),
+                    activationKey = generateActivationKey,
+                    authorities = setOf(ROLE_USER),
+                    langKey = when {
+                        langKey.isNullOrBlank() -> ENGLISH.language
+                        else -> langKey
+                    },
+                    activated = false,
+                    createdBy = SYSTEM_USER,
+                    createdDate = this@run,
+                    lastModifiedBy = SYSTEM_USER,
+                    lastModifiedDate = this@run
+                )
+         */
         mailService.sendActivationEmail(this)
     }
 
