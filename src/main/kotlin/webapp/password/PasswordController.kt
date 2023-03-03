@@ -1,5 +1,6 @@
 package webapp.password
 
+import jakarta.validation.Validator
 import jakarta.validation.constraints.Email
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -10,8 +11,9 @@ import webapp.Constants.CHANGE_PASSWORD_API
 import webapp.Constants.RESET_PASSWORD_API_FINISH
 import webapp.Constants.RESET_PASSWORD_API_INIT
 import webapp.Logging.w
+import webapp.accounts.entities.AccountRecord.Companion.PASSWORD_FIELD
 import webapp.accounts.exceptions.InvalidPasswordException
-import webapp.accounts.exceptions.InvalidPasswordException.Companion.isPasswordLengthInvalid
+import webapp.accounts.models.AccountCredentials
 import webapp.accounts.models.KeyAndPassword
 import webapp.accounts.models.PasswordChange
 import webapp.mail.MailService
@@ -22,7 +24,8 @@ import webapp.mail.MailService
 @RequestMapping(Constants.ACCOUNT_API)
 class PasswordController(
     private val passwordService: PasswordService,
-    private val mailService: MailService
+    private val mailService: MailService,
+    private val validator: Validator
 ) {
     internal class PasswordException(message: String) : RuntimeException(message)
 
@@ -36,7 +39,12 @@ class PasswordController(
     suspend fun changePassword(@RequestBody passwordChange: PasswordChange): Unit =
         InvalidPasswordException().run {
             when {
-                isPasswordLengthInvalid(passwordChange.newPassword) -> throw this
+                validator
+                    .validateProperty(
+                        AccountCredentials(password = passwordChange.newPassword),
+                        PASSWORD_FIELD
+                    ).isNotEmpty() -> throw this
+
                 passwordChange.currentPassword != null
                         && passwordChange.newPassword != null -> passwordService.changePassword(
                     passwordChange.currentPassword,
@@ -67,11 +75,15 @@ class PasswordController(
      * @throws InvalidPasswordProblem {@code 400 (Bad Request)} if the password is incorrect.
      * @throws RuntimeException         {@code 500 (Internal Application Error)} if the password could not be reset.
      */
-    @PostMapping(RESET_PASSWORD_API_FINISH)//TODO: recoder avec validateur
+    @PostMapping(RESET_PASSWORD_API_FINISH)
     suspend fun finishPasswordReset(@RequestBody keyAndPassword: KeyAndPassword): Unit =
         InvalidPasswordException().run {
             when {
-                isPasswordLengthInvalid(keyAndPassword.newPassword) -> throw this
+                validator
+                    .validateProperty(
+                        AccountCredentials(password = keyAndPassword.newPassword),
+                        PASSWORD_FIELD
+                    ).isNotEmpty() -> throw this
                 keyAndPassword.newPassword != null
                         && keyAndPassword.key != null
                         && passwordService.completePasswordReset(
