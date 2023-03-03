@@ -15,9 +15,7 @@ import webapp.Constants.ACCOUNT_API
 import webapp.Constants.ACTIVATE_API
 import webapp.Constants.ACTIVATE_API_KEY
 import webapp.Constants.MSG_WRONG_ACTIVATION_KEY
-import webapp.Constants.ROLE_USER
 import webapp.Constants.SIGNUP_API
-import webapp.Constants.SYSTEM_USER
 import webapp.Logging.i
 import webapp.ProblemsModel
 import webapp.accounts.entities.AccountRecord.Companion.EMAIL_FIELD
@@ -29,9 +27,7 @@ import webapp.accounts.exceptions.EmailAlreadyUsedException
 import webapp.accounts.exceptions.UsernameAlreadyUsedException
 import webapp.accounts.models.AccountCredentials
 import webapp.accounts.models.AccountCredentials.Companion.objectName
-import webapp.accounts.models.AccountUtils.generateActivationKey
 import java.net.URI
-import java.time.Instant.now
 import java.util.*
 import java.util.Locale.*
 
@@ -54,9 +50,8 @@ class SignupController(private val signupService: SignupService) {
     suspend fun signup(
         @RequestBody account: AccountCredentials,
         exchange: ServerWebExchange
-    ): ResponseEntity<ProblemDetail> = now().run {
+    ): ResponseEntity<ProblemDetail> =
         account.run acc@{
-            i("signup attempt: ${this@run} $login $email")
             ProblemsModel(
                 type = "https://cheroliv.github.io/problem/constraint-violation",
                 title = "Data binding and validation failure",
@@ -160,28 +155,10 @@ class SignupController(private val signupService: SignupService) {
                     )
                 }
             }
-
-
-            signupService.signup(
-                this@acc.copy(
-                    password = signupService.encode(password),
-                    activationKey = generateActivationKey,
-                    authorities = setOf(ROLE_USER),
-                    langKey = when {
-                        langKey.isNullOrBlank() -> ENGLISH.language
-                        else -> langKey
-                    },
-                    activated = false,
-                    createdBy = SYSTEM_USER,
-                    createdDate = this@run,
-                    lastModifiedBy = SYSTEM_USER,
-                    lastModifiedDate = this@run
-                )
-            )
-
+            signupService.signup(this)
             ResponseEntity<ProblemDetail>(CREATED)
         }
-    }
+    
 
     /**
      * `GET  /activate` : activate the signed-up user.
@@ -192,11 +169,11 @@ class SignupController(private val signupService: SignupService) {
     @GetMapping(ACTIVATE_API)
     @Throws(SignupException::class)
     suspend fun activateAccount(@RequestParam(ACTIVATE_API_KEY) key: String) {
-        if (!signupService.findOneByActivationKey(key).run no@{
+        if (!signupService.accountByActivationKey(key).run no@{
                 return@no when {
                     this == null -> false.apply { i("no activation for key: $key") }
                     else -> signupService
-                        .save(copy(activated = true, activationKey = null))
+                        .saveAccount(copy(activated = true, activationKey = null))
                         .run yes@{
                             return@yes when {
                                 this != null -> true.apply { i("activation: $login") }
@@ -210,9 +187,9 @@ class SignupController(private val signupService: SignupService) {
 
     @Throws(UsernameAlreadyUsedException::class)
     private suspend fun isLoginAvailable(model: AccountCredentials) {
-        signupService.findOne(model.login!!).run {
+        signupService.accountById(model.login!!).run {
             when {
-                this != null -> if (!activated) signupService.delete(toAccount())
+                this != null -> if (!activated) signupService.deleteAccount(toAccount())
                 else throw UsernameAlreadyUsedException()
             }
         }
@@ -220,9 +197,9 @@ class SignupController(private val signupService: SignupService) {
 
     @Throws(EmailAlreadyUsedException::class)
     private suspend fun isEmailAvailable(model: AccountCredentials) {
-        signupService.findOne(model.email!!).run {
+        signupService.accountById(model.email!!).run {
             when {
-                this != null -> if (!activated) signupService.delete(toAccount())
+                this != null -> if (!activated) signupService.deleteAccount(toAccount())
                 else throw EmailAlreadyUsedException()
             }
         }

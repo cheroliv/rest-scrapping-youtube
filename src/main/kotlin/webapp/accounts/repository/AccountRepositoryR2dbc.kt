@@ -25,9 +25,7 @@ class AccountRepositoryR2dbc(
     private val dao: R2dbcEntityTemplate,
     private val validator: Validator,
 ) : AccountRepository {
-
-
-    override suspend fun save(model: AccountCredentials): Account? =
+    override suspend fun save(model: AccountCredentials) =
         try {
             if (model.id != null) dao.update(
                 AccountEntity(model).copy(
@@ -81,37 +79,40 @@ class AccountRepositoryR2dbc(
             .awaitOneOrNull()
             ?.activationKey
 
-    override suspend fun signup(accountCredentials: AccountCredentials) {
-        dao.insert(AccountEntity(accountCredentials))
-            .awaitSingleOrNull()
-            ?.id
-            .run {
-                if (this != null) dao.insert(
-                    AccountAuthorityEntity(
-                        userId = this,
-                        role = Constants.ROLE_USER
-                    )
-                ).awaitSingleOrNull()
-            }
-    }
+    override suspend fun signup(accountCredentials: AccountCredentials) = dao
+        .insert(AccountEntity(accountCredentials))
+        .awaitSingleOrNull()
+        ?.id
+        .run {
+            if (this != null) dao.insert(
+                AccountAuthorityEntity(
+                    userId = this,
+                    role = Constants.ROLE_USER
+                )
+            ).awaitSingleOrNull()
+        }
 
-    override suspend fun findOneByActivationKey(key: String) =
-        dao.selectOne(
+    override suspend fun findOneByActivationKey(key: String) = dao
+        .selectOne(
             query(where(ACTIVATION_KEY_FIELD).`is`(key)),
             AccountEntity::class.java
         ).awaitSingleOrNull()
-            ?.toCredentialsModel
+        ?.toCredentialsModel
 
-    override suspend fun findOneByResetKey(key: String) = dao.selectOne(
-        query(where(RESET_KEY_FIELD).`is`(key)),
-        AccountEntity::class.java
-    ).awaitSingleOrNull() //as  AccountRecord<*>?
+    override suspend fun findOneByResetKey(key: String) = dao
+        .selectOne(
+            query(where(RESET_KEY_FIELD).`is`(key)),
+            AccountEntity::class.java
+        ).awaitSingleOrNull() //as  AccountRecord<*>?
 
     override suspend fun delete(account: Account) {
-        if (account.login != null || account.email != null && account.id == null)
-            (if (account.login != null) findOne(account.login)
-            else if (account.email != null) findOne(account.email)
-            else null).run {
+        when {
+            account.login != null || account.email != null && account.id == null -> (
+                    when {
+                        account.login != null -> findOne(account.login)
+                        account.email != null -> findOne(account.email)
+                        else -> null
+                    }).run {
                 if (this != null) {
                     dao.delete<AccountAuthorityEntity>()
                         .matching(query(where(ACCOUNT_AUTH_USER_ID_FIELD).`is`(id!!)))
@@ -119,5 +120,6 @@ class AccountRepositoryR2dbc(
                     dao.delete(AccountEntity(this)).awaitSingle()
                 }
             }
+        }
     }
 }
