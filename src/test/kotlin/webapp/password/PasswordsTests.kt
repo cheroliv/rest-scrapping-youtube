@@ -1,15 +1,53 @@
-@file:Suppress("NonAsciiCharacters")
+@file:Suppress(
+    "NonAsciiCharacters",
+    "unused"
+)
 
 package webapp.password
 
 //import org.assertj.core.api.Assertions.assertThat
 //import org.springframework.test.web.reactive.server.returnResult
 //import java.net.URI
-import kotlin.test.*
+import jakarta.validation.Validator
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
+import org.springframework.beans.factory.getBean
+import org.springframework.context.ConfigurableApplicationContext
+import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
+import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.test.web.reactive.server.WebTestClient.bindToServer
+import webapp.Constants.BASE_URL_DEV
+import webapp.Logging.i
+import webapp.deleteAllAccounts
+import webapp.launcher
+import kotlin.test.Test
 
-@Suppress("unused")
 internal class PasswordControllerTests {
 
+    private lateinit var context: ConfigurableApplicationContext
+    private val dao: R2dbcEntityTemplate by lazy { context.getBean() }
+    private val validator: Validator by lazy { context.getBean() }
+    private val client: WebTestClient by lazy {
+        bindToServer()
+            .baseUrl(BASE_URL_DEV)
+            .build()
+    }
+
+    @BeforeAll
+    fun `lance le server en profile test`() {
+        context = launcher()
+    }
+
+    @AfterAll
+    fun `arrête le serveur`() = context.close()
+
+    @AfterEach
+    fun tearDown() = deleteAllAccounts(dao)
+    @Test
+    fun `test Change Password Wrong Existing Password`() {
+        i("test Change Password Wrong Existing Password")
+    }
     /*
         @Test
         @WithMockUser("change-password-wrong-existing-password")
