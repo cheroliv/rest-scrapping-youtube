@@ -3,6 +3,8 @@ package webapp.signup
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import webapp.Constants.ACTIVATE_API_PATH
+import webapp.Constants.BASE_URL_DEV
 import webapp.Constants.ROLE_USER
 import webapp.Constants.SYSTEM_USER
 import webapp.Logging.i
@@ -37,7 +39,7 @@ class SignupService(
                 createdDate = this,
                 lastModifiedBy = SYSTEM_USER,
                 lastModifiedDate = this
-            )
+            ).apply { i("activation link: $BASE_URL_DEV$ACTIVATE_API_PATH$activationKey") }
         )
         mailService.sendActivationEmail(account)
     }
