@@ -1,4 +1,4 @@
-= kotlin-springboot
+= rest-scrapping-youtube
 
 == *springboot codebase*
 
@@ -11,10 +11,10 @@
 * kotlin coroutines
 * Http problem details
 
-.features:
-* Signup account
-* Password reset and update
-* Account management
+.features: (todo)
+* Signin account
+* Account retrieve data
+
 
 ==== **to test the app**
 Open terminal and run : ```./gradlew check```

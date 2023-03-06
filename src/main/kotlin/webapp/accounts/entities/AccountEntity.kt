@@ -9,6 +9,7 @@ import org.springframework.data.annotation.*
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import webapp.Constants
+import webapp.Constants.LOGIN_REGEX
 import webapp.accounts.models.AccountCredentials
 import java.time.Instant
 import java.util.*
@@ -19,7 +20,7 @@ data class AccountEntity @JvmOverloads constructor(
     @Id override var id: UUID? = null,
 
     @field:NotNull
-    @field:Pattern(regexp = Constants.LOGIN_REGEX)
+    @field:Pattern(regexp = LOGIN_REGEX)
     @field:Size(min = 1, max = 50)
     override var login: String? = null,
 
