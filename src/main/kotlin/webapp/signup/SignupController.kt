@@ -181,7 +181,9 @@ class SignupController(private val signupService: SignupService) {
                             }
                         }
                 }
-            }) throw SignupException(MSG_WRONG_ACTIVATION_KEY)
+            })
+            //TODO: remplacer un ResponseEntity<ProblemDetail>
+            throw SignupException(MSG_WRONG_ACTIVATION_KEY)
     }
 
 
